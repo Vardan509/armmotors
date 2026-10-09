@@ -2,7 +2,27 @@ import { useEffect, useRef, useState } from "react";
 import { setCurrencyByLanguage } from "../../utils/useCurrency";
 import { apiRequest } from "../../utils/api";
 import { useI18n } from "../../utils/i18n";
+import { asset } from "../../utils/asset";
 import "./Header.css";
+
+// Աշխատում է localhost-ում և GitHub Pages-ում
+const BASE = import.meta.env.BASE_URL;
+
+function pageUrl(path = "/") {
+    const cleanPath = String(path).replace(/^\/+/, "");
+    return `${BASE}${cleanPath}`;
+}
+
+function currentPage() {
+    const basePath = BASE.replace(/\/+$/, "");
+    let path = window.location.pathname;
+
+    if (basePath && (path === basePath || path.startsWith(basePath + "/"))) {
+        path = path.slice(basePath.length);
+    }
+
+    return path.replace(/\/+$/, "") || "/";
+}
 
 function Icon({ name }) {
     const common = {
@@ -119,7 +139,7 @@ export default function Header() {
 
     const headerRef = useRef(null);
 
-    const path = window.location.pathname;
+    const path = currentPage();
 
     let user = null;
 
@@ -135,16 +155,13 @@ export default function Header() {
 
     const isHome = path === "/";
     const isCars = path === "/cars" || path.startsWith("/cars/");
-
     const isFavorites = path === "/favorites";
     const isAccount = path === "/account";
 
-    // Լեզվի փոփոխության ժամանակ փոխել նաև արժույթը
     useEffect(() => {
         setCurrencyByLanguage(language);
     }, [language]);
 
-    // Լեզվի մենյուն փակել դրսում սեղմելիս
     useEffect(() => {
         function handleOutsideClick(event) {
             if (
@@ -162,12 +179,10 @@ export default function Header() {
         }
 
         document.addEventListener("pointerdown", handleOutsideClick);
-
         document.addEventListener("keydown", handleEscape);
 
         return () => {
             document.removeEventListener("pointerdown", handleOutsideClick);
-
             document.removeEventListener("keydown", handleEscape);
         };
     }, []);
@@ -187,7 +202,8 @@ export default function Header() {
             localStorage.removeItem("token");
             localStorage.removeItem("user");
 
-            window.location.assign("/");
+            window.dispatchEvent(new Event("session-changed"));
+            window.location.assign(pageUrl("/"));
         }
     }
 
@@ -209,14 +225,13 @@ export default function Header() {
         window.dispatchEvent(new CustomEvent("open-support"));
     }
 
-    // ՍՐՏԻԿԻ ՀԻՄՆԱԿԱՆ ՖՈՒՆԿՑԻԱՆ
     function handleFavoritesClick(event) {
         const token = localStorage.getItem("token");
 
         if (!token) {
             event.preventDefault();
 
-            window.location.assign("/login?next=%2Ffavorites");
+            window.location.assign(pageUrl("/login?next=%2Ffavorites"));
         }
     }
 
@@ -225,9 +240,13 @@ export default function Header() {
             <header className="site-header" ref={headerRef}>
                 {/* DESKTOP HEADER */}
                 <div className="desktop-header desktop-header-only">
-                    <a className="header-logo" href="/" aria-label="ArmMotors">
+                    <a
+                        className="header-logo"
+                        href={pageUrl("/")}
+                        aria-label="ArmMotors"
+                    >
                         <img
-                            src="/logo.png"
+                            src={asset("/logo.png")}
                             alt="ArmMotors"
                             className="header-logo-image"
                         />
@@ -235,7 +254,7 @@ export default function Header() {
 
                     <nav className="header-nav" aria-label="Main navigation">
                         <a
-                            href="/"
+                            href={pageUrl("/")}
                             className={
                                 isHome ? "header-link active" : "header-link"
                             }
@@ -245,7 +264,7 @@ export default function Header() {
                         </a>
 
                         <a
-                            href="/cars"
+                            href={pageUrl("/cars")}
                             className={
                                 isCars ? "header-link active" : "header-link"
                             }
@@ -256,7 +275,6 @@ export default function Header() {
                     </nav>
 
                     <div className="header-actions">
-                        {/* Լեզվի ընտրություն */}
                         <LanguageMenu
                             selected={selectedLanguage}
                             languages={languages}
@@ -267,7 +285,7 @@ export default function Header() {
 
                         {/* DESKTOP FAVORITES */}
                         <a
-                            href="/favorites"
+                            href={pageUrl("/favorites")}
                             onClick={handleFavoritesClick}
                             className={`header-icon-button ${
                                 isFavorites ? "active" : ""
@@ -282,7 +300,7 @@ export default function Header() {
                         {user ? (
                             <>
                                 <a
-                                    href="/account"
+                                    href={pageUrl("/account")}
                                     className={`header-icon-button ${
                                         isAccount ? "active" : ""
                                     }`}
@@ -294,7 +312,7 @@ export default function Header() {
 
                                 {user.isAdmin && (
                                     <a
-                                        href="/admin"
+                                        href={pageUrl("/admin")}
                                         className="header-text-button"
                                     >
                                         {t("admin")}
@@ -311,12 +329,18 @@ export default function Header() {
                                 </button>
                             </>
                         ) : (
-                            <a href="/login" className="header-login-button">
+                            <a
+                                href={pageUrl("/login")}
+                                className="header-login-button"
+                            >
                                 {t("login")}
                             </a>
                         )}
 
-                        <a href="/add-product" className="header-add-button">
+                        <a
+                            href={pageUrl("/add-product")}
+                            className="header-add-button"
+                        >
                             <Icon name="plus" />
                             <span>{t("addListing")}</span>
                         </a>
@@ -327,10 +351,10 @@ export default function Header() {
                 <div className="mobile-header-bar">
                     <a
                         className="mobile-header-logo"
-                        href="/"
+                        href={pageUrl("/")}
                         aria-label={t("home")}
                     >
-                        <img src="/logo.png" alt="ArmMotors" />
+                        <img src={asset("/logo.png")} alt="ArmMotors" />
                     </a>
 
                     <div className="mobile-header-actions">
@@ -346,7 +370,7 @@ export default function Header() {
                         {/* MOBILE TOP FAVORITES */}
                         <a
                             className="mobile-like-link"
-                            href="/favorites"
+                            href={pageUrl("/favorites")}
                             onClick={handleFavoritesClick}
                             aria-label={t("favorites")}
                         >
@@ -359,7 +383,7 @@ export default function Header() {
             {/* MOBILE BOTTOM MENU */}
             <nav className="mobile-bottom-nav" aria-label="Mobile navigation">
                 <a
-                    href="/"
+                    href={pageUrl("/")}
                     className={isHome ? "active" : ""}
                     aria-current={isHome ? "page" : undefined}
                 >
@@ -367,9 +391,8 @@ export default function Header() {
                     <span>{t("homeNav")}</span>
                 </a>
 
-                {/* MOBILE BOTTOM FAVORITES */}
                 <a
-                    href="/favorites"
+                    href={pageUrl("/favorites")}
                     onClick={handleFavoritesClick}
                     className={isFavorites ? "active" : ""}
                     aria-current={isFavorites ? "page" : undefined}
@@ -379,7 +402,7 @@ export default function Header() {
                 </a>
 
                 <a
-                    href="/add-product"
+                    href={pageUrl("/add-product")}
                     className="mobile-add-nav"
                     aria-label={t("addListing")}
                 >
@@ -396,7 +419,7 @@ export default function Header() {
                 </button>
 
                 <a
-                    href={user ? "/account" : "/login"}
+                    href={pageUrl(user ? "/account" : "/login")}
                     className={isAccount ? "active" : ""}
                     aria-current={isAccount ? "page" : undefined}
                 >

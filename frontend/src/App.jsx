@@ -14,6 +14,25 @@ import "./components/header/HomePage.css";
 import "./pages/CarDetailsPage.css";
 import "./global.css";
 
+// Vite-ի base-ը՝
+// localhost-ում՝ "/"
+// GitHub Pages-ում՝ "/armmotors/"
+const BASE = import.meta.env.BASE_URL;
+
+function getCurrentPath() {
+    let path = window.location.pathname;
+
+    // Հեռացնում ենք GitHub Pages-ի base-ը
+    const basePath = BASE.replace(/\/+$/, "");
+
+    if (basePath && (path === basePath || path.startsWith(basePath + "/"))) {
+        path = path.slice(basePath.length);
+    }
+
+    // Նորմալացնում ենք հասցեն
+    return path.replace(/\/+$/, "") || "/";
+}
+
 export default function App() {
     return (
         <>
@@ -24,47 +43,72 @@ export default function App() {
 }
 
 function Page() {
-    const path = window.location.pathname.replace(/\/+$/, "") || "/";
+    const path = getCurrentPath();
 
+    // Մեքենայի մանրամասների էջ
     const detail = path.match(/^\/cars\/([^/]+)$/);
 
     if (detail) {
-        return <CarDetailsPage id={detail[1]} />;
+        return <CarDetailsPage id={decodeURIComponent(detail[1])} />;
     }
 
+    // Admin Panel
     if (
         /^\/admin(?:\/(users|products|orders|messages|broadcasts|audit))?$/.test(
             path,
         )
-    )
+    ) {
         return <AdminPage section={path.split("/")[2] || ""} />;
-    if (path === "/favorites") return <FavoritesPage />;
-    if (path === "/account") return <AccountPage />;
+    }
 
+    // Favorites
+    if (path === "/favorites") {
+        return <FavoritesPage />;
+    }
+
+    // Account
+    if (path === "/account") {
+        return <AccountPage />;
+    }
+
+    // Գլխավոր էջ
     if (path === "/") {
         return <HomePage />;
     }
 
+    // Մեքենաների էջ
     if (path === "/cars") {
         return <CarsPage />;
     }
 
+    // Մուտք
     if (path === "/login") {
         return <AuthPage />;
     }
 
+    // Գրանցում
     if (path === "/registration") {
         return <AuthPage registration />;
     }
 
+    // Հայտարարություն ավելացնել
     if (path === "/add-product") {
         return <AddProductPage />;
     }
 
+    // 404
     return (
-        <main style={{ padding: "40px", textAlign: "center" }}>
+        <main
+            style={{
+                minHeight: "70vh",
+                padding: "80px 20px",
+                textAlign: "center",
+                background: "#ffffff",
+            }}
+        >
             <h1>Էջը չի գտնվել</h1>
-            <a href="/">Գլխավոր էջ</a>
+
+            <a href={BASE}>Վերադառնալ գլխավոր էջ</a>
         </main>
     );
 }
