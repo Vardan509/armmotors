@@ -1,0 +1,244 @@
+.support-trigger {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 150;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid #21864b;
+  background: #21864b;
+  color: #ffffff;
+  border-radius: 32px;
+  padding: 16px 21px;
+  box-shadow: 0 6px 24px #21864b30;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.support-trigger:hover {
+  background: #196c3c;
+  border-color: #196c3c;
+  transform: translateY(-2px);
+}
+
+.support-dialog {
+  position: fixed;
+  inset: auto 24px 92px auto;
+  margin: 0;
+  width: min(420px, calc(100vw - 32px));
+  max-height: calc(100dvh - 125px);
+  overflow: auto;
+  border: 1px solid #e0e3e8;
+  border-radius: 20px;
+  padding: 26px;
+  background: #ffffff;
+  box-shadow: 0 20px 80px #00000025;
+  color: #202020;
+}
+
+.support-dialog::backdrop {
+  background: #10182855;
+}
+
+.support-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.support-heading small {
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: #8a681b;
+}
+
+.support-heading h2 {
+  font-size: 23px;
+  margin: 9px 0;
+}
+
+.support-heading button {
+  background: #f3f4f6;
+  color: #666666;
+  border: 0;
+  border-radius: 50%;
+  font-size: 25px;
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.support-heading button:hover {
+  background: #faf3df;
+  color: #8a681b;
+}
+
+.support-dialog > p {
+  font-size: 13px;
+  line-height: 1.8;
+  color: #6b7280;
+}
+
+.support-dialog fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+
+.support-dialog label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  font-size: 12px;
+  margin: 14px 0;
+}
+
+.support-dialog input,
+.support-dialog textarea {
+  width: 100%;
+  border: 1px solid #dce0e6;
+  border-radius: 9px;
+  padding: 12px;
+  font: inherit;
+  font-size: 14px;
+  background: #ffffff;
+  color: #333333;
+  resize: vertical;
+}
+
+.support-dialog input:focus,
+.support-dialog textarea:focus {
+  outline: 2px solid #b58b35;
+  outline-offset: 2px;
+}
+
+.support-dialog form small {
+  color: #777777;
+  font-size: 11px;
+}
+
+.support-submit {
+  width: 100%;
+  border: 1px solid #21864b;
+  border-radius: 10px;
+  background: #21864b;
+  color: #ffffff;
+  padding: 14px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  margin-top: 20px;
+  cursor: pointer;
+}
+
+.support-submit:hover:not(:disabled) {
+  background: #196c3c;
+  border-color: #196c3c;
+}
+
+.support-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.support-success {
+  background: #edf8f1;
+  padding: 20px;
+  border-radius: 12px;
+  color: #176b3b;
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+.support-listing {
+  padding: 9px;
+  background: #f5f6f8;
+  border-radius: 7px;
+}
+
+.admin-message {
+  padding: 24px;
+  background: #ffffff;
+  border: 1px solid #e2e5eb;
+  border-radius: 14px;
+  margin: 16px 0;
+  overflow-wrap: anywhere;
+}
+
+.admin-message header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.admin-message p {
+  white-space: pre-wrap;
+  line-height: 1.7;
+}
+
+.admin-message time {
+  font-size: 12px;
+  color: #777777;
+}
+
+.admin-message footer {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.admin-message footer button,
+.admin-pagination button {
+  padding: 10px 16px;
+  border: 1px solid #e2bd50;
+  border-radius: 8px;
+  background: #faf3df;
+  color: #795c16;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.admin-message footer button:hover:not(:disabled),
+.admin-pagination button:hover:not(:disabled) {
+  background: #f3e3b5;
+}
+
+.admin-pagination {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin: 24px;
+}
+
+.admin-pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 600px) {
+  .support-trigger {
+    right: 16px;
+    bottom: 16px;
+    padding: 15px;
+  }
+
+  .support-trigger span {
+    display: none;
+  }
+
+  .support-dialog {
+    right: 16px;
+    bottom: 82px;
+    padding: 22px;
+  }
+}

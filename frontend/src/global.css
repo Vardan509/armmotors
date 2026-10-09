@@ -1,0 +1,96 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 170px;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f7f8fa;
+  color: #202020;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+a.product-card {
+  display: flex;
+  text-decoration: none;
+  color: inherit;
+}
+
+.product-card:focus-visible,
+a:focus-visible,
+button:focus-visible {
+  outline: 3px solid #ac8434;
+  outline-offset: 4px;
+}
+
+.demo-label {
+  display: block;
+  margin-bottom: 7px;
+  color: #8a681b;
+  font-size: 10px;
+}
+
+.brand-card small {
+  color: #737373;
+  font-size: 11px;
+}
+
+.category-card {
+  text-decoration: none;
+  color: inherit;
+}
+
+.catalog-notice {
+  padding: 14px 18px;
+  border: 1px solid #eee0bb;
+  border-radius: 12px;
+  background: #fff8e7;
+  color: #735b25;
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.site-form input,
+.site-form textarea,
+.site-form select {
+  max-width: 100%;
+}
+
+.product-card:hover .product-title {
+  color: #8a681b;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+    

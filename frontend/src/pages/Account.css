@@ -1,0 +1,102 @@
+.account-page {
+    max-width: 1440px;
+    margin: auto;
+    padding: 40px 28px 100px;
+}
+.account-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 28px;
+}
+.account-heading h1 {
+    margin: 10px 0;
+    font-size: 32px;
+}
+.account-empty {
+    text-align: center;
+    padding: 70px 20px;
+    background: white;
+    border-radius: 20px;
+}
+.account-empty > span {
+    font: 60px sans-serif;
+    color: #bd871f;
+}
+.account-empty a,
+.account-page a {
+    color: #956611;
+}
+.account-profile {
+    background: white;
+    border: 1px solid #e5e5e5;
+    padding: 28px;
+    border-radius: 18px;
+    max-width: 560px;
+}
+.account-profile p {
+    overflow-wrap: anywhere;
+}
+.account-orders {
+    display: grid;
+    gap: 16px;
+    margin-top: 20px;
+}
+.account-order {
+    padding: 24px;
+    background: white;
+    border: 1px solid #e5e5e5;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+}
+.account-order button {
+    padding: 10px 16px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 9px;
+}
+.google-signin {
+    margin-top: 20px;
+    min-height: 44px;
+}
+.google-signin > div {
+    max-width: 100%;
+    overflow: hidden;
+}
+.google-unavailable {
+    color: #777;
+    font-size: 14px;
+}
+.auth-divider {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin: 20px 0;
+    color: #999;
+}
+.auth-divider:before,
+.auth-divider:after {
+    content: "";
+    height: 1px;
+    background: #eee;
+    flex: 1;
+}
+@media (max-width: 600px) {
+    .account-page {
+        padding: 24px 16px 80px;
+    }
+    .account-heading {
+        align-items: start;
+    }
+    .account-heading h1 {
+        font-size: 26px;
+    }
+    .account-order {
+        align-items: start;
+        flex-direction: column;
+    }
+}

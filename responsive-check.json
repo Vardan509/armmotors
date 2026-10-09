@@ -1,0 +1,494 @@
+[
+  {
+    "path": "/",
+    "width": 320,
+    "overflow": false,
+    "offenders": [],
+    "categories": 5,
+    "logos": 7
+  },
+  {
+    "path": "/",
+    "width": 375,
+    "overflow": false,
+    "offenders": [],
+    "categories": 5,
+    "logos": 7
+  },
+  {
+    "path": "/",
+    "width": 480,
+    "overflow": false,
+    "offenders": [],
+    "categories": 5,
+    "logos": 7
+  },
+  {
+    "path": "/",
+    "width": 768,
+    "overflow": false,
+    "offenders": [],
+    "categories": 5,
+    "logos": 7
+  },
+  {
+    "path": "/",
+    "width": 1024,
+    "overflow": false,
+    "offenders": [],
+    "categories": 5,
+    "logos": 7
+  },
+  {
+    "path": "/",
+    "width": 1440,
+    "overflow": false,
+    "offenders": [],
+    "categories": 5,
+    "logos": 7
+  },
+  {
+    "path": "/",
+    "width": 1920,
+    "overflow": false,
+    "offenders": [],
+    "categories": 5,
+    "logos": 7
+  },
+  {
+    "path": "/cars",
+    "width": 320,
+    "overflow": false,
+    "offenders": [],
+    "categories": 0,
+    "logos": 0
+  },
+  {
+    "path": "/cars",
+    "width": 375,
+    "overflow": false,
+    "offenders": [],
+    "categories": 0,
+    "logos": 0
+  },
+  {
+    "path": "/cars",
+    "width": 480,
+    "overflow": false,
+    "offenders": [],
+    "categories": 0,
+    "logos": 0
+  },
+  {
+    "path": "/cars",
+    "width": 768,
+    "overflow": false,
+    "offenders": [],
+    "categories": 0,
+    "logos": 0
+  },
+  {
+    "path": "/cars",
+    "width": 1024,
+    "overflow": false,
+    "offenders": [],
+    "categories": 0,
+    "logos": 0
+  },
+  {
+    "path": "/cars",
+    "width": 1440,
+    "overflow": false,
+    "offenders": [],
+    "categories": 0,
+    "logos": 0
+  },
+  {
+    "path": "/cars",
+    "width": 1920,
+    "overflow": false,
+    "offenders": [],
+    "categories": 0,
+    "logos": 0
+  },
+  {
+    "path": "/cars/demo-1",
+    "width": 320,
+    "overflow": false,
+    "offenders": [],
+    "categories": 0,
+    "logos": 0
+  },
+  {
+    "path": "/cars/demo-1",
+    "width": 375,
+    "overflow": false,
+    "offenders": [],
+    "categories": 0,
+    "logos": 0
+  },
+  {
+    "path": "/cars/demo-1",
+    "width": 480,
+    "overflow": false,
+    "offenders": [],
+    "categories": 0,
+    "logos": 0
+  },
+  {
+    "path": "/cars/demo-1",
+    "width": 768,
+    "overflow": false,
+    "offenders": [],
+    "categories": 0,
+    "logos": 0
+  },
+  {
+    "path": "/cars/demo-1",
+    "width": 1024,
+    "overflow": false,
+    "offenders": [],
+    "categories": 0,
+    "logos": 0
+  },
+  {
+    "path": "/cars/demo-1",
+    "width": 1440,
+    "overflow": false,
+    "offenders": [],
+    "categories": 0,
+    "logos": 0
+  },
+  {
+    "path": "/cars/demo-1",
+    "width": 1920,
+    "overflow": false,
+    "offenders": [],
+    "categories": 0,
+    "logos": 0
+  },
+  {
+    "path": "/login",
+    "width": 320,
+    "overflow": false,
+    "offenders": [],
+    "categories": 0,
+    "logos": 0
+  },
+  {
+    "path": "/login",
+    "width": 375,
+    "overflow": false,
+    "offenders": [],
+    "categories": 0,
+    "logos": 0
+  },
+  {
+    "path": "/login",
+    "width": 480,
+    "overflow": false,
+    "offenders": [],
+    "categories": 0,
+    "logos": 0
+  },
+  {
+    "path": "/login",
+    "width": 768,
+    "overflow": false,
+    "offenders": [],
+    "categories": 0,
+    "logos": 0
+  },
+  {
+    "path": "/login",
+    "width": 1024,
+    "overflow": false,
+    "offenders": [],
+    "categories": 0,
+    "logos": 0
+  },
+  {
+    "path": "/login",
+    "width": 1440,
+    "overflow": false,
+    "offenders": [],
+    "categories": 0,
+    "logos": 0
+  },
+  {
+    "path": "/login",
+    "width": 1920,
+    "overflow": false,
+    "offenders": [],
+    "categories": 0,
+    "logos": 0
+  },
+  {
+    "path": "/registration",
+    "width": 320,
+    "overflow": false,
+    "offenders": [],
+    "categories": 0,
+    "logos": 0
+  },
+  {
+    "path": "/registration",
+    "width": 375,
+    "overflow": false,
+    "offenders": [],
+    "categories": 0,
+    "logos": 0
+  },
+  {
+    "path": "/registration",
+    "width": 480,
+    "overflow": false,
+    "offenders": [],
+    "categories": 0,
+    "logos": 0
+  },
+  {
+    "path": "/registration",
+    "width": 768,
+    "overflow": false,
+    "offenders": [],
+    "categories": 0,
+    "logos": 0
+  },
+  {
+    "path": "/registration",
+    "width": 1024,
+    "overflow": false,
+    "offenders": [],
+    "categories": 0,
+    "logos": 0
+  },
+  {
+    "path": "/registration",
+    "width": 1440,
+    "overflow": false,
+    "offenders": [],
+    "categories": 0,
+    "logos": 0
+  },
+  {
+    "path": "/registration",
+    "width": 1920,
+    "overflow": false,
+    "offenders": [],
+    "categories": 0,
+    "logos": 0
+  },
+  {
+    "path": "/add-product",
+    "width": 320,
+    "overflow": false,
+    "offenders": [],
+    "categories": 0,
+    "logos": 0
+  },
+  {
+    "path": "/add-product",
+    "width": 375,
+    "overflow": false,
+    "offenders": [],
+    "categories": 0,
+    "logos": 0
+  },
+  {
+    "path": "/add-product",
+    "width": 480,
+    "overflow": false,
+    "offenders": [],
+    "categories": 0,
+    "logos": 0
+  },
+  {
+    "path": "/add-product",
+    "width": 768,
+    "overflow": false,
+    "offenders": [],
+    "categories": 0,
+    "logos": 0
+  },
+  {
+    "path": "/add-product",
+    "width": 1024,
+    "overflow": false,
+    "offenders": [],
+    "categories": 0,
+    "logos": 0
+  },
+  {
+    "path": "/add-product",
+    "width": 1440,
+    "overflow": false,
+    "offenders": [],
+    "categories": 0,
+    "logos": 0
+  },
+  {
+    "path": "/add-product",
+    "width": 1920,
+    "overflow": false,
+    "offenders": [],
+    "categories": 0,
+    "logos": 0
+  },
+  {
+    "path": "/admin/messages",
+    "width": 320,
+    "overflow": false,
+    "offenders": [],
+    "categories": 0,
+    "logos": 0
+  },
+  {
+    "path": "/admin/messages",
+    "width": 375,
+    "overflow": false,
+    "offenders": [],
+    "categories": 0,
+    "logos": 0
+  },
+  {
+    "path": "/admin/messages",
+    "width": 480,
+    "overflow": false,
+    "offenders": [],
+    "categories": 0,
+    "logos": 0
+  },
+  {
+    "path": "/admin/messages",
+    "width": 768,
+    "overflow": false,
+    "offenders": [],
+    "categories": 0,
+    "logos": 0
+  },
+  {
+    "path": "/admin/messages",
+    "width": 1024,
+    "overflow": false,
+    "offenders": [],
+    "categories": 0,
+    "logos": 0
+  },
+  {
+    "path": "/admin/messages",
+    "width": 1440,
+    "overflow": false,
+    "offenders": [],
+    "categories": 0,
+    "logos": 0
+  },
+  {
+    "path": "/admin/messages",
+    "width": 1920,
+    "overflow": false,
+    "offenders": [],
+    "categories": 0,
+    "logos": 0
+  },
+  {
+    "dialog": "filters",
+    "visible": true,
+    "fits": true
+  },
+  {
+    "dialog": "support",
+    "visible": true,
+    "fits": true
+  },
+  {
+    "assets": [
+      {
+        "src": "/images/categories/electric.png",
+        "loaded": true
+      },
+      {
+        "src": "/images/categories/hybrid.png",
+        "loaded": true
+      },
+      {
+        "src": "/images/categories/new.png",
+        "loaded": true
+      },
+      {
+        "src": "/images/categories/truck.png",
+        "loaded": true
+      },
+      {
+        "src": "/images/categories/parts.png",
+        "loaded": true
+      },
+      {
+        "src": "/images/brands/mercedes.png",
+        "loaded": true
+      },
+      {
+        "src": "/images/brands/toyota.png",
+        "loaded": true
+      },
+      {
+        "src": "/images/brands/bmw.png",
+        "loaded": true
+      },
+      {
+        "src": "/images/brands/tesla.png",
+        "loaded": true
+      },
+      {
+        "src": "/images/brands/hyundai.png",
+        "loaded": true
+      },
+      {
+        "src": "/images/brands/honda.png",
+        "loaded": true
+      },
+      {
+        "src": "/images/brands/nissan.png",
+        "loaded": true
+      }
+    ]
+  },
+  {
+    "category": {
+      "active": "true",
+      "query": "?category=electric"
+    }
+  },
+  {
+    "path": "/add-product (authenticated)",
+    "width": 320,
+    "overflow": false,
+    "form": true
+  },
+  {
+    "path": "/add-product (authenticated)",
+    "width": 375,
+    "overflow": false,
+    "form": true
+  },
+  {
+    "path": "/add-product (authenticated)",
+    "width": 768,
+    "overflow": false,
+    "form": true
+  },
+  {
+    "path": "/add-product (authenticated)",
+    "width": 1440,
+    "overflow": false,
+    "form": true
+  },
+  {
+    "dialog": "filters (320x568)",
+    "fits": true
+  },
+  {
+    "dialog": "support (320x568)",
+    "fits": true
+  }
+]
