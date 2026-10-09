@@ -10,7 +10,8 @@ import useProducts from "../../utils/useProducts";
 import { useI18n } from "../../utils/i18n";
 import { asset } from "../../utils/asset";
 
-// Կատեգորիաներ
+const BASE = import.meta.env.BASE_URL;
+
 const CATEGORIES = [
     {
         id: 1,
@@ -64,38 +65,13 @@ const CATEGORIES = [
     },
 ];
 
-// Մակնիշներ
 const BRANDS = [
-    {
-        id: 1,
-        name: "Mercedes-Benz",
-        logo: "/mrc.png",
-    },
-    {
-        id: 2,
-        name: "Toyota",
-        logo: "/toyota.png",
-    },
-    {
-        id: 3,
-        name: "BMW",
-        logo: "/bmw.png",
-    },
-    {
-        id: 4,
-        name: "Tesla",
-        logo: "/tesla.png",
-    },
-    {
-        id: 6,
-        name: "Nissan",
-        logo: "/nissan.png",
-    },
-    {
-        id: 7,
-        name: "Kia",
-        logo: "/kia.png",
-    },
+    { id: 1, name: "Mercedes-Benz", logo: "/mercedes.png" },
+    { id: 2, name: "Toyota", logo: "/toyota.png" },
+    { id: 3, name: "BMW", logo: "/bmw.png" },
+    { id: 4, name: "Tesla", logo: "/tesla.png" },
+    { id: 5, name: "Hyundai", logo: "/hyundai.png" },
+    { id: 6, name: "Nissan", logo: "/nissan.png" },
 ];
 
 export default function HomePage() {
@@ -108,24 +84,20 @@ export default function HomePage() {
 
     const [category, setCategory] = useState(() => {
         const params = new URLSearchParams(window.location.search);
-
         const value = params.get("category") || "";
 
         return CATEGORIES.some((item) => item.value === value) ? value : "";
     });
 
     const PRODUCTS = Array.isArray(products) ? products : [];
-
     const normalizedSearch = search.trim().toLowerCase();
 
-    // Որոնման համար մեքենայի տվյալները
     function getSearchValues(product) {
         return [product.title, product.brand, product.model, product.year]
             .filter((value) => value !== undefined && value !== null)
             .map((value) => String(value).toLowerCase());
     }
 
-    // Որոնման առաջարկներ
     const searchSuggestions = normalizedSearch
         ? PRODUCTS.filter((product) =>
               getSearchValues(product).some((value) =>
@@ -134,7 +106,6 @@ export default function HomePage() {
           ).slice(0, 6)
         : [];
 
-    // Կատեգորիայի և որոնման ֆիլտրում
     const filteredProducts = PRODUCTS.filter((product) => {
         const matchesSearch =
             !normalizedSearch ||
@@ -142,9 +113,7 @@ export default function HomePage() {
                 value.includes(normalizedSearch),
             );
 
-        if (!matchesSearch) {
-            return false;
-        }
+        if (!matchesSearch) return false;
 
         if (category === "electric") {
             return product.type === "car" && product.fuel === "electric";
@@ -208,7 +177,6 @@ export default function HomePage() {
         updateCategory("");
     }
 
-    // Մակնիշներ և գովազդ
     function renderBrandsAndAd() {
         return (
             <section className="brands-ad-wrapper brands-ad-middle" id="brands">
@@ -221,9 +189,6 @@ export default function HomePage() {
 
                     <div className="brands-grid">
                         {BRANDS.map((brand) => {
-                            // ՍԽԱԼԸ ՈՒՂՂՎԱԾ Է
-                            // filter-ը վերադարձնում է զանգված,
-                            // .length-ը՝ մեքենաների քանակը
                             const count = PRODUCTS.filter(
                                 (product) =>
                                     product.type === "car" &&
@@ -240,14 +205,14 @@ export default function HomePage() {
                                     className="brand-card"
                                     onClick={() => {
                                         window.location.assign(
-                                            `/cars?brand=${encodeURIComponent(
+                                            `${BASE}cars?brand=${encodeURIComponent(
                                                 brand.name,
                                             )}`,
                                         );
                                     }}
                                 >
                                     <img
-                                        src={brand.logo}
+                                        src={asset(brand.logo)}
                                         alt={brand.name}
                                         className="brand-logo"
                                         loading="lazy"
@@ -268,7 +233,7 @@ export default function HomePage() {
 
                 <div className="ad-banner">
                     <img
-                        src="/image.png"
+                        src={asset("/image.png")}
                         alt="Գովազդային տարածք"
                         className="ad-image"
                         loading="lazy"
@@ -283,19 +248,7 @@ export default function HomePage() {
             <Header />
 
             <main className="main-content">
-                {/* Գլխավոր հատված */}
                 <section className="intro-section">
-                    {/* <div className="intro-copy">
-                            <span className="section-label">
-                                {t("marketLabel")}
-                            </span>
-
-                            <h1>{t("heroTitle")}</h1>
-
-                            <p>{t("heroText")}</p>
-                        </div> */}
-
-                    {/* Որոնում + ֆիլտր */}
                     <div
                         className="home-search-controls"
                         style={{
@@ -334,7 +287,6 @@ export default function HomePage() {
                                     aria-hidden="true"
                                 >
                                     <circle cx="10.5" cy="10.5" r="6.5" />
-
                                     <path d="m16 16 5 5" />
                                 </svg>
 
@@ -366,7 +318,6 @@ export default function HomePage() {
                                 )}
                             </div>
 
-                            {/* Որոնման առաջարկներ */}
                             {searchFocused && normalizedSearch && (
                                 <div className="search-suggestions">
                                     {searchSuggestions.length > 0 ? (
@@ -428,12 +379,10 @@ export default function HomePage() {
                             )}
                         </div>
 
-                        {/* Ֆիլտրի կոճակ */}
                         <Filter />
                     </div>
                 </section>
 
-                {/* Կատեգորիաներ */}
                 <section className="categories-section" aria-label="Categories">
                     <div className="categories-grid">
                         {CATEGORIES.map((cat) => (
@@ -451,7 +400,7 @@ export default function HomePage() {
                                 <span className="category-image-wrapper">
                                     <img
                                         className="category-image"
-                                        src={cat.image}
+                                        src={asset(cat.image)}
                                         alt=""
                                         draggable={false}
                                         loading="lazy"
@@ -462,7 +411,6 @@ export default function HomePage() {
                     </div>
                 </section>
 
-                {/* Հայտարարություններ */}
                 <section
                     className="products-section"
                     id="products"
@@ -545,7 +493,6 @@ export default function HomePage() {
                 </section>
             </main>
 
-            {/* Footer */}
             <footer className="home-footer">
                 <div className="footer-container">
                     <strong>ArmMotors</strong>
