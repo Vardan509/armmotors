@@ -1,9 +1,9 @@
 import { useState } from "react";
 
 import { apiRequest } from "../utils/api";
+import { pageUrl } from "../utils/navigation";
 
 import Header from "../components/header/Header";
-
 import GoogleSignIn from "../components/GoogleSignIn";
 
 import "./Account.css";
@@ -22,11 +22,8 @@ export default function AuthPage({ registration = false }) {
     const [mode, setMode] = useState(registration ? "register" : "login");
 
     const [form, setForm] = useState(EMPTY_FORM);
-
     const [error, setError] = useState("");
-
     const [loading, setLoading] = useState(false);
-
     const [showPassword, setShowPassword] = useState(false);
 
     const isRegistration = mode === "register";
@@ -47,11 +44,8 @@ export default function AuthPage({ registration = false }) {
         if (nextMode === mode) return;
 
         setMode(nextMode);
-
         setError("");
-
         setShowPassword(false);
-
         setForm(EMPTY_FORM);
     }
 
@@ -68,12 +62,10 @@ export default function AuthPage({ registration = false }) {
 
     async function handleSubmit(event) {
         event.preventDefault();
-
         setError("");
 
         if (isRegistration && form.password !== form.repetPassword) {
             setError("Գաղտնաբառերը չեն համընկնում։");
-
             return;
         }
 
@@ -84,7 +76,6 @@ export default function AuthPage({ registration = false }) {
                 isRegistration ? "/auth/reg" : "/auth/login",
                 {
                     method: "POST",
-
                     body: JSON.stringify(
                         isRegistration
                             ? form
@@ -97,18 +88,18 @@ export default function AuthPage({ registration = false }) {
             );
 
             localStorage.setItem("token", data.token);
-
             localStorage.setItem("user", JSON.stringify(data.user));
 
             window.dispatchEvent(new Event("session-changed"));
 
-            window.location.assign(
-                destination === "/" && data.user.isAdmin
+            const redirectTo =
+                destination === "/" && data.user?.isAdmin
                     ? "/admin"
-                    : destination,
-            );
+                    : destination;
+
+            window.location.assign(pageUrl(redirectTo));
         } catch (requestError) {
-            setError(requestError.message);
+            setError(requestError.message || "Տեղի ունեցավ սխալ։");
         } finally {
             setLoading(false);
         }
@@ -182,7 +173,7 @@ export default function AuthPage({ registration = false }) {
                                                 onChange={changeField}
                                                 minLength={2}
                                                 autoComplete="given-name"
-                                                placeholder="Վարդան"
+                                                placeholder="Անուն"
                                                 required
                                             />
                                         </label>
@@ -197,7 +188,7 @@ export default function AuthPage({ registration = false }) {
                                                 onChange={changeField}
                                                 minLength={2}
                                                 autoComplete="family-name"
-                                                placeholder="Հանոյան"
+                                                placeholder="Ազգանուն"
                                                 required
                                             />
                                         </label>
@@ -349,7 +340,7 @@ export default function AuthPage({ registration = false }) {
                                 <span>կամ շարունակել</span>
                             </div>
 
-                            <GoogleSignIn destination={destination} />
+                            <GoogleSignIn destination={pageUrl(destination)} />
 
                             <p className="auth-switch-copy">
                                 {isRegistration
