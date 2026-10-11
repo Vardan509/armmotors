@@ -1,89 +1,169 @@
 import { OAuth2Client } from "google-auth-library";
+
 import User from "../models/user.js";
 import { createAuthResult } from "./authServices.js";
 import { isAdminEmail } from "../middleware/requireAdmin.js";
 import { httpError } from "../utils/http.js";
 
-export async function googleLogin(credential) {
+const googleClient = new OAuth2Client();
+
+async function verifyGoogleCredential(credential) {
     const clientId = process.env.GOOGLE_CLIENT_ID;
-    if (!clientId) throw httpError(503, "Google մուտքը դեռ կարգավորված չէ։");
-    if (typeof credential !== "string" || credential.length > 10000)
+
+    if (!clientId) {
+        throw httpError(503, "Google մուտքը դեռ կարգավորված չէ։");
+    }
+
+    if (
+        typeof credential !== "string" ||
+        !credential ||
+        credential.length > 10000
+    ) {
         throw httpError(400, "Սխալ Google տվյալներ։");
-    let payload;
+    }
+
     try {
-        const ticket = await new OAuth2Client(clientId).verifyIdToken({
+        const ticket = await googleClient.verifyIdToken({
             idToken: credential,
             audience: clientId,
         });
-        payload = ticket.getPayload();
-    } catch {
+
+        const payload = ticket.getPayload();
+
+        if (
+            !payload?.sub ||
+            !payload?.email ||
+            payload.email_verified !== true
+        ) {
+            throw httpError(401, "Google email-ը հաստատված չէ։");
+        }
+
+        return {
+            googleId: payload.sub,
+            email: payload.email.trim().toLowerCase(),
+            name: payload.given_name || payload.name || "Օգտատեր",
+            surname: payload.family_name || "",
+        };
+    } catch (error) {
+        if (error.status === 401) {
+            throw error;
+        }
+
         throw httpError(401, "Google մուտքը ստուգել չհաջողվեց։");
     }
-    if (!payload?.sub || !payload.email || !payload.email_verified)
-        throw httpError(401, "Google email-ը հաստատված չէ։");
-    const email = payload.email.toLowerCase();
-    let user = await User.findOne({ googleId: payload.sub }).select(
-        "+googleId",
-    );
+}
+
+export async function googleLogin(credential) {
+    const google = await verifyGoogleCredential(credential);
+
+    let user = await User.findOne({
+        googleId: google.googleId,
+    });
+
     if (!user) {
-        const existing = await User.findOne({ email });
-        // Existing password accounts must explicitly link Google while signed in.
-        if (existing)
+        const existing = await User.findOne({
+            email: google.email,
+        });
+
+        if (existing) {
             throw httpError(
                 409,
-                "Այս email-ով հաշիվ կա։ Մուտք գործեք գաղտնաբառով և Google-ը կապեք հաշվի բաժնում։",
+                "Այս email-ով հաշիվ արդեն կա։ Նախ մուտք գործեք գաղտնաբառով և կապեք Google հաշիվը։",
             );
-        if (isAdminEmail(email))
+        }
+
+        if (isAdminEmail(google.email)) {
             throw httpError(
                 403,
-                "Ադմինի համար օգտագործեք նախապես ստեղծված հաշիվը։",
+                "Ադմինի հաշիվը նախ պետք է ստեղծել և կապել Google-ին։",
             );
+        }
+
         try {
             user = await User.create({
-                googleId: payload.sub,
-                email,
-                name: payload.given_name || payload.name || "Օգտատեր",
-                surname: payload.family_name || "",
+                googleId: google.googleId,
+                email: google.email,
+                name: google.name,
+                surname: google.surname,
+                role: "user",
                 isVerified: true,
             });
         } catch (error) {
-            if (error.code !== 11000) throw error;
-            user = await User.findOne({ googleId: payload.sub });
-            if (!user) throw httpError(409, "Այս email-ով հաշիվ արդեն կա։");
+            if (error.code !== 11000) {
+                throw error;
+            }
+
+            user = await User.findOne({
+                googleId: google.googleId,
+            });
+
+            if (!user) {
+                throw httpError(409, "Այս email-ով հաշիվ արդեն կա։");
+            }
         }
     }
-    if (user.banned) throw httpError(403, "Ձեր հաշիվն արգելափակված է։");
+
+    if (user.banned) {
+        throw httpError(403, "Ձեր հաշիվն արգելափակված է։");
+    }
+
     return createAuthResult(user);
 }
 
 export async function linkGoogle(userId, credential) {
-    if (!process.env.GOOGLE_CLIENT_ID)
-        throw httpError(503, "Google մուտքը դեռ կարգավորված չէ։");
-    if (typeof credential !== "string" || credential.length > 10000)
-        throw httpError(400, "Սխալ Google տվյալներ։");
-    let payload;
-    try {
-        payload = (
-            await new OAuth2Client(process.env.GOOGLE_CLIENT_ID).verifyIdToken({
-                idToken: credential,
-                audience: process.env.GOOGLE_CLIENT_ID,
-            })
-        ).getPayload();
-    } catch {
-        throw httpError(401, "Սխալ Google token։");
+    if (!userId) {
+        throw httpError(401, "Նախ մուտք գործեք Ձեր հաշիվ։");
     }
+
+    const google = await verifyGoogleCredential(credential);
+
     const user = await User.findById(userId);
-    if (
-        !payload?.sub ||
-        !payload.email ||
-        !payload.email_verified ||
-        payload.email.toLowerCase() !== user.email
-    )
+
+    if (!user) {
+        throw httpError(404, "Օգտատերը չի գտնվել։");
+    }
+
+    if (user.banned) {
+        throw httpError(403, "Ձեր հաշիվն արգելափակված է։");
+    }
+
+    if (user.email.trim().toLowerCase() !== google.email) {
         throw httpError(
             400,
             "Google email-ը պետք է համընկնի Ձեր հաշվի email-ին։",
         );
-    user.googleId = payload.sub;
-    await user.save();
-    return { message: "Google հաշիվը կապվել է։" };
+    }
+
+    const alreadyLinked = await User.findOne({
+        googleId: google.googleId,
+        _id: { $ne: user._id },
+    });
+
+    if (alreadyLinked) {
+        throw httpError(
+            409,
+            "Այս Google հաշիվն արդեն կապված է այլ օգտատիրոջ հետ։",
+        );
+    }
+
+    if (user.googleId && user.googleId !== google.googleId) {
+        throw httpError(409, "Այս հաշվին արդեն այլ Google հաշիվ է կապված։");
+    }
+
+    user.googleId = google.googleId;
+    user.isVerified = true;
+
+    try {
+        await user.save();
+    } catch (error) {
+        if (error.code === 11000) {
+            throw httpError(409, "Այս Google հաշիվն արդեն օգտագործվում է։");
+        }
+
+        throw error;
+    }
+
+    return {
+        message: "Google հաշիվը հաջողությամբ կապվել է։",
+    };
 }

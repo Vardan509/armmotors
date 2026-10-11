@@ -2,14 +2,17 @@ import { useEffect, useState } from "react";
 
 import Header from "../components/header/Header";
 import ProductCard from "../components/ProductCard/ProductCard";
+import ReportProduct from "../components/ReportProduct";
+import CurrencySelect from "../components/CurrencySelect";
 
 import { apiRequest } from "../utils/api";
 import useProducts from "../utils/useProducts";
-
-import "./CarDetailsPage.css";
 import useCurrency from "../utils/useCurrency";
 import useFavorite from "../utils/useFavorite";
-import CurrencySelect from "../components/CurrencySelect";
+
+import "./CarDetailsPage.css";
+
+const BASE = import.meta.env.BASE_URL;
 
 const FUELS = {
     petrol: "Բենզին",
@@ -18,6 +21,10 @@ const FUELS = {
     hybrid: "Հիբրիդ",
     gas: "Գազ",
 };
+
+function getProductId(product) {
+    return String(product?._id || product?.id || "");
+}
 
 function Gallery({ images, title }) {
     const [index, setIndex] = useState(0);
@@ -32,6 +39,14 @@ function Gallery({ images, title }) {
         }));
     }
 
+    function previousImage() {
+        setIndex((current) => (current + images.length - 1) % images.length);
+    }
+
+    function nextImage() {
+        setIndex((current) => (current + 1) % images.length);
+    }
+
     return (
         <section className="car-gallery" aria-label="Հայտարարության նկարներ">
             <div className="gallery-main">
@@ -43,7 +58,6 @@ function Gallery({ images, title }) {
                     />
                 ) : (
                     <div className="gallery-empty">
-                        🚗
                         <p>Նկարը հասանելի չէ</p>
                     </div>
                 )}
@@ -51,23 +65,19 @@ function Gallery({ images, title }) {
                 {images.length > 1 && (
                     <>
                         <button
+                            type="button"
                             className="gallery-prev"
                             aria-label="Նախորդ նկար"
-                            onClick={() => {
-                                setIndex(
-                                    (index + images.length - 1) % images.length,
-                                );
-                            }}
+                            onClick={previousImage}
                         >
                             ‹
                         </button>
 
                         <button
+                            type="button"
                             className="gallery-next"
                             aria-label="Հաջորդ նկար"
-                            onClick={() => {
-                                setIndex((index + 1) % images.length);
-                            }}
+                            onClick={nextImage}
                         >
                             ›
                         </button>
@@ -82,6 +92,7 @@ function Gallery({ images, title }) {
             <div className="gallery-thumbs">
                 {images.map((image, i) => (
                     <button
+                        type="button"
                         key={`${image}-${i}`}
                         aria-label={`Ցուցադրել նկար ${i + 1}`}
                         aria-pressed={i === index}
@@ -109,16 +120,17 @@ export default function CarDetailsPage({ id }) {
         car: null,
         loading: true,
         error: "",
-        offline: false,
     });
 
     const [copied, setCopied] = useState("");
+
     const [purchase, setPurchase] = useState({
         busy: false,
         message: "",
         error: "",
     });
-    const { products } = useProducts();
+
+    const { products = [] } = useProducts();
     const { format } = useCurrency();
     const [favorite, toggleFavorite] = useFavorite(id);
 
@@ -126,6 +138,12 @@ export default function CarDetailsPage({ id }) {
         const controller = new AbortController();
 
         async function load() {
+            setState({
+                car: null,
+                loading: true,
+                error: "",
+            });
+
             try {
                 const car = await apiRequest(
                     `/products/${encodeURIComponent(id)}`,
@@ -134,22 +152,21 @@ export default function CarDetailsPage({ id }) {
                     },
                 );
 
+                if (controller.signal.aborted) return;
+
                 setState({
                     car,
                     loading: false,
                     error: "",
-                    offline: false,
                 });
             } catch (error) {
-                if (controller.signal.aborted) {
-                    return;
-                }
+                if (controller.signal.aborted) return;
 
                 setState({
                     car: null,
                     loading: false,
-                    error: error.message,
-                    offline: false,
+                    error:
+                        error.message || "Հայտարարությունը բեռնել չհաջողվեց։",
                 });
             }
         }
@@ -160,17 +177,72 @@ export default function CarDetailsPage({ id }) {
     }, [id]);
 
     useEffect(() => {
-        if (state.car) {
-            document.title = `${state.car.title} — ArmMotors`;
-        }
+        if (!state.car) return;
+
+        const previousTitle = document.title;
+
+        document.title = `${state.car.title} — ArmMotors`;
+
+        return () => {
+            document.title = previousTitle;
+        };
     }, [state.car]);
 
     async function share() {
         try {
             await navigator.clipboard.writeText(window.location.href);
+
             setCopied("Հղումը պատճենված է");
         } catch {
             setCopied("Պատճենեք հղումը հասցեի տողից։");
+        }
+    }
+
+    function openSupport() {
+        window.dispatchEvent(
+            new CustomEvent("open-support", {
+                detail: {
+                    listingId: id,
+                    title: state.car?.title || "",
+                },
+            }),
+        );
+    }
+
+    async function sendPurchaseRequest() {
+        if (!localStorage.getItem("token")) {
+            window.location.assign(
+                `${BASE}login?next=${encodeURIComponent(`/cars/${id}`)}`,
+            );
+
+            return;
+        }
+
+        setPurchase({
+            busy: true,
+            message: "",
+            error: "",
+        });
+
+        try {
+            await apiRequest("/orders", {
+                method: "POST",
+                body: JSON.stringify({
+                    productId: id,
+                }),
+            });
+
+            setPurchase({
+                busy: false,
+                error: "",
+                message: "Հայտն ուղարկված է։ Հետևեք դրան «Իմ հաշիվը» բաժնում։",
+            });
+        } catch (error) {
+            setPurchase({
+                busy: false,
+                message: "",
+                error: error.message || "Գնման հայտը ուղարկել չհաջողվեց։",
+            });
         }
     }
 
@@ -190,10 +262,10 @@ export default function CarDetailsPage({ id }) {
               [
                   "Վազք",
                   car.mileage != null
-                      ? `${car.mileage.toLocaleString("en-US")} կմ`
+                      ? `${Number(car.mileage).toLocaleString("en-US")} կմ`
                       : null,
               ],
-              ["Վառելիք", FUELS[car.fuel]],
+              ["Վառելիք", FUELS[car.fuel] || car.fuel],
               [
                   "Ղեկ",
                   car.steering === "left"
@@ -209,16 +281,17 @@ export default function CarDetailsPage({ id }) {
           ]
         : [];
 
-    function openSupport() {
-        window.dispatchEvent(
-            new CustomEvent("open-support", {
-                detail: {
-                    listingId: id,
-                    title: car.title,
-                },
-            }),
-        );
-    }
+    const relatedCars = car
+        ? products
+              .filter(
+                  (item) =>
+                      getProductId(item) !== getProductId(car) &&
+                      item.brand === car.brand &&
+                      item.status !== "sold" &&
+                      item.status !== "draft",
+              )
+              .slice(0, 4)
+        : [];
 
     return (
         <>
@@ -226,10 +299,14 @@ export default function CarDetailsPage({ id }) {
 
             <main className="details-page">
                 <nav className="detail-breadcrumb" aria-label="Էջի ուղի">
-                    <a href="/">Գլխավոր</a>
+                    <a href={BASE}>Գլխավոր</a>
+
                     <span>/</span>
-                    <a href="/cars">Հայտարարություններ</a>
+
+                    <a href={`${BASE}cars`}>Հայտարարություններ</a>
+
                     <span>/</span>
+
                     <span>{car?.title || "Մանրամասներ"}</span>
                 </nav>
 
@@ -241,7 +318,7 @@ export default function CarDetailsPage({ id }) {
 
                         <p role="alert">{error}</p>
 
-                        <a href="/cars">Դիտել այլ մեքենաներ →</a>
+                        <a href={`${BASE}cars`}>Դիտել այլ մեքենաներ →</a>
                     </section>
                 ) : (
                     car && (
@@ -249,14 +326,16 @@ export default function CarDetailsPage({ id }) {
                             <div className="detail-heading">
                                 <div>
                                     <span className="section-label">
-                                        {car.region} ·{" "}
+                                        {car.region}
+                                        {" · "}
                                         {car.year || car.condition}
                                     </span>
 
-                                    <p>Հայտարարություն #{car.id || car._id}</p>
+                                    <p>Հայտարարություն #{getProductId(car)}</p>
                                 </div>
 
                                 <button
+                                    type="button"
                                     className="detail-secondary"
                                     onClick={share}
                                 >
@@ -264,7 +343,7 @@ export default function CarDetailsPage({ id }) {
                                 </button>
                             </div>
 
-                            <p role="status">{copied}</p>
+                            {copied && <p role="status">{copied}</p>}
 
                             <div className="detail-layout">
                                 <div>
@@ -282,11 +361,13 @@ export default function CarDetailsPage({ id }) {
                                                 .filter(
                                                     ([, value]) =>
                                                         value !== undefined &&
-                                                        value !== null,
+                                                        value !== null &&
+                                                        value !== "",
                                                 )
                                                 .map(([label, value]) => (
                                                     <div key={label}>
                                                         <dt>{label}</dt>
+
                                                         <dd>{value}</dd>
                                                     </div>
                                                 ))}
@@ -309,7 +390,9 @@ export default function CarDetailsPage({ id }) {
                                             {car.title}
                                             {car.year ? `, ${car.year} թ.` : ""}
                                         </h1>
+
                                         <button
+                                            type="button"
                                             className="detail-favorite"
                                             onClick={toggleFavorite}
                                             aria-pressed={favorite}
@@ -347,9 +430,23 @@ export default function CarDetailsPage({ id }) {
                                             car.currency || "AMD",
                                         )}
                                     </strong>
+
                                     <CurrencySelect />
 
                                     <p>{car.region}</p>
+
+                                    {typeof car.views === "number" && (
+                                        <p className="detail-views">
+                                            Դիտումներ՝{" "}
+                                            {car.views.toLocaleString("en-US")}
+                                        </p>
+                                    )}
+
+                                    {car.status === "sold" && (
+                                        <p className="detail-sold-label">
+                                            Վաճառված է
+                                        </p>
+                                    )}
 
                                     <hr />
 
@@ -360,8 +457,10 @@ export default function CarDetailsPage({ id }) {
                                         >
                                             {(car.brand || "A").slice(0, 1)}
                                         </span>
+
                                         <div>
                                             <h2>Կապ վաճառողի հետ</h2>
+
                                             <p>{car.region}</p>
                                         </div>
                                     </div>
@@ -369,7 +468,9 @@ export default function CarDetailsPage({ id }) {
                                     {car.phone && !car.isDemo ? (
                                         <a
                                             className="detail-primary"
-                                            href={`tel:${car.phone.replace(/[^+0-9]/g, "")}`}
+                                            href={`tel:${String(
+                                                car.phone,
+                                            ).replace(/[^+0-9]/g, "")}`}
                                         >
                                             Զանգահարել · {car.phone}
                                         </a>
@@ -381,6 +482,7 @@ export default function CarDetailsPage({ id }) {
                                     )}
 
                                     <button
+                                        type="button"
                                         className="detail-secondary"
                                         onClick={openSupport}
                                     >
@@ -388,47 +490,14 @@ export default function CarDetailsPage({ id }) {
                                     </button>
 
                                     <button
+                                        type="button"
                                         className="detail-primary"
                                         disabled={
                                             purchase.busy ||
-                                            !!purchase.message ||
+                                            Boolean(purchase.message) ||
                                             car.status === "sold"
                                         }
-                                        onClick={async () => {
-                                            if (
-                                                !localStorage.getItem("token")
-                                            ) {
-                                                window.location.assign(
-                                                    `/login?next=${encodeURIComponent(`/cars/${id}`)}`,
-                                                );
-                                                return;
-                                            }
-                                            setPurchase({
-                                                busy: true,
-                                                message: "",
-                                                error: "",
-                                            });
-                                            try {
-                                                await apiRequest("/orders", {
-                                                    method: "POST",
-                                                    body: JSON.stringify({
-                                                        productId: id,
-                                                    }),
-                                                });
-                                                setPurchase({
-                                                    busy: false,
-                                                    error: "",
-                                                    message:
-                                                        "Հայտն ուղարկված է։ Հետևեք դրան «Իմ հաշիվը» բաժնում։",
-                                                });
-                                            } catch (error) {
-                                                setPurchase({
-                                                    busy: false,
-                                                    message: "",
-                                                    error: error.message,
-                                                });
-                                            }
-                                        }}
+                                        onClick={sendPurchaseRequest}
                                     >
                                         {car.status === "sold"
                                             ? "Վաճառված է"
@@ -436,38 +505,40 @@ export default function CarDetailsPage({ id }) {
                                               ? "Ուղարկվում է…"
                                               : "Գնման հայտ ուղարկել"}
                                     </button>
-                                    <p role="status">{purchase.message}</p>
+
+                                    {purchase.message && (
+                                        <p role="status">{purchase.message}</p>
+                                    )}
+
                                     {purchase.error && (
                                         <p role="alert" className="form-error">
                                             {purchase.error}
                                         </p>
                                     )}
+
                                     <small>
                                         Մինչև գործարքը անձամբ ստուգեք մեքենայի և
                                         փաստաթղթերի տվյալները։
                                     </small>
+
+                                    {/* ԲՈՂՈՔԱՐԿՄԱՆ ՀԱՄԱԿԱՐԳ */}
+                                    <ReportProduct
+                                        productId={getProductId(car)}
+                                    />
                                 </aside>
                             </div>
-                            {products.some(
-                                (item) =>
-                                    item.id !== id && item.brand === car.brand,
-                            ) && (
+
+                            {relatedCars.length > 0 && (
                                 <section className="related-cars">
                                     <h2>Նմանատիպ մեքենաներ</h2>
+
                                     <div className="products-grid">
-                                        {products
-                                            .filter(
-                                                (item) =>
-                                                    item.id !== id &&
-                                                    item.brand === car.brand,
-                                            )
-                                            .slice(0, 4)
-                                            .map((item) => (
-                                                <ProductCard
-                                                    key={item.id}
-                                                    item={item}
-                                                />
-                                            ))}
+                                        {relatedCars.map((item) => (
+                                            <ProductCard
+                                                key={getProductId(item)}
+                                                item={item}
+                                            />
+                                        ))}
                                     </div>
                                 </section>
                             )}

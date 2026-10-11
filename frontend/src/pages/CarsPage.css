@@ -282,3 +282,64 @@
         min-width: 0;
     }
 }
+
+/* ========================================
+   ARMMOTORS - DETAILS IMPROVEMENTS
+======================================== */
+
+.detail-views {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    margin: 12px 0;
+    padding: 8px 12px;
+
+    background: #f7f8fa;
+    border: 1px solid #ececec;
+    border-radius: 8px;
+
+    color: #777;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.detail-sold-label {
+    display: inline-block;
+
+    padding: 8px 13px;
+    margin: 10px 0;
+
+    background: #fff0f0;
+    border: 1px solid #f4d3d3;
+    border-radius: 8px;
+
+    color: #c34545;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.seller-panel .report-product {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #eeeeee;
+}
+
+.seller-panel .report-open-button {
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.seller-panel .report-form {
+    padding: 16px;
+}
+
+@media (max-width: 768px) {
+    .detail-views {
+        font-size: 11px;
+    }
+
+    .seller-panel .report-form {
+        padding: 14px;
+    }
+}

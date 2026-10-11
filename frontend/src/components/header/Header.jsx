@@ -5,7 +5,6 @@ import { useI18n } from "../../utils/i18n";
 import { asset } from "../../utils/asset";
 import "./Header.css";
 
-// Աշխատում է localhost-ում և GitHub Pages-ում
 const BASE = import.meta.env.BASE_URL;
 
 function pageUrl(path = "/") {
@@ -135,9 +134,57 @@ export default function Header() {
     const { language, languages, setLanguage, t } = useI18n();
 
     const [languageOpen, setLanguageOpen] = useState(false);
+
     const [loggingOut, setLoggingOut] = useState(false);
 
+    const [unreadMessages, setUnreadMessages] = useState(0);
+
     const headerRef = useRef(null);
+
+    useEffect(() => {
+        let alive = true;
+
+        const refresh = async () => {
+            if (!localStorage.getItem("token")) {
+                if (alive) {
+                    setUnreadMessages(0);
+                }
+
+                return;
+            }
+
+            try {
+                const data = await apiRequest("/conversations");
+
+                const count = (data.items || []).reduce(
+                    (sum, item) => sum + Number(item.unreadCount || 0),
+                    0,
+                );
+
+                if (alive) {
+                    setUnreadMessages(count);
+                }
+            } catch {
+                if (alive) {
+                    setUnreadMessages(0);
+                }
+            }
+        };
+
+        void refresh();
+
+        const interval = window.setInterval(refresh, 60000);
+
+        window.addEventListener("session-changed", refresh);
+
+        return () => {
+            alive = false;
+
+            window.clearInterval(interval);
+
+            window.removeEventListener("session-changed", refresh);
+        };
+    }, []);
 
     const path = currentPage();
 
@@ -145,6 +192,7 @@ export default function Header() {
 
     try {
         const savedUser = localStorage.getItem("user");
+
         user = savedUser ? JSON.parse(savedUser) : null;
     } catch {
         user = null;
@@ -154,7 +202,9 @@ export default function Header() {
         languages.find((item) => item.code === language) || languages[0];
 
     const isHome = path === "/";
+
     const isCars = path === "/cars" || path.startsWith("/cars/");
+
     const isFavorites = path === "/favorites";
     const isAccount = path === "/account";
 
@@ -179,10 +229,12 @@ export default function Header() {
         }
 
         document.addEventListener("pointerdown", handleOutsideClick);
+
         document.addEventListener("keydown", handleEscape);
 
         return () => {
             document.removeEventListener("pointerdown", handleOutsideClick);
+
             document.removeEventListener("keydown", handleEscape);
         };
     }, []);
@@ -203,6 +255,7 @@ export default function Header() {
             localStorage.removeItem("user");
 
             window.dispatchEvent(new Event("session-changed"));
+
             window.location.assign(pageUrl("/"));
         }
     }
@@ -239,6 +292,7 @@ export default function Header() {
         <>
             <header className="site-header" ref={headerRef}>
                 {/* DESKTOP HEADER */}
+
                 <div className="desktop-header desktop-header-only">
                     <a
                         className="header-logo"
@@ -283,7 +337,8 @@ export default function Header() {
                             onSelect={changeLanguage}
                         />
 
-                        {/* DESKTOP FAVORITES */}
+                        {/* FAVORITES */}
+
                         <a
                             href={pageUrl("/favorites")}
                             onClick={handleFavoritesClick}
@@ -296,6 +351,45 @@ export default function Header() {
                         >
                             <Icon name="heart" />
                         </a>
+
+                        {/* MESSAGES */}
+
+                        {user && (
+                            <a
+                                href={pageUrl("/messages")}
+                                className="header-icon-button"
+                                title="Հաղորդագրություններ"
+                                aria-label={`Հաղորդագրություններ, ${unreadMessages} չկարդացված`}
+                                style={{
+                                    position: "relative",
+                                }}
+                            >
+                                <Icon name="chat" />
+
+                                {unreadMessages > 0 && (
+                                    <span
+                                        style={{
+                                            position: "absolute",
+                                            top: -5,
+                                            right: -7,
+                                            minWidth: 18,
+                                            height: 18,
+                                            padding: "0 4px",
+                                            borderRadius: 12,
+                                            background: "#b99547",
+                                            color: "white",
+                                            fontSize: 10,
+                                            display: "grid",
+                                            placeItems: "center",
+                                        }}
+                                    >
+                                        {unreadMessages > 99
+                                            ? "99+"
+                                            : unreadMessages}
+                                    </span>
+                                )}
+                            </a>
+                        )}
 
                         {user ? (
                             <>
@@ -342,12 +436,14 @@ export default function Header() {
                             className="header-add-button"
                         >
                             <Icon name="plus" />
+
                             <span>{t("addListing")}</span>
                         </a>
                     </div>
                 </div>
 
                 {/* MOBILE HEADER */}
+
                 <div className="mobile-header-bar">
                     <a
                         className="mobile-header-logo"
@@ -367,7 +463,6 @@ export default function Header() {
                             compact
                         />
 
-                        {/* MOBILE TOP FAVORITES */}
                         <a
                             className="mobile-like-link"
                             href={pageUrl("/favorites")}
@@ -380,7 +475,8 @@ export default function Header() {
                 </div>
             </header>
 
-            {/* MOBILE BOTTOM MENU */}
+            {/* MOBILE BOTTOM NAV */}
+
             <nav className="mobile-bottom-nav" aria-label="Mobile navigation">
                 <a
                     href={pageUrl("/")}
@@ -398,6 +494,7 @@ export default function Header() {
                     aria-current={isFavorites ? "page" : undefined}
                 >
                     <Icon name="heart" />
+
                     <span>{t("favoritesNav")}</span>
                 </a>
 
@@ -415,6 +512,7 @@ export default function Header() {
 
                 <button type="button" onClick={openSupport}>
                     <Icon name="chat" />
+
                     <span>{t("chatNav")}</span>
                 </button>
 
@@ -424,6 +522,7 @@ export default function Header() {
                     aria-current={isAccount ? "page" : undefined}
                 >
                     <Icon name="account" />
+
                     <span>{t("accountNav")}</span>
                 </a>
             </nav>

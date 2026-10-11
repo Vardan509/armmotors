@@ -6,13 +6,19 @@ import jwt from "jsonwebtoken";
 function createError(message, status) {
     const error = new Error(message);
     error.status = status;
-
     return error;
 }
 
 export function createAuthResult(user) {
+    if (!user) {
+        throw createError("Օգտատերը չի գտնվել։", 404);
+    }
+
     const token = jwt.sign(
-        { userId: user._id.toString(), version: user.tokenVersion || 0 },
+        {
+            userId: user._id.toString(),
+            version: user.tokenVersion || 0,
+        },
         process.env.JWT_SECRET,
         { expiresIn: "1h" },
     );
@@ -25,7 +31,7 @@ export function createAuthResult(user) {
             surname: user.surname,
             phone: user.phone,
             email: user.email,
-            isAdmin: user.role === "admin" || isAdminEmail(user.email),
+            isAdmin: user.role === "admin",
         },
     };
 }
@@ -84,26 +90,24 @@ export async function fnRegistration(
     }
 
     if (isAdminEmail(email)) {
-        throw createError(
-            "Այս email-ով հանրային գրանցումը փակ է։ Եթե արդեն հաշիվ ունեք, մուտք գործեք։",
-            403,
-        );
+        throw createError("Այս email-ով հանրային գրանցումը փակ է։", 403);
     }
 
-    const existingUser = await User.findOne({ email });
+    const existing = await User.findOne({ email });
 
-    if (existingUser) {
+    if (existing) {
         throw createError("Այս email-ն արդեն գրանցված է։", 409);
     }
 
-    const hashPassword = await bcrypt.hash(password, 10);
+    const passwordHash = await bcrypt.hash(password, 12);
 
     const user = await User.create({
         name,
         surname,
         phone,
         email,
-        password: hashPassword,
+        password: passwordHash,
+        role: "user",
     });
 
     return createAuthResult(user);
@@ -127,12 +131,15 @@ export async function fnLogin(login, password) {
         throw createError("Email-ը կամ գաղտնաբառը սխալ է։", 401);
     }
 
-    const isCorrect = await bcrypt.compare(password, user.password);
+    const validPassword = await bcrypt.compare(password, user.password);
 
-    if (!isCorrect) {
+    if (!validPassword) {
         throw createError("Email-ը կամ գաղտնաբառը սխալ է։", 401);
     }
-    if (user.banned) throw createError("Ձեր հաշիվն արգելափակված է։", 403);
+
+    if (user.banned) {
+        throw createError("Ձեր հաշիվն արգելափակված է։", 403);
+    }
 
     return createAuthResult(user);
 }

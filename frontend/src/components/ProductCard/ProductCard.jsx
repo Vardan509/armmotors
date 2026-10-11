@@ -1,7 +1,17 @@
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
+
 import useCurrency from "../../utils/useCurrency";
 import useFavorite from "../../utils/useFavorite";
+
+import {
+    getCompareIds,
+    toggleCompare,
+    subscribeCompare,
+} from "../../utils/compare";
+
 import "./ProductCard.css";
+
+const BASE = import.meta.env.BASE_URL;
 
 const FUELS = {
     petrol: "Բենզին",
@@ -13,26 +23,22 @@ const FUELS = {
 
 export default function ProductCard({ item }) {
     const [failedImage, setFailedImage] = useState(null);
+    const [message, setMessage] = useState("");
 
     const { format } = useCurrency();
 
-    const id = item._id || item.id;
+    const id = String(item._id || item.id || "");
 
     const [favorite, toggleFavorite] = useFavorite(id);
 
-    // Չգրանցված օգտատիրոջը տեղափոխում ենք Login էջ
-    function handleFavoriteClick() {
-        const token = localStorage.getItem("token");
+    const compareSnapshot = useSyncExternalStore(
+        subscribeCompare,
+        () => JSON.stringify(getCompareIds()),
+        () => "[]",
+    );
 
-        if (!token) {
-            window.location.assign(
-                `/login?next=${encodeURIComponent("/favorites")}`,
-            );
-            return;
-        }
-
-        toggleFavorite();
-    }
+    const compareIds = JSON.parse(compareSnapshot);
+    const isCompared = compareIds.includes(id);
 
     const isCar = item.type === "car";
 
@@ -52,12 +58,35 @@ export default function ProductCard({ item }) {
           ].filter(Boolean)
         : [item.condition].filter(Boolean);
 
+    function handleFavoriteClick() {
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+            window.location.assign(
+                `${BASE}login?next=${encodeURIComponent("/favorites")}`,
+            );
+            return;
+        }
+
+        toggleFavorite();
+    }
+
+    function handleCompareClick() {
+        const result = toggleCompare(id);
+
+        if (!result.success) {
+            setMessage(result.message);
+            return;
+        }
+
+        setMessage("");
+    }
+
     return (
         <article className="listing-card">
-            {/* Հայտարարության քարտ */}
             <a
                 className="product-card"
-                href={`/cars/${encodeURIComponent(id)}`}
+                href={`${BASE}cars/${encodeURIComponent(id)}`}
                 aria-label={`${title}՝ մանրամասներ`}
             >
                 <div className="product-image-wrapper">
@@ -112,7 +141,6 @@ export default function ProductCard({ item }) {
                 </div>
             </a>
 
-            {/* Սրտիկի կոճակ */}
             <button
                 type="button"
                 className="favorite-button"
@@ -138,6 +166,38 @@ export default function ProductCard({ item }) {
                     <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z" />
                 </svg>
             </button>
+
+            {isCar && id && (
+                <div className="compare-card-actions">
+                    <button
+                        type="button"
+                        className={`compare-card-button ${
+                            isCompared ? "is-selected" : ""
+                        }`}
+                        onClick={handleCompareClick}
+                    >
+                        <span aria-hidden="true">⇄</span>
+                        {isCompared
+                            ? "Հեռացնել համեմատությունից"
+                            : "Ավելացնել համեմատության"}
+                    </button>
+
+                    {isCompared && (
+                        <a
+                            className="compare-card-link"
+                            href={`${BASE}compare`}
+                        >
+                            Համեմատել →
+                        </a>
+                    )}
+
+                    {message && (
+                        <p className="compare-card-error" role="alert">
+                            {message}
+                        </p>
+                    )}
+                </div>
+            )}
         </article>
     );
 }

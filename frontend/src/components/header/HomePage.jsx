@@ -1,4 +1,5 @@
 import { useState } from "react";
+import useSEO from "../../utils/useSEO";
 
 import Header from "./Header";
 import ProductCard from "../ProductCard/ProductCard";
@@ -75,6 +76,11 @@ const BRANDS = [
 ];
 
 export default function HomePage() {
+    useSEO({
+        title: "ArmMotors — Գտեք Ձեր հաջորդ մեքենան",
+        description:
+            "Գնեք և վաճառեք ավտոմեքենաներ ու պահեստամասեր ArmMotors-ում։",
+    });
     const { language, t } = useI18n();
 
     const { products = [], loading, error } = useProducts();

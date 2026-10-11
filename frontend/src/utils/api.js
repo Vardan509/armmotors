@@ -8,8 +8,10 @@ export const API_URL = (
 
 export async function apiRequest(path, options = {}) {
     if (!API_URL) {
-        throw new Error("Backend-ի հրապարակված հասցեն դեռ կարգավորված չէ։");
+        throw new Error("Backend-ի հասցեն կարգավորված չէ։");
     }
+
+    const { timeoutMs = 30000, signal, ...fetchOptions } = options;
 
     const token = localStorage.getItem("token");
 
@@ -17,20 +19,24 @@ export async function apiRequest(path, options = {}) {
 
     const timeout = setTimeout(() => {
         controller.abort();
-    }, 12000);
+    }, timeoutMs);
 
     const onAbort = () => controller.abort();
 
-    options.signal?.addEventListener("abort", onAbort, {
-        once: true,
-    });
+    if (signal?.aborted) {
+        controller.abort();
+    } else {
+        signal?.addEventListener("abort", onAbort, {
+            once: true,
+        });
+    }
 
     try {
-        const headers = new Headers(options.headers);
+        const headers = new Headers(fetchOptions.headers);
 
         if (
-            options.body != null &&
-            !(options.body instanceof FormData) &&
+            fetchOptions.body != null &&
+            !(fetchOptions.body instanceof FormData) &&
             !headers.has("Content-Type")
         ) {
             headers.set("Content-Type", "application/json");
@@ -40,53 +46,69 @@ export async function apiRequest(path, options = {}) {
             headers.set("Authorization", `Bearer ${token}`);
         }
 
-        const response = await fetch(
-            `${API_URL}/${String(path).replace(/^\/+/, "")}`,
-            {
-                ...options,
-                headers,
-                signal: controller.signal,
-            },
-        );
+        const url = `${API_URL}/${String(path).replace(/^\/+/, "")}`;
 
-        const data =
-            response.status === 204
-                ? null
-                : await response.json().catch(() => null);
+        const response = await fetch(url, {
+            ...fetchOptions,
+            headers,
+            signal: controller.signal,
+        });
+
+        const contentType = response.headers.get("content-type") || "";
+
+        let data = null;
+
+        if (response.status !== 204) {
+            if (contentType.includes("application/json")) {
+                data = await response.json().catch(() => null);
+            } else {
+                data = await response.text().catch(() => null);
+            }
+        }
 
         if (!response.ok) {
-            if (response.status === 401 || data?.code === "ACCOUNT_BANNED") {
+            const message =
+                (typeof data === "object" && (data?.message || data?.error)) ||
+                (typeof data === "string" && data) ||
+                `Հարցումը չհաջողվեց։ Status: ${response.status}`;
+
+            const error = new Error(message);
+
+            error.status = response.status;
+            error.data = data;
+
+            const isAuthRequest = /^\/?auth(?:\/|$)/.test(
+                String(path).replace(/^\/+/, ""),
+            );
+
+            const accountBanned = data?.code === "ACCOUNT_BANNED";
+
+            if (
+                accountBanned ||
+                (response.status === 401 && !isAuthRequest && token)
+            ) {
                 localStorage.removeItem("token");
                 localStorage.removeItem("user");
 
                 window.dispatchEvent(new Event("session-changed"));
             }
 
-            const error = new Error(
-                data?.message ||
-                    data?.error ||
-                    `Հարցումը չհաջողվեց։ Status: ${response.status}`,
-            );
-
-            error.status = response.status;
-            error.data = data;
-
             throw error;
         }
 
         return data;
     } catch (error) {
-        if (options.signal?.aborted) {
-            throw error;
+        if (signal?.aborted) {
+            throw new Error("Հարցումը չեղարկվել է։");
         }
 
         if (error.name === "AbortError") {
-            throw new Error("Սերվերի պատասխանը ուշանում է։ Փորձիր կրկին։");
+            throw new Error("Սերվերի պատասխանը ուշանում է։ Փորձեք կրկին։");
         }
 
         if (error instanceof TypeError) {
             throw new Error(
-                "Backend-ին միանալ չհաջողվեց։ Ստուգիր API հասցեն և սերվերի հասանելիությունը։",
+                "Backend-ին միանալ չհաջողվեց։ Ստուգեք սերվերի հասանելիությունը։",
             );
         }
 
@@ -94,6 +116,6 @@ export async function apiRequest(path, options = {}) {
     } finally {
         clearTimeout(timeout);
 
-        options.signal?.removeEventListener("abort", onAbort);
+        signal?.removeEventListener("abort", onAbort);
     }
 }

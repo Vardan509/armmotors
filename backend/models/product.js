@@ -1,4 +1,3 @@
-
 import mongoose from "mongoose";
 
 function carRequired() {
@@ -39,6 +38,12 @@ const productSchema = new mongoose.Schema(
             enum: ["AMD", "USD", "RUB"],
             default: "AMD",
             uppercase: true,
+        },
+
+        views: {
+            type: Number,
+            default: 0,
+            min: 0,
         },
 
         status: {
@@ -88,13 +93,7 @@ const productSchema = new mongoose.Schema(
 
         fuel: {
             type: String,
-            enum: [
-                "petrol",
-                "diesel",
-                "gas",
-                "hybrid",
-                "electric",
-            ],
+            enum: ["petrol", "diesel", "gas", "hybrid", "electric"],
             required: carRequired,
         },
 
@@ -140,9 +139,7 @@ const productSchema = new mongoose.Schema(
             required: true,
             validate: {
                 validator: (value) =>
-                    /^\+?[0-9]{8,15}$/.test(
-                        value.replace(/[\s()-]/g, "")
-                    ),
+                    /^\+?[0-9]{8,15}$/.test(value.replace(/[\s()-]/g, "")),
                 message: "Հեռախոսահամարը սխալ է։",
             },
         },
@@ -153,17 +150,18 @@ const productSchema = new mongoose.Schema(
             validate: {
                 validator: (images) =>
                     images.length <= 12 &&
-                    images.every((image) =>
-                        /^https?:\/\//i.test(image)
-                    ),
-                message:
-                    "Ավելացրեք առավելագույնը 12 նկարի HTTP/HTTPS հղում։",
+                    images.every((image) => /^https?:\/\//i.test(image)),
+                message: "Ավելացրեք առավելագույնը 12 նկարի HTTP/HTTPS հղում։",
             },
         },
     },
-    {
-        timestamps: true,
-    }
+    { timestamps: true },
 );
+
+productSchema.index({ status: 1, createdAt: -1 });
+productSchema.index({ status: 1, type: 1, createdAt: -1 });
+productSchema.index({ status: 1, brand: 1, createdAt: -1 });
+productSchema.index({ status: 1, price: 1 });
+productSchema.index({ owner: 1, createdAt: -1 });
 
 export default mongoose.model("Product", productSchema);

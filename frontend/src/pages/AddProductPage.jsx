@@ -1,13 +1,28 @@
 import { useState } from "react";
-import { apiRequest } from "../utils/api";
+
 import Header from "../components/header/Header";
-import useCurrency from "../utils/useCurrency";
-import "./Forms.css";
+import ImageUploader from "../components/uploads/ImageUploader";
+import LocationFields from "../components/add-product/LocationFields";
+
+import {
+    CAR_BRANDS,
+    CAR_MODELS,
+    CAR_COLORS,
+    CAR_YEARS,
+} from "../components/add-product/vehicleData";
+
+import { apiRequest } from "../utils/api";
+
+import "./AddProductPage.css";
+
+const BASE = import.meta.env.BASE_URL;
 
 const INITIAL_FORM = {
     type: "car",
     title: "",
     price: "",
+    currency: "AMD",
+    condition: "Օգտագործված",
     vehicleType: "passenger",
     brand: "",
     model: "",
@@ -16,175 +31,462 @@ const INITIAL_FORM = {
     fuel: "petrol",
     steering: "left",
     color: "",
-    region: "",
     vin: "",
-    condition: "Օգտագործված",
     description: "",
     phone: "",
-    images: "",
 };
 
-const REGIONS = [
-    "Երևան",
-    "Արագածոտն",
-    "Արարատ",
-    "Արմավիր",
-    "Գեղարքունիք",
-    "Կոտայք",
-    "Լոռի",
-    "Շիրակ",
-    "Սյունիք",
-    "Տավուշ",
-    "Վայոց ձոր",
+const INITIAL_LOCATION = {
+    regionId: "",
+    communityId: "",
+    settlementId: "",
+    region: "",
+    community: "",
+    settlement: "",
+};
+
+const STEPS = [
+    "Հիմնական տվյալներ",
+    "Մեքենայի տվյալներ",
+    "Նկարներ և կապ",
+    "Հրապարակում",
 ];
 
-const FUELS = [
+const FUEL_OPTIONS = [
     ["petrol", "Բենզին"],
-    ["gas", "Գազ"],
     ["diesel", "Դիզել"],
-    ["electric", "Էլեկտրական"],
+    ["gas", "Գազ"],
     ["hybrid", "Հիբրիդ"],
+    ["electric", "Էլեկտրական"],
 ];
+
+const STEERING_OPTIONS = [
+    ["left", "Ձախ"],
+    ["right", "Աջ"],
+];
+
+function InputField({
+    label,
+    value,
+    onChange,
+    type = "text",
+    placeholder = "",
+    required = false,
+    min,
+    max,
+    maxLength,
+}) {
+    return (
+        <label className="ap-field">
+            <span className="ap-field-label">
+                {label}
+                {required && <em>*</em>}
+            </span>
+
+            <input
+                type={type}
+                value={value}
+                onChange={(event) => onChange(event.target.value)}
+                placeholder={placeholder}
+                min={min}
+                max={max}
+                maxLength={maxLength}
+            />
+        </label>
+    );
+}
+
+function SelectField({
+    label,
+    value,
+    onChange,
+    options,
+    placeholder = "Ընտրել",
+    required = false,
+    disabled = false,
+}) {
+    return (
+        <label className="ap-field">
+            <span className="ap-field-label">
+                {label}
+                {required && <em>*</em>}
+            </span>
+
+            <select
+                value={value}
+                onChange={(event) => onChange(event.target.value)}
+                disabled={disabled}
+            >
+                <option value="">{placeholder}</option>
+
+                {options.map((option) => {
+                    const [optionValue, optionLabel] = Array.isArray(option)
+                        ? option
+                        : [String(option), String(option)];
+
+                    return (
+                        <option key={optionValue} value={optionValue}>
+                            {optionLabel}
+                        </option>
+                    );
+                })}
+            </select>
+        </label>
+    );
+}
+
+function SectionTitle({ number, title, description }) {
+    return (
+        <div className="ap-section-title">
+            <span className="ap-section-number">{number}</span>
+
+            <div>
+                <h2>{title}</h2>
+                <p>{description}</p>
+            </div>
+        </div>
+    );
+}
+
+function SummaryItem({ label, value }) {
+    return (
+        <div className="ap-summary-item">
+            <span>{label}</span>
+            <strong>{value || "—"}</strong>
+        </div>
+    );
+}
+
+function getLabel(options, value) {
+    return options.find((item) => item[0] === value)?.[1] || value;
+}
+
+function formatPrice(value) {
+    return Number(value || 0).toLocaleString("en-US");
+}
 
 export default function AddProductPage() {
-    const { currency } = useCurrency();
-
-    const [form, setForm] = useState({ ...INITIAL_FORM });
+    const [form, setForm] = useState(INITIAL_FORM);
+    const [location, setLocation] = useState(INITIAL_LOCATION);
+    const [images, setImages] = useState([]);
+    const [step, setStep] = useState(0);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
     const [loading, setLoading] = useState(false);
 
     const token = localStorage.getItem("token");
+    const isCar = form.type === "car";
 
-    function changeField(event) {
-        const { name, value } = event.target;
+    const modelOptions = form.brand
+        ? [
+              ...CAR_MODELS[form.brand].map((model) => [model, model]),
+              ...(CAR_MODELS[form.brand].includes("Այլ մոդել")
+                  ? []
+                  : [["Այլ մոդել", "Այլ մոդել"]]),
+          ]
+        : [];
 
-        setForm((prev) => ({
-            ...prev,
+    const generatedTitle = [form.brand, form.model, form.year]
+        .filter(Boolean)
+        .join(" ");
+
+    const title = isCar ? generatedTitle : form.title.trim();
+
+    const locationText = [
+        location.region,
+        location.community,
+        location.settlement,
+    ]
+        .filter(Boolean)
+        .join(", ");
+
+    function update(name, value) {
+        setForm((current) => ({
+            ...current,
             [name]: value,
         }));
 
         setError("");
-        setSuccess("");
+    }
+
+    function changeBrand(brand) {
+        setForm((current) => ({
+            ...current,
+            brand,
+            model: "",
+        }));
+
+        setError("");
+    }
+
+    function changeType(type) {
+        setForm((current) => ({
+            ...current,
+            type,
+            title: "",
+            brand: "",
+            model: "",
+            year: "",
+            mileage: "",
+            color: "",
+            vin: "",
+        }));
+
+        setError("");
+    }
+
+    function handleUploaded(result) {
+        const raw = Array.isArray(result)
+            ? result
+            : result?.urls || result?.images || [];
+
+        const urls = raw
+            .map((item) =>
+                typeof item === "string" ? item : item?.url || item?.secure_url,
+            )
+            .filter(
+                (url) => typeof url === "string" && url.startsWith("https://"),
+            );
+
+        setImages((current) => {
+            const next = [...new Set([...current, ...urls])];
+
+            if (next.length > 12) {
+                setError("Կարող եք ավելացնել առավելագույնը 12 նկար։");
+
+                return current;
+            }
+
+            setError("");
+            return next;
+        });
+    }
+
+    function removeImage(url) {
+        setImages((current) => current.filter((item) => item !== url));
+    }
+
+    function makeMainImage(url) {
+        setImages((current) => [
+            url,
+            ...current.filter((item) => item !== url),
+        ]);
+    }
+
+    function validate(currentStep) {
+        if (currentStep === 0) {
+            if (!title) {
+                return isCar
+                    ? "Լրացրեք մեքենայի տվյալները։"
+                    : "Լրացրեք պահեստամասի անվանումը։";
+            }
+
+            if (
+                form.price === "" ||
+                !Number.isFinite(Number(form.price)) ||
+                Number(form.price) < 0
+            ) {
+                return "Նշեք ճիշտ գին։";
+            }
+
+            if (!location.regionId) {
+                return "Ընտրեք մարզը։";
+            }
+
+            if (!location.communityId) {
+                return "Ընտրեք համայնքը։";
+            }
+        }
+
+        if (currentStep === 1 && isCar) {
+            if (!form.brand) {
+                return "Ընտրեք մակնիշը։";
+            }
+
+            if (!form.model) {
+                return "Ընտրեք մոդելը։";
+            }
+
+            if (!form.year) {
+                return "Ընտրեք տարեթիվը։";
+            }
+
+            if (
+                form.mileage === "" ||
+                !Number.isFinite(Number(form.mileage)) ||
+                Number(form.mileage) < 0
+            ) {
+                return "Նշեք ճիշտ վազքը։";
+            }
+
+            if (!form.color) {
+                return "Ընտրեք մեքենայի գույնը։";
+            }
+
+            if (
+                form.vin.trim() &&
+                !/^[A-HJ-NPR-Z0-9]{17}$/i.test(form.vin.trim())
+            ) {
+                return "VIN-ը պետք է պարունակի 17 ճիշտ նիշ։";
+            }
+        }
+
+        if (currentStep === 2) {
+            const phone = form.phone.replace(/[\s()-]/g, "");
+
+            if (!/^\+?[0-9]{8,15}$/.test(phone)) {
+                return "Նշեք ճիշտ հեռախոսահամար։";
+            }
+
+            if (!images.length) {
+                return "Վերբեռնեք առնվազն մեկ լուսանկար։";
+            }
+        }
+
+        return "";
+    }
+
+    function nextStep() {
+        // Մեքենայի վերնագիրը լրացվում է երկրորդ քայլում։
+        if (step === 0 && isCar) {
+            if (
+                form.price === "" ||
+                !Number.isFinite(Number(form.price)) ||
+                Number(form.price) < 0
+            ) {
+                setError("Նշեք ճիշտ գին։");
+                return;
+            }
+
+            if (!location.regionId || !location.communityId) {
+                setError("Ընտրեք մարզը և համայնքը։");
+                return;
+            }
+        } else {
+            const message = validate(step);
+
+            if (message) {
+                setError(message);
+                return;
+            }
+        }
+
+        setError("");
+        setStep((current) => Math.min(3, current + 1));
+
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth",
+        });
+    }
+
+    function previousStep() {
+        setError("");
+        setStep((current) => Math.max(0, current - 1));
+
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth",
+        });
+    }
+
+    function createDescription() {
+        if (form.description.trim()) {
+            return form.description.trim();
+        }
+
+        if (!isCar) {
+            return `Պահեստամաս՝ ${title}. Վիճակ՝ ${form.condition}. Գտնվելու վայր՝ ${locationText}.`;
+        }
+
+        return [
+            `Մեքենա՝ ${title}.`,
+            `Վազք՝ ${formatPrice(form.mileage)} կմ.`,
+            `Վառելիք՝ ${getLabel(FUEL_OPTIONS, form.fuel)}.`,
+            `Ղեկ՝ ${getLabel(STEERING_OPTIONS, form.steering)}.`,
+            `Գույն՝ ${form.color}.`,
+            `Վիճակ՝ ${form.condition}.`,
+            `Գտնվելու վայր՝ ${locationText}.`,
+        ].join(" ");
     }
 
     async function handleSubmit(event) {
         event.preventDefault();
 
-        if (loading) return;
+        if (loading || step !== 3) return;
+
+        for (let index = 0; index < 3; index++) {
+            const message = validate(index);
+
+            if (message) {
+                setError(message);
+                setStep(index);
+                return;
+            }
+        }
 
         setLoading(true);
         setError("");
         setSuccess("");
 
         try {
-            const body = {
+            const payload = {
                 type: form.type,
-                title: form.title.trim(),
+                title,
                 price: Number(form.price),
-                currency,
-                region: form.region.trim(),
+                currency: form.currency,
                 condition: form.condition,
-                description: form.description.trim(),
+                region: location.region,
+                description: createDescription(),
                 phone: form.phone.replace(/[\s()-]/g, ""),
-                images: form.images
-                    .split(/\r?\n/)
-                    .map((image) => image.trim())
-                    .filter(Boolean),
+                images,
             };
 
-            if (body.title.length < 2 || !body.region || !body.description) {
-                throw new Error(
-                    "Լրացրեք վերնագիրը, տարածաշրջանը և նկարագրությունը։",
-                );
-            }
-
-            if (
-                form.price.trim() === "" ||
-                !Number.isFinite(body.price) ||
-                body.price < 0
-            ) {
-                throw new Error("Մուտքագրեք ճիշտ գին։");
-            }
-
-            if (!/^\+?[0-9]{8,15}$/.test(body.phone)) {
-                throw new Error("Հեռախոսահամարը սխալ է։");
-            }
-
-            if (body.images.length === 0 || body.images.length > 12) {
-                throw new Error("Ավելացրեք 1–12 նկարի հղում։");
-            }
-
-            for (const image of body.images) {
-                let url;
-
-                try {
-                    url = new URL(image);
-                } catch {
-                    throw new Error(
-                        "Նկարների հղումները պետք է լինեն ճիշտ HTTP/HTTPS հասցեներ։",
-                    );
-                }
-
-                if (!["http:", "https:"].includes(url.protocol)) {
-                    throw new Error(
-                        "Նկարների հղումները պետք է սկսվեն http:// կամ https://։",
-                    );
-                }
-            }
-
-            if (form.type === "car") {
-                Object.assign(body, {
+            if (isCar) {
+                Object.assign(payload, {
                     vehicleType: form.vehicleType,
-                    brand: form.brand.trim(),
-                    model: form.model.trim(),
+                    brand: form.brand,
+                    model: form.model,
                     year: Number(form.year),
                     mileage: Number(form.mileage),
                     fuel: form.fuel,
                     steering: form.steering,
-                    color: form.color.trim(),
-                    vin: form.vin.trim(),
+                    color: form.color,
+                    vin: form.vin.trim().toUpperCase(),
                 });
-
-                if (!body.brand || !body.model || !body.color) {
-                    throw new Error(
-                        "Լրացրեք մեքենայի մակնիշը, մոդելը և գույնը։",
-                    );
-                }
-
-                if (
-                    form.year.trim() === "" ||
-                    !Number.isInteger(body.year) ||
-                    body.year < 1886 ||
-                    body.year > new Date().getFullYear() + 1
-                ) {
-                    throw new Error("Մուտքագրեք ճիշտ տարեթիվ։");
-                }
-
-                if (
-                    form.mileage.trim() === "" ||
-                    !Number.isFinite(body.mileage) ||
-                    body.mileage < 0
-                ) {
-                    throw new Error("Մուտքագրեք ճիշտ վազք։");
-                }
             }
 
-            await apiRequest("/products", {
+            const result = await apiRequest("/products", {
                 method: "POST",
-                body: JSON.stringify(body),
+                body: JSON.stringify(payload),
+                timeoutMs: 30000,
             });
 
-            setSuccess("Հայտարարությունը հաջողությամբ պահպանվեց։");
+            setSuccess("Հայտարարությունը հաջողությամբ հրապարակվեց։");
 
-            setForm({ ...INITIAL_FORM });
+            const productId =
+                result?.product?._id ||
+                result?.product?.id ||
+                result?._id ||
+                result?.id;
+
+            if (productId) {
+                window.location.assign(
+                    `${BASE}cars/${encodeURIComponent(productId)}`,
+                );
+            } else {
+                setForm(INITIAL_FORM);
+                setLocation(INITIAL_LOCATION);
+                setImages([]);
+                setStep(0);
+            }
         } catch (err) {
             if (err.status === 401) {
-                window.location.assign("/login?next=/add-product");
+                window.location.assign(`${BASE}login?next=/add-product`);
                 return;
             }
 
-            setError(err.message || "Տեղի ունեցավ սխալ։");
+            setError(err.message || "Հայտարարությունը չհրապարակվեց։");
         } finally {
             setLoading(false);
         }
@@ -195,65 +497,35 @@ export default function AddProductPage() {
             <>
                 <Header />
 
-                <main className="auth-required-page">
-                    <a href="/" className="auth-required-back">
-                        ← Գլխավոր էջ
-                    </a>
+                <main className="ap-auth-page">
+                    <div className="ap-auth-card">
+                        <div className="ap-auth-symbol">+</div>
 
-                    <section className="auth-required-card">
-                        {/* <div className="auth-required-icon">
-                            <svg
-                                width="32"
-                                height="32"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="1.6"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                aria-hidden="true"
-                            >
-                                <rect
-                                    x="4"
-                                    y="10"
-                                    width="16"
-                                    height="11"
-                                    rx="3"
-                                />
-                                <path d="M8 10V7a4 4 0 0 1 8 0v3" />
-                            </svg>
-                        </div> */}
+                        <span className="ap-eyebrow">ARMMOTORS</span>
 
-                        <h2>
-                            Մուտք գործեք կամ ստեղծեք հաշիվ՝ Ձեր մեքենան կամ
-                            պահեստամասը վաճառքի տեղադրելու համար։
-                        </h2>
+                        <h1>Տեղադրել հայտարարություն</h1>
 
-                        {/* <p className="auth-required-description">
-                          
-                        </p> */}
+                        <p>
+                            Հայտարարություն հրապարակելու համար մուտք գործեք կամ
+                            գրանցվեք։
+                        </p>
 
-                        <div className="auth-required-actions">
+                        <div className="ap-auth-actions">
                             <a
-                                href="/login?next=/add-product"
-                                className="auth-required-login"
+                                href={`${BASE}login?next=/add-product`}
+                                className="ap-primary-link"
                             >
-                                Մուտք գործել →
+                                Մուտք
                             </a>
 
                             <a
-                                href="/registration?next=/add-product"
-                                className="auth-required-register"
+                                href={`${BASE}registration?next=/add-product`}
+                                className="ap-secondary-link"
                             >
-                                Ստեղծել հաշիվ
+                                Գրանցվել
                             </a>
                         </div>
-
-                        <div className="auth-required-footer">
-                            Հայտարարություն տեղադրելու համար անհրաժեշտ է հաշիվ և
-                            կապի հեռախոսահամար։
-                        </div>
-                    </section>
+                    </div>
                 </main>
             </>
         );
@@ -263,252 +535,540 @@ export default function AddProductPage() {
         <>
             <Header />
 
-            <main className="form-page">
-                <a href="/">← Գլխավոր էջ</a>
+            <main className="ap-page">
+                <div className="ap-container">
+                    <a href={BASE} className="ap-back-link">
+                        ← Գլխավոր էջ
+                    </a>
 
-                <form className="site-form" onSubmit={handleSubmit}>
-                    <h1>Տեղադրել հայտարարություն</h1>
+                    <div className="ap-heading">
+                        <div>
+                            <span className="ap-eyebrow">
+                                ARMMOTORS / ՀԱՅՏԱՐԱՐՈՒԹՅՈՒՆ
+                            </span>
 
-                    <label>
-                        Բաժին
-                        <select
-                            name="type"
-                            value={form.type}
-                            onChange={changeField}
-                            disabled={loading}
-                        >
-                            <option value="car">Մեքենա</option>
-                            <option value="part">Ավտոպահեստամաս</option>
-                        </select>
-                    </label>
+                            <h1>Տեղադրել հայտարարություն</h1>
 
-                    <label>
-                        Վերնագիր
-                        <input
-                            type="text"
-                            name="title"
-                            placeholder="Օրինակ՝ Toyota Camry 2019"
-                            value={form.title}
-                            onChange={changeField}
-                            minLength={2}
-                            maxLength={120}
-                            disabled={loading}
-                            required
-                        />
-                    </label>
+                            <p>
+                                Ընտրեք տվյալները, ավելացրեք լուսանկարներ և
+                                հրապարակեք։
+                            </p>
+                        </div>
 
-                    <label>
-                        Գին՝ {currency}
-                        <input
-                            type="number"
-                            name="price"
-                            min="0"
-                            step="any"
-                            placeholder="Օրինակ՝ 22800"
-                            value={form.price}
-                            onChange={changeField}
-                            disabled={loading}
-                            required
-                        />
-                    </label>
+                        <span className="ap-heading-badge">
+                            Քայլ {step + 1} / 4
+                        </span>
+                    </div>
 
-                    {form.type === "car" && (
-                        <>
-                            <label>
-                                Մեքենայի տեսակ
-                                <select
-                                    name="vehicleType"
-                                    value={form.vehicleType}
-                                    onChange={changeField}
-                                    disabled={loading}
-                                >
-                                    <option value="passenger">Մարդատար</option>
-                                    <option value="truck">Բեռնատար</option>
-                                </select>
-                            </label>
+                    <div className="ap-progress">
+                        {STEPS.map((name, index) => (
+                            <div
+                                key={name}
+                                className={[
+                                    "ap-progress-step",
+                                    index === step ? "is-active" : "",
+                                    index < step ? "is-completed" : "",
+                                ].join(" ")}
+                            >
+                                <span className="ap-progress-line" />
+                                <span className="ap-progress-label">
+                                    {name}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
 
-                            {[
-                                ["brand", "Մակնիշ", "Օրինակ՝ Toyota"],
-                                ["model", "Մոդել", "Օրինակ՝ Camry"],
-                                ["color", "Գույն", "Օրինակ՝ Սպիտակ"],
-                            ].map(([name, label, placeholder]) => (
-                                <label key={name}>
-                                    {label}
-                                    <input
-                                        type="text"
-                                        name={name}
-                                        placeholder={placeholder}
-                                        value={form[name]}
-                                        onChange={changeField}
-                                        maxLength={name === "color" ? 40 : 60}
-                                        disabled={loading}
+                    <form
+                        className="ap-form"
+                        onSubmit={handleSubmit}
+                        noValidate
+                    >
+                        {step === 0 && (
+                            <section className="ap-section">
+                                <SectionTitle
+                                    number="01"
+                                    title="Հիմնական տվյալներ"
+                                    description="Ընտրեք հայտարարության տեսակը, գինը և գտնվելու վայրը։"
+                                />
+
+                                <div className="ap-grid">
+                                    <SelectField
+                                        label="Բաժին"
+                                        value={form.type}
+                                        onChange={changeType}
+                                        options={[
+                                            ["car", "Մեքենա"],
+                                            ["part", "Պահեստամաս"],
+                                        ]}
+                                    />
+
+                                    <SelectField
+                                        label="Վիճակ"
+                                        value={form.condition}
+                                        onChange={(value) =>
+                                            update("condition", value)
+                                        }
+                                        options={["Նոր", "Օգտագործված"]}
+                                    />
+
+                                    {!isCar && (
+                                        <div className="ap-full">
+                                            <InputField
+                                                label="Պահեստամասի անվանում"
+                                                value={form.title}
+                                                onChange={(value) =>
+                                                    update("title", value)
+                                                }
+                                                placeholder="Օրինակ՝ Mercedes W212 լուսարձակ"
+                                                required
+                                            />
+                                        </div>
+                                    )}
+
+                                    <InputField
+                                        label="Գին"
+                                        type="number"
+                                        value={form.price}
+                                        onChange={(value) =>
+                                            update("price", value)
+                                        }
+                                        placeholder="Օրինակ՝ 8500000"
+                                        min="0"
                                         required
                                     />
-                                </label>
-                            ))}
 
-                            <label>
-                                Տարեթիվ
-                                <input
-                                    type="number"
-                                    name="year"
-                                    min="1886"
-                                    max={new Date().getFullYear() + 1}
-                                    step="1"
-                                    placeholder="Օրինակ՝ 2020"
-                                    value={form.year}
-                                    onChange={changeField}
-                                    disabled={loading}
-                                    required
+                                    <SelectField
+                                        label="Արժույթ"
+                                        value={form.currency}
+                                        onChange={(value) =>
+                                            update("currency", value)
+                                        }
+                                        options={[
+                                            ["AMD", "AMD — Դրամ"],
+                                            ["USD", "USD — Դոլար"],
+                                            ["RUB", "RUB — Ռուբլի"],
+                                        ]}
+                                    />
+
+                                    <div className="ap-full">
+                                        <h3 className="ap-location-heading">
+                                            Գտնվելու վայր
+                                        </h3>
+                                    </div>
+
+                                    <LocationFields
+                                        value={location}
+                                        onChange={(value) => {
+                                            setLocation(value);
+                                            setError("");
+                                        }}
+                                    />
+                                </div>
+                            </section>
+                        )}
+
+                        {step === 1 && (
+                            <section className="ap-section">
+                                <SectionTitle
+                                    number="02"
+                                    title={
+                                        isCar
+                                            ? "Մեքենայի տվյալներ"
+                                            : "Պահեստամասի տվյալներ"
+                                    }
+                                    description={
+                                        isCar
+                                            ? "Մակնիշն ընտրելուց հետո հասանելի կլինեն համապատասխան մոդելները։"
+                                            : "Պահեստամասի հիմնական տվյալներն արդեն լրացված են։"
+                                    }
                                 />
-                            </label>
 
-                            <label>
-                                Վազք՝ կմ
-                                <input
-                                    type="number"
-                                    name="mileage"
-                                    min="0"
-                                    placeholder="Օրինակ՝ 70000"
-                                    value={form.mileage}
-                                    onChange={changeField}
-                                    disabled={loading}
-                                    required
+                                {isCar ? (
+                                    <div className="ap-grid">
+                                        <SelectField
+                                            label="Մեքենայի տեսակ"
+                                            value={form.vehicleType}
+                                            onChange={(value) =>
+                                                update("vehicleType", value)
+                                            }
+                                            options={[
+                                                ["passenger", "Մարդատար"],
+                                                ["truck", "Բեռնատար"],
+                                            ]}
+                                        />
+
+                                        <SelectField
+                                            label="Մակնիշ"
+                                            value={form.brand}
+                                            onChange={changeBrand}
+                                            options={CAR_BRANDS}
+                                            placeholder="Ընտրեք մակնիշը"
+                                            required
+                                        />
+
+                                        <SelectField
+                                            label="Մոդել"
+                                            value={form.model}
+                                            onChange={(value) =>
+                                                update("model", value)
+                                            }
+                                            options={modelOptions}
+                                            placeholder={
+                                                form.brand
+                                                    ? "Ընտրեք մոդելը"
+                                                    : "Նախ ընտրեք մակնիշը"
+                                            }
+                                            disabled={!form.brand}
+                                            required
+                                        />
+
+                                        <SelectField
+                                            label="Տարեթիվ"
+                                            value={form.year}
+                                            onChange={(value) =>
+                                                update("year", value)
+                                            }
+                                            options={CAR_YEARS.map((year) => [
+                                                String(year),
+                                                String(year),
+                                            ])}
+                                            placeholder="Ընտրեք տարեթիվը"
+                                            required
+                                        />
+
+                                        <InputField
+                                            label="Վազք (կմ)"
+                                            type="number"
+                                            value={form.mileage}
+                                            onChange={(value) =>
+                                                update("mileage", value)
+                                            }
+                                            placeholder="Օրինակ՝ 85000"
+                                            min="0"
+                                            required
+                                        />
+
+                                        <SelectField
+                                            label="Վառելիք"
+                                            value={form.fuel}
+                                            onChange={(value) =>
+                                                update("fuel", value)
+                                            }
+                                            options={FUEL_OPTIONS}
+                                        />
+
+                                        <SelectField
+                                            label="Ղեկ"
+                                            value={form.steering}
+                                            onChange={(value) =>
+                                                update("steering", value)
+                                            }
+                                            options={STEERING_OPTIONS}
+                                        />
+
+                                        <SelectField
+                                            label="Գույն"
+                                            value={form.color}
+                                            onChange={(value) =>
+                                                update("color", value)
+                                            }
+                                            options={CAR_COLORS}
+                                            placeholder="Ընտրեք գույնը"
+                                            required
+                                        />
+
+                                        <div className="ap-full">
+                                            <InputField
+                                                label="VIN (ըստ ցանկության)"
+                                                value={form.vin}
+                                                onChange={(value) =>
+                                                    update("vin", value)
+                                                }
+                                                placeholder="17 նիշ"
+                                                maxLength={17}
+                                            />
+                                        </div>
+
+                                        {generatedTitle && (
+                                            <div className="ap-full">
+                                                <div className="ap-info-box">
+                                                    Վերնագիրը կստեղծվի ավտոմատ՝{" "}
+                                                    <strong>
+                                                        {generatedTitle}
+                                                    </strong>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                ) : (
+                                    <div className="ap-info-box">
+                                        Կարող եք անցնել հաջորդ քայլին։
+                                    </div>
+                                )}
+                            </section>
+                        )}
+
+                        {step === 2 && (
+                            <section className="ap-section">
+                                <SectionTitle
+                                    number="03"
+                                    title="Նկարներ և կապ"
+                                    description="Ավելացրեք նկարները և հեռախոսահամարը։"
                                 />
-                            </label>
 
-                            <label>
-                                Վառելիք
-                                <select
-                                    name="fuel"
-                                    value={form.fuel}
-                                    onChange={changeField}
+                                <div className="ap-grid">
+                                    <div className="ap-full">
+                                        <InputField
+                                            label="Հեռախոսահամար"
+                                            type="tel"
+                                            value={form.phone}
+                                            onChange={(value) =>
+                                                update("phone", value)
+                                            }
+                                            placeholder="+374XXXXXXXX"
+                                            required
+                                        />
+                                    </div>
+
+                                    <div className="ap-full">
+                                        <label className="ap-field">
+                                            <span className="ap-field-label">
+                                                Նկարագրություն (ըստ ցանկության)
+                                            </span>
+
+                                            <textarea
+                                                value={form.description}
+                                                onChange={(event) =>
+                                                    update(
+                                                        "description",
+                                                        event.target.value,
+                                                    )
+                                                }
+                                                rows={5}
+                                                maxLength={7000}
+                                                placeholder="Կարող եք գրել լրացուցիչ տեղեկություններ։ Եթե թողնեք դատարկ, հիմնական տվյալներից նկարագրությունը կստեղծվի ավտոմատ։"
+                                            />
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div className="ap-upload-section">
+                                    <div className="ap-upload-heading">
+                                        <div>
+                                            <h3>Լուսանկարներ</h3>
+                                            <p>Առավելագույնը 12 նկար։</p>
+                                        </div>
+
+                                        <span className="ap-image-count">
+                                            {images.length} / 12
+                                        </span>
+                                    </div>
+
+                                    {images.length < 12 && (
+                                        <div className="ap-uploader">
+                                            <ImageUploader
+                                                onUploaded={handleUploaded}
+                                                disabled={loading}
+                                            />
+                                        </div>
+                                    )}
+
+                                    {images.length > 0 && (
+                                        <div className="ap-images-grid">
+                                            {images.map((url, index) => (
+                                                <div
+                                                    className="ap-image-card"
+                                                    key={url}
+                                                >
+                                                    <img
+                                                        src={url}
+                                                        alt={`Նկար ${index + 1}`}
+                                                    />
+
+                                                    {index === 0 && (
+                                                        <span className="ap-main-image-badge">
+                                                            Գլխավոր
+                                                        </span>
+                                                    )}
+
+                                                    <div className="ap-image-actions">
+                                                        {index !== 0 && (
+                                                            <button
+                                                                type="button"
+                                                                onClick={() =>
+                                                                    makeMainImage(
+                                                                        url,
+                                                                    )
+                                                                }
+                                                            >
+                                                                Գլխավոր
+                                                            </button>
+                                                        )}
+
+                                                        <button
+                                                            type="button"
+                                                            className="ap-remove-image"
+                                                            onClick={() =>
+                                                                removeImage(url)
+                                                            }
+                                                        >
+                                                            Հեռացնել
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            </section>
+                        )}
+
+                        {step === 3 && (
+                            <section className="ap-section">
+                                <SectionTitle
+                                    number="04"
+                                    title="Հայտարարության ամփոփում"
+                                    description="Ստուգեք տվյալները նախքան հրապարակելը։"
+                                />
+
+                                {images[0] && (
+                                    <div className="ap-review-cover">
+                                        <img
+                                            src={images[0]}
+                                            alt="Գլխավոր նկար"
+                                        />
+                                    </div>
+                                )}
+
+                                <div className="ap-review-title">
+                                    <h2>{title}</h2>
+                                    <strong>
+                                        {formatPrice(form.price)}{" "}
+                                        {form.currency}
+                                    </strong>
+                                </div>
+
+                                <div className="ap-summary-grid">
+                                    <SummaryItem
+                                        label="Բաժին"
+                                        value={isCar ? "Մեքենա" : "Պահեստամաս"}
+                                    />
+
+                                    <SummaryItem
+                                        label="Վիճակ"
+                                        value={form.condition}
+                                    />
+
+                                    <SummaryItem
+                                        label="Գտնվելու վայր"
+                                        value={locationText}
+                                    />
+
+                                    <SummaryItem
+                                        label="Հեռախոս"
+                                        value={form.phone}
+                                    />
+
+                                    {isCar && (
+                                        <>
+                                            <SummaryItem
+                                                label="Մակնիշ"
+                                                value={form.brand}
+                                            />
+
+                                            <SummaryItem
+                                                label="Մոդել"
+                                                value={form.model}
+                                            />
+
+                                            <SummaryItem
+                                                label="Տարեթիվ"
+                                                value={form.year}
+                                            />
+
+                                            <SummaryItem
+                                                label="Վազք"
+                                                value={`${formatPrice(
+                                                    form.mileage,
+                                                )} կմ`}
+                                            />
+
+                                            <SummaryItem
+                                                label="Գույն"
+                                                value={form.color}
+                                            />
+
+                                            <SummaryItem
+                                                label="Վառելիք"
+                                                value={getLabel(
+                                                    FUEL_OPTIONS,
+                                                    form.fuel,
+                                                )}
+                                            />
+                                        </>
+                                    )}
+
+                                    <SummaryItem
+                                        label="Լուսանկարներ"
+                                        value={`${images.length} հատ`}
+                                    />
+                                </div>
+
+                                <div className="ap-review-description">
+                                    <h3>Նկարագրություն</h3>
+                                    <p>{createDescription()}</p>
+                                </div>
+                            </section>
+                        )}
+
+                        {error && (
+                            <div className="ap-error" role="alert">
+                                {error}
+                            </div>
+                        )}
+
+                        {success && (
+                            <div className="ap-success" role="status">
+                                {success}
+                            </div>
+                        )}
+
+                        <div className="ap-form-footer">
+                            <div className="ap-footer-left">
+                                {step > 0 && (
+                                    <button
+                                        type="button"
+                                        className="ap-back-button"
+                                        onClick={previousStep}
+                                        disabled={loading}
+                                    >
+                                        ← Նախորդ քայլ
+                                    </button>
+                                )}
+                            </div>
+
+                            {step < 3 ? (
+                                <button
+                                    type="button"
+                                    className="ap-next-button"
+                                    onClick={nextStep}
+                                >
+                                    Շարունակել →
+                                </button>
+                            ) : (
+                                <button
+                                    type="submit"
+                                    className="ap-next-button"
                                     disabled={loading}
                                 >
-                                    {FUELS.map(([value, label]) => (
-                                        <option key={value} value={value}>
-                                            {label}
-                                        </option>
-                                    ))}
-                                </select>
-                            </label>
-
-                            <label>
-                                Ղեկ
-                                <select
-                                    name="steering"
-                                    value={form.steering}
-                                    onChange={changeField}
-                                    disabled={loading}
-                                >
-                                    <option value="left">Ձախ</option>
-                                    <option value="right">Աջ</option>
-                                </select>
-                            </label>
-
-                            <label>
-                                VIN՝ ոչ պարտադիր
-                                <input
-                                    type="text"
-                                    name="vin"
-                                    value={form.vin}
-                                    onChange={changeField}
-                                    maxLength={17}
-                                    disabled={loading}
-                                />
-                            </label>
-                        </>
-                    )}
-
-                    <label>
-                        Տարածաշրջան
-                        <select
-                            name="region"
-                            value={form.region}
-                            onChange={changeField}
-                            disabled={loading}
-                            required
-                        >
-                            <option value="">Ընտրեք տարածաշրջանը</option>
-
-                            {REGIONS.map((region) => (
-                                <option key={region} value={region}>
-                                    {region}
-                                </option>
-                            ))}
-                        </select>
-                    </label>
-
-                    <label>
-                        Վիճակ
-                        <select
-                            name="condition"
-                            value={form.condition}
-                            onChange={changeField}
-                            disabled={loading}
-                        >
-                            <option value="Օգտագործված">Օգտագործված</option>
-                            <option value="Նոր">Նոր</option>
-                        </select>
-                    </label>
-
-                    <label>
-                        Կապի հեռախոսահամար
-                        <input
-                            type="tel"
-                            name="phone"
-                            placeholder="+374..."
-                            autoComplete="tel"
-                            value={form.phone}
-                            onChange={changeField}
-                            disabled={loading}
-                            required
-                        />
-                    </label>
-
-                    <label>
-                        Նկարների հղումներ՝ յուրաքանչյուրն առանձին տողով
-                        <textarea
-                            name="images"
-                            placeholder="https://..."
-                            value={form.images}
-                            onChange={changeField}
-                            rows={4}
-                            disabled={loading}
-                            required
-                        />
-                    </label>
-
-                    <label>
-                        Նկարագրություն
-                        <textarea
-                            name="description"
-                            placeholder="Նկարագրեք մեքենան կամ պահեստամասը..."
-                            value={form.description}
-                            onChange={changeField}
-                            maxLength={5000}
-                            rows={5}
-                            disabled={loading}
-                            required
-                        />
-                    </label>
-
-                    {error && (
-                        <p className="form-error" role="alert">
-                            {error}
-                        </p>
-                    )}
-
-                    {success && (
-                        <p className="form-success" role="status">
-                            {success}
-                        </p>
-                    )}
-
-                    <button type="submit" disabled={loading}>
-                        {loading ? "Պահպանվում է..." : "Տեղադրել"}
-                    </button>
-                </form>
+                                    {loading
+                                        ? "Հրապարակվում է..."
+                                        : "Հրապարակել →"}
+                                </button>
+                            )}
+                        </div>
+                    </form>
+                </div>
             </main>
         </>
     );

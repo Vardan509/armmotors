@@ -1,5 +1,6 @@
 import {
     getAllProduct,
+    getMyProducts,
     getProductById,
     addProduct,
     updateById,
@@ -25,9 +26,15 @@ function sendError(res, error) {
 
 export async function getAllProductController(req, res) {
     try {
-        const products = await getAllProduct();
+        res.json(await getAllProduct());
+    } catch (error) {
+        sendError(res, error);
+    }
+}
 
-        res.json(products);
+export async function getMyProductsController(req, res) {
+    try {
+        res.json(await getMyProducts(req.userId));
     } catch (error) {
         sendError(res, error);
     }
@@ -35,9 +42,7 @@ export async function getAllProductController(req, res) {
 
 export async function getProductByController(req, res) {
     try {
-        const product = await getProductById(req.params.id);
-
-        res.json(product);
+        res.json(await getProductById(req.params.id));
     } catch (error) {
         sendError(res, error);
     }

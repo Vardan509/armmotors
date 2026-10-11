@@ -1,0 +1,3339 @@
+[
+  {
+    "id": "AM01_ajapnyak",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Ajapnyak",
+      "en": "Ajapnyak",
+      "slug": "ajapnyak"
+    },
+    "code": {
+      "id": "AM01_ajapnyak",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM01",
+      "level": 1,
+      "name": {
+        "local": "Երևան",
+        "en": "Yerevan",
+        "slug": "yerevan-am01"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM01",
+        "level": 1,
+        "name": {
+          "local": "Երևան",
+          "en": "Yerevan",
+          "slug": "yerevan-am01"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 0
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "40.199",
+      "lon": "44.471"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM01_arabkir",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Arabkir",
+      "en": "Arabkir",
+      "slug": "arabkir"
+    },
+    "code": {
+      "id": "AM01_arabkir",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM01",
+      "level": 1,
+      "name": {
+        "local": "Երևան",
+        "en": "Yerevan",
+        "slug": "yerevan-am01"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM01",
+        "level": 1,
+        "name": {
+          "local": "Երևան",
+          "en": "Yerevan",
+          "slug": "yerevan-am01"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 0
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "40.206",
+      "lon": "44.504"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM01_avan",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Avan",
+      "en": "Avan",
+      "slug": "avan"
+    },
+    "code": {
+      "id": "AM01_avan",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM01",
+      "level": 1,
+      "name": {
+        "local": "Երևան",
+        "en": "Yerevan",
+        "slug": "yerevan-am01"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM01",
+        "level": 1,
+        "name": {
+          "local": "Երևան",
+          "en": "Yerevan",
+          "slug": "yerevan-am01"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 0
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "40.335",
+      "lon": "44.168"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM01_davtashen",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Davtashen",
+      "en": "Davtashen",
+      "slug": "davtashen"
+    },
+    "code": {
+      "id": "AM01_davtashen",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM01",
+      "level": 1,
+      "name": {
+        "local": "Երևան",
+        "en": "Yerevan",
+        "slug": "yerevan-am01"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM01",
+        "level": 1,
+        "name": {
+          "local": "Երևան",
+          "en": "Yerevan",
+          "slug": "yerevan-am01"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 0
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "40.367",
+      "lon": "43.967"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM01_erebuni",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Erebuni",
+      "en": "Erebuni",
+      "slug": "erebuni"
+    },
+    "code": {
+      "id": "AM01_erebuni",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM01",
+      "level": 1,
+      "name": {
+        "local": "Երևան",
+        "en": "Yerevan",
+        "slug": "yerevan-am01"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM01",
+        "level": 1,
+        "name": {
+          "local": "Երևան",
+          "en": "Yerevan",
+          "slug": "yerevan-am01"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 0
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "40.133",
+      "lon": "44.53"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM01_kanaker-zeytun",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Kanaker-Zeytun",
+      "en": "Kanaker-Zeytun",
+      "slug": "kanaker-zeytun"
+    },
+    "code": {
+      "id": "AM01_kanaker-zeytun",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM01",
+      "level": 1,
+      "name": {
+        "local": "Երևան",
+        "en": "Yerevan",
+        "slug": "yerevan-am01"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM01",
+        "level": 1,
+        "name": {
+          "local": "Երևան",
+          "en": "Yerevan",
+          "slug": "yerevan-am01"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 0
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "40.22",
+      "lon": "44.538"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM01_kentron",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Kentron",
+      "en": "Kentron",
+      "slug": "kentron"
+    },
+    "code": {
+      "id": "AM01_kentron",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM01",
+      "level": 1,
+      "name": {
+        "local": "Երևան",
+        "en": "Yerevan",
+        "slug": "yerevan-am01"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM01",
+        "level": 1,
+        "name": {
+          "local": "Երևան",
+          "en": "Yerevan",
+          "slug": "yerevan-am01"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 0
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "40.178",
+      "lon": "44.513"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM01_malatia-sebastia",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Malatia-Sebastia",
+      "en": "Malatia-Sebastia",
+      "slug": "malatia-sebastia"
+    },
+    "code": {
+      "id": "AM01_malatia-sebastia",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM01",
+      "level": 1,
+      "name": {
+        "local": "Երևան",
+        "en": "Yerevan",
+        "slug": "yerevan-am01"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM01",
+        "level": 1,
+        "name": {
+          "local": "Երևան",
+          "en": "Yerevan",
+          "slug": "yerevan-am01"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 0
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "40.174",
+      "lon": "44.446"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM01_nork-marash",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Nork-Marash",
+      "en": "Nork-Marash",
+      "slug": "nork-marash"
+    },
+    "code": {
+      "id": "AM01_nork-marash",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM01",
+      "level": 1,
+      "name": {
+        "local": "Երևան",
+        "en": "Yerevan",
+        "slug": "yerevan-am01"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM01",
+        "level": 1,
+        "name": {
+          "local": "Երևան",
+          "en": "Yerevan",
+          "slug": "yerevan-am01"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 0
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "40.174",
+      "lon": "44.541"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM01_nor-nork",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Nor Nork",
+      "en": "Nor Nork",
+      "slug": "nor-nork"
+    },
+    "code": {
+      "id": "AM01_nor-nork",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM01",
+      "level": 1,
+      "name": {
+        "local": "Երևան",
+        "en": "Yerevan",
+        "slug": "yerevan-am01"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM01",
+        "level": 1,
+        "name": {
+          "local": "Երևան",
+          "en": "Yerevan",
+          "slug": "yerevan-am01"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 0
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "40.197",
+      "lon": "44.567"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM01_nubarashen",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Nubarashen",
+      "en": "Nubarashen",
+      "slug": "nubarashen"
+    },
+    "code": {
+      "id": "AM01_nubarashen",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM01",
+      "level": 1,
+      "name": {
+        "local": "Երևան",
+        "en": "Yerevan",
+        "slug": "yerevan-am01"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM01",
+        "level": 1,
+        "name": {
+          "local": "Երևան",
+          "en": "Yerevan",
+          "slug": "yerevan-am01"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 0
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "40.091",
+      "lon": "44.552"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM01_shengavit",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Shengavit",
+      "en": "Shengavit",
+      "slug": "shengavit"
+    },
+    "code": {
+      "id": "AM01_shengavit",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM01",
+      "level": 1,
+      "name": {
+        "local": "Երևան",
+        "en": "Yerevan",
+        "slug": "yerevan-am01"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM01",
+        "level": 1,
+        "name": {
+          "local": "Երևան",
+          "en": "Yerevan",
+          "slug": "yerevan-am01"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 0
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "40.156",
+      "lon": "44.478"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM02_alagyaz",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Alagyaz",
+      "en": "Alagyaz",
+      "slug": "alagyaz"
+    },
+    "code": {
+      "id": "AM02_alagyaz",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM02",
+      "level": 1,
+      "name": {
+        "local": "Արագածոտն",
+        "en": "Aragatsotn",
+        "slug": "aragatsotn-am02"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM02",
+        "level": 1,
+        "name": {
+          "local": "Արագածոտն",
+          "en": "Aragatsotn",
+          "slug": "aragatsotn-am02"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 11
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "40.681",
+      "lon": "44.29"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM02_aparan",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Aparan",
+      "en": "Aparan",
+      "slug": "aparan"
+    },
+    "code": {
+      "id": "AM02_aparan",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM02",
+      "level": 1,
+      "name": {
+        "local": "Արագածոտն",
+        "en": "Aragatsotn",
+        "slug": "aragatsotn-am02"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM02",
+        "level": 1,
+        "name": {
+          "local": "Արագածոտն",
+          "en": "Aragatsotn",
+          "slug": "aragatsotn-am02"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 21
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "40.589",
+      "lon": "44.357"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM02_arevut",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Arevut",
+      "en": "Arevut",
+      "slug": "arevut"
+    },
+    "code": {
+      "id": "AM02_arevut",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM02",
+      "level": 1,
+      "name": {
+        "local": "Արագածոտն",
+        "en": "Aragatsotn",
+        "slug": "aragatsotn-am02"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM02",
+        "level": 1,
+        "name": {
+          "local": "Արագածոտն",
+          "en": "Aragatsotn",
+          "slug": "aragatsotn-am02"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 6
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "40.364",
+      "lon": "43.809"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM02_metsadzor",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Metsadzor",
+      "en": "Metsadzor",
+      "slug": "metsadzor"
+    },
+    "code": {
+      "id": "AM02_metsadzor",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM02",
+      "level": 1,
+      "name": {
+        "local": "Արագածոտն",
+        "en": "Aragatsotn",
+        "slug": "aragatsotn-am02"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM02",
+        "level": 1,
+        "name": {
+          "local": "Արագածոտն",
+          "en": "Aragatsotn",
+          "slug": "aragatsotn-am02"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 2
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "40.383",
+      "lon": "44.05"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM02_shamiram",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Shamiram",
+      "en": "Shamiram",
+      "slug": "shamiram"
+    },
+    "code": {
+      "id": "AM02_shamiram",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM02",
+      "level": 1,
+      "name": {
+        "local": "Արագածոտն",
+        "en": "Aragatsotn",
+        "slug": "aragatsotn-am02"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM02",
+        "level": 1,
+        "name": {
+          "local": "Արագածոտն",
+          "en": "Aragatsotn",
+          "slug": "aragatsotn-am02"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 1
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "40.276",
+      "lon": "44.101"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM02_talin",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Talin",
+      "en": "Talin",
+      "slug": "talin"
+    },
+    "code": {
+      "id": "AM02_talin",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM02",
+      "level": 1,
+      "name": {
+        "local": "Արագածոտն",
+        "en": "Aragatsotn",
+        "slug": "aragatsotn-am02"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM02",
+        "level": 1,
+        "name": {
+          "local": "Արագածոտն",
+          "en": "Aragatsotn",
+          "slug": "aragatsotn-am02"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 29
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "40.384",
+      "lon": "43.876"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM02_tsaghkahovit",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Tsaghkahovit",
+      "en": "Tsaghkahovit",
+      "slug": "tsaghkahovit"
+    },
+    "code": {
+      "id": "AM02_tsaghkahovit",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM02",
+      "level": 1,
+      "name": {
+        "local": "Արագածոտն",
+        "en": "Aragatsotn",
+        "slug": "aragatsotn-am02"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM02",
+        "level": 1,
+        "name": {
+          "local": "Արագածոտն",
+          "en": "Aragatsotn",
+          "slug": "aragatsotn-am02"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 10
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "40.636",
+      "lon": "44.223"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM03_ararat",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Ararat",
+      "en": "Ararat",
+      "slug": "ararat"
+    },
+    "code": {
+      "id": "AM03_ararat",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM03",
+      "level": 1,
+      "name": {
+        "local": "Արարատ",
+        "en": "Ararat",
+        "slug": "ararat-am03"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM03",
+        "level": 1,
+        "name": {
+          "local": "Արարատ",
+          "en": "Ararat",
+          "slug": "ararat-am03"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 12
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "39.83",
+      "lon": "44.703"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM03_artashat",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Artashat",
+      "en": "Artashat",
+      "slug": "artashat"
+    },
+    "code": {
+      "id": "AM03_artashat",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM03",
+      "level": 1,
+      "name": {
+        "local": "Արարատ",
+        "en": "Ararat",
+        "slug": "ararat-am03"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM03",
+        "level": 1,
+        "name": {
+          "local": "Արարատ",
+          "en": "Ararat",
+          "slug": "ararat-am03"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 38
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "39.954",
+      "lon": "44.551"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM03_masis",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Masis",
+      "en": "Masis",
+      "slug": "masis"
+    },
+    "code": {
+      "id": "AM03_masis",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM03",
+      "level": 1,
+      "name": {
+        "local": "Արարատ",
+        "en": "Ararat",
+        "slug": "ararat-am03"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM03",
+        "level": 1,
+        "name": {
+          "local": "Արարատ",
+          "en": "Ararat",
+          "slug": "ararat-am03"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 26
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "39.997",
+      "lon": "44.494"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM03_vedi",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Vedi",
+      "en": "Vedi",
+      "slug": "vedi"
+    },
+    "code": {
+      "id": "AM03_vedi",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM03",
+      "level": 1,
+      "name": {
+        "local": "Արարատ",
+        "en": "Ararat",
+        "slug": "ararat-am03"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM03",
+        "level": 1,
+        "name": {
+          "local": "Արարատ",
+          "en": "Ararat",
+          "slug": "ararat-am03"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 18
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "39.911",
+      "lon": "44.728"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM03_verin-dvin",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Verin Dvin",
+      "en": "Verin Dvin",
+      "slug": "verin-dvin"
+    },
+    "code": {
+      "id": "AM03_verin-dvin",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM03",
+      "level": 1,
+      "name": {
+        "local": "Արարատ",
+        "en": "Ararat",
+        "slug": "ararat-am03"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM03",
+        "level": 1,
+        "name": {
+          "local": "Արարատ",
+          "en": "Ararat",
+          "slug": "ararat-am03"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 1
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "40.025",
+      "lon": "44.591"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM04_araks",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Araks",
+      "en": "Araks",
+      "slug": "araks"
+    },
+    "code": {
+      "id": "AM04_araks",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM04",
+      "level": 1,
+      "name": {
+        "local": "Արմավիր",
+        "en": "Armavir",
+        "slug": "armavir-am04"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM04",
+        "level": 1,
+        "name": {
+          "local": "Արմավիր",
+          "en": "Armavir",
+          "slug": "armavir-am04"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 13
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "40.055",
+      "lon": "44.303"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM04_armavir",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Armavir",
+      "en": "Armavir",
+      "slug": "armavir"
+    },
+    "code": {
+      "id": "AM04_armavir",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM04",
+      "level": 1,
+      "name": {
+        "local": "Արմավիր",
+        "en": "Armavir",
+        "slug": "armavir-am04"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM04",
+        "level": 1,
+        "name": {
+          "local": "Արմավիր",
+          "en": "Armavir",
+          "slug": "armavir-am04"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 10
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "40.09",
+      "lon": "44.048"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM04_baghramyan",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Baghramyan",
+      "en": "Baghramyan",
+      "slug": "baghramyan"
+    },
+    "code": {
+      "id": "AM04_baghramyan",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM04",
+      "level": 1,
+      "name": {
+        "local": "Արմավիր",
+        "en": "Armavir",
+        "slug": "armavir-am04"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM04",
+        "level": 1,
+        "name": {
+          "local": "Արմավիր",
+          "en": "Armavir",
+          "slug": "armavir-am04"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 14
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "40.191",
+      "lon": "43.849"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM04_ferik",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Ferik",
+      "en": "Ferik",
+      "slug": "ferik"
+    },
+    "code": {
+      "id": "AM04_ferik",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM04",
+      "level": 1,
+      "name": {
+        "local": "Արմավիր",
+        "en": "Armavir",
+        "slug": "armavir-am04"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM04",
+        "level": 1,
+        "name": {
+          "local": "Արմավիր",
+          "en": "Armavir",
+          "slug": "armavir-am04"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 1
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "40.186",
+      "lon": "44.209"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM04_khoy",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Khoy",
+      "en": "Khoy",
+      "slug": "khoy"
+    },
+    "code": {
+      "id": "AM04_khoy",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM04",
+      "level": 1,
+      "name": {
+        "local": "Արմավիր",
+        "en": "Armavir",
+        "slug": "armavir-am04"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM04",
+        "level": 1,
+        "name": {
+          "local": "Արմավիր",
+          "en": "Armavir",
+          "slug": "armavir-am04"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 17
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "40.124",
+      "lon": "45.381"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM04_metsamor",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Metsamor",
+      "en": "Metsamor",
+      "slug": "metsamor"
+    },
+    "code": {
+      "id": "AM04_metsamor",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM04",
+      "level": 1,
+      "name": {
+        "local": "Արմավիր",
+        "en": "Armavir",
+        "slug": "armavir-am04"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM04",
+        "level": 1,
+        "name": {
+          "local": "Արմավիր",
+          "en": "Armavir",
+          "slug": "armavir-am04"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 30
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "40.071",
+      "lon": "44.289"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM05_gavar",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Gavar",
+      "en": "Gavar",
+      "slug": "gavar"
+    },
+    "code": {
+      "id": "AM05_gavar",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM05",
+      "level": 1,
+      "name": {
+        "local": "Գեղարքունիք",
+        "en": "Gegharkunik",
+        "slug": "gegharkunik-am05"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM05",
+        "level": 1,
+        "name": {
+          "local": "Գեղարքունիք",
+          "en": "Gegharkunik",
+          "slug": "gegharkunik-am05"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 11
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "40.354",
+      "lon": "45.124"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM05_martuni",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Martuni",
+      "en": "Martuni",
+      "slug": "martuni"
+    },
+    "code": {
+      "id": "AM05_martuni",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM05",
+      "level": 1,
+      "name": {
+        "local": "Գեղարքունիք",
+        "en": "Gegharkunik",
+        "slug": "gegharkunik-am05"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM05",
+        "level": 1,
+        "name": {
+          "local": "Գեղարքունիք",
+          "en": "Gegharkunik",
+          "slug": "gegharkunik-am05"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 18
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "40.667",
+      "lon": "45.254"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM05_sevan",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Sevan",
+      "en": "Sevan",
+      "slug": "sevan"
+    },
+    "code": {
+      "id": "AM05_sevan",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM05",
+      "level": 1,
+      "name": {
+        "local": "Գեղարքունիք",
+        "en": "Gegharkunik",
+        "slug": "gegharkunik-am05"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM05",
+        "level": 1,
+        "name": {
+          "local": "Գեղարքունիք",
+          "en": "Gegharkunik",
+          "slug": "gegharkunik-am05"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 11
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "40.555",
+      "lon": "44.954"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM05_vardenis",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Vardenis",
+      "en": "Vardenis",
+      "slug": "vardenis"
+    },
+    "code": {
+      "id": "AM05_vardenis",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM05",
+      "level": 1,
+      "name": {
+        "local": "Գեղարքունիք",
+        "en": "Gegharkunik",
+        "slug": "gegharkunik-am05"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM05",
+        "level": 1,
+        "name": {
+          "local": "Գեղարքունիք",
+          "en": "Gegharkunik",
+          "slug": "gegharkunik-am05"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 35
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "40.572",
+      "lon": "44.403"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM07_abovyan",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Abovyan",
+      "en": "Abovyan",
+      "slug": "abovyan"
+    },
+    "code": {
+      "id": "AM07_abovyan",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM07",
+      "level": 1,
+      "name": {
+        "local": "Կոտայք",
+        "en": "Kotayk",
+        "slug": "kotayk-am07"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM07",
+        "level": 1,
+        "name": {
+          "local": "Կոտայք",
+          "en": "Kotayk",
+          "slug": "kotayk-am07"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 10
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "40.049",
+      "lon": "44.547"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM07_arzni",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Arzni",
+      "en": "Arzni",
+      "slug": "arzni"
+    },
+    "code": {
+      "id": "AM07_arzni",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM07",
+      "level": 1,
+      "name": {
+        "local": "Կոտայք",
+        "en": "Kotayk",
+        "slug": "kotayk-am07"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM07",
+        "level": 1,
+        "name": {
+          "local": "Կոտայք",
+          "en": "Kotayk",
+          "slug": "kotayk-am07"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 1
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "40.296",
+      "lon": "44.596"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM07_byureghavan",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Byureghavan",
+      "en": "Byureghavan",
+      "slug": "byureghavan"
+    },
+    "code": {
+      "id": "AM07_byureghavan",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM07",
+      "level": 1,
+      "name": {
+        "local": "Կոտայք",
+        "en": "Kotayk",
+        "slug": "kotayk-am07"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM07",
+        "level": 1,
+        "name": {
+          "local": "Կոտայք",
+          "en": "Kotayk",
+          "slug": "kotayk-am07"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 3
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "40.315",
+      "lon": "44.594"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM07_charentsavan",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Charentsavan",
+      "en": "Charentsavan",
+      "slug": "charentsavan"
+    },
+    "code": {
+      "id": "AM07_charentsavan",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM07",
+      "level": 1,
+      "name": {
+        "local": "Կոտայք",
+        "en": "Kotayk",
+        "slug": "kotayk-am07"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM07",
+        "level": 1,
+        "name": {
+          "local": "Կոտայք",
+          "en": "Kotayk",
+          "slug": "kotayk-am07"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 5
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "40.41",
+      "lon": "44.643"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM07_garni",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Garni",
+      "en": "Garni",
+      "slug": "garni"
+    },
+    "code": {
+      "id": "AM07_garni",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM07",
+      "level": 1,
+      "name": {
+        "local": "Կոտայք",
+        "en": "Kotayk",
+        "slug": "kotayk-am07"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM07",
+        "level": 1,
+        "name": {
+          "local": "Կոտայք",
+          "en": "Kotayk",
+          "slug": "kotayk-am07"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 6
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "40.119",
+      "lon": "44.734"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM07_hrazdan",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Hrazdan",
+      "en": "Hrazdan",
+      "slug": "hrazdan"
+    },
+    "code": {
+      "id": "AM07_hrazdan",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM07",
+      "level": 1,
+      "name": {
+        "local": "Կոտայք",
+        "en": "Kotayk",
+        "slug": "kotayk-am07"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM07",
+        "level": 1,
+        "name": {
+          "local": "Կոտայք",
+          "en": "Kotayk",
+          "slug": "kotayk-am07"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 4
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "40.5",
+      "lon": "44.767"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM07_nairi",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Nairi",
+      "en": "Nairi",
+      "slug": "nairi"
+    },
+    "code": {
+      "id": "AM07_nairi",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM07",
+      "level": 1,
+      "name": {
+        "local": "Կոտայք",
+        "en": "Kotayk",
+        "slug": "kotayk-am07"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM07",
+        "level": 1,
+        "name": {
+          "local": "Կոտայք",
+          "en": "Kotayk",
+          "slug": "kotayk-am07"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 7
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "40.154",
+      "lon": "44.477"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM07_nor-hachn",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Nor Hachn",
+      "en": "Nor Hachn",
+      "slug": "nor-hachn"
+    },
+    "code": {
+      "id": "AM07_nor-hachn",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM07",
+      "level": 1,
+      "name": {
+        "local": "Կոտայք",
+        "en": "Kotayk",
+        "slug": "kotayk-am07"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM07",
+        "level": 1,
+        "name": {
+          "local": "Կոտայք",
+          "en": "Kotayk",
+          "slug": "kotayk-am07"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 9
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "40.302",
+      "lon": "44.583"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM07_tsaghkadzor",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Tsaghkadzor",
+      "en": "Tsaghkadzor",
+      "slug": "tsaghkadzor"
+    },
+    "code": {
+      "id": "AM07_tsaghkadzor",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM07",
+      "level": 1,
+      "name": {
+        "local": "Կոտայք",
+        "en": "Kotayk",
+        "slug": "kotayk-am07"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM07",
+        "level": 1,
+        "name": {
+          "local": "Կոտայք",
+          "en": "Kotayk",
+          "slug": "kotayk-am07"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 8
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "40.531",
+      "lon": "44.725"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM06_alaverdi",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Alaverdi",
+      "en": "Alaverdi",
+      "slug": "alaverdi"
+    },
+    "code": {
+      "id": "AM06_alaverdi",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM06",
+      "level": 1,
+      "name": {
+        "local": "Լոռի",
+        "en": "Lori",
+        "slug": "lori-am06"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM06",
+        "level": 1,
+        "name": {
+          "local": "Լոռի",
+          "en": "Lori",
+          "slug": "lori-am06"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 7
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "41.133",
+      "lon": "44.65"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM06_fioletovo",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Fioletovo",
+      "en": "Fioletovo",
+      "slug": "fioletovo"
+    },
+    "code": {
+      "id": "AM06_fioletovo",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM06",
+      "level": 1,
+      "name": {
+        "local": "Լոռի",
+        "en": "Lori",
+        "slug": "lori-am06"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM06",
+        "level": 1,
+        "name": {
+          "local": "Լոռի",
+          "en": "Lori",
+          "slug": "lori-am06"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 1
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "40.725",
+      "lon": "44.714"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM06_gyulagarak",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Gyulagarak",
+      "en": "Gyulagarak",
+      "slug": "gyulagarak"
+    },
+    "code": {
+      "id": "AM06_gyulagarak",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM06",
+      "level": 1,
+      "name": {
+        "local": "Լոռի",
+        "en": "Lori",
+        "slug": "lori-am06"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM06",
+        "level": 1,
+        "name": {
+          "local": "Լոռի",
+          "en": "Lori",
+          "slug": "lori-am06"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 7
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "40.965",
+      "lon": "44.47"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM06_lermontovo",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Lermontovo",
+      "en": "Lermontovo",
+      "slug": "lermontovo"
+    },
+    "code": {
+      "id": "AM06_lermontovo",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM06",
+      "level": 1,
+      "name": {
+        "local": "Լոռի",
+        "en": "Lori",
+        "slug": "lori-am06"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM06",
+        "level": 1,
+        "name": {
+          "local": "Լոռի",
+          "en": "Lori",
+          "slug": "lori-am06"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 2
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "40.765",
+      "lon": "44.63"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM06_spitak",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Spitak",
+      "en": "Spitak",
+      "slug": "spitak"
+    },
+    "code": {
+      "id": "AM06_spitak",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM06",
+      "level": 1,
+      "name": {
+        "local": "Լոռի",
+        "en": "Lori",
+        "slug": "lori-am06"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM06",
+        "level": 1,
+        "name": {
+          "local": "Լոռի",
+          "en": "Lori",
+          "slug": "lori-am06"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 21
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "40.837",
+      "lon": "44.267"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM06_stepanavan",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Stepanavan",
+      "en": "Stepanavan",
+      "slug": "stepanavan"
+    },
+    "code": {
+      "id": "AM06_stepanavan",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM06",
+      "level": 1,
+      "name": {
+        "local": "Լոռի",
+        "en": "Lori",
+        "slug": "lori-am06"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM06",
+        "level": 1,
+        "name": {
+          "local": "Լոռի",
+          "en": "Lori",
+          "slug": "lori-am06"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 4
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "41.01",
+      "lon": "44.384"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM06_tashir",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Tashir",
+      "en": "Tashir",
+      "slug": "tashir"
+    },
+    "code": {
+      "id": "AM06_tashir",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM06",
+      "level": 1,
+      "name": {
+        "local": "Լոռի",
+        "en": "Lori",
+        "slug": "lori-am06"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM06",
+        "level": 1,
+        "name": {
+          "local": "Լոռի",
+          "en": "Lori",
+          "slug": "lori-am06"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 12
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "41.124",
+      "lon": "44.282"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM06_tumanyan",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Tumanyan",
+      "en": "Tumanyan",
+      "slug": "tumanyan"
+    },
+    "code": {
+      "id": "AM06_tumanyan",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM06",
+      "level": 1,
+      "name": {
+        "local": "Լոռի",
+        "en": "Lori",
+        "slug": "lori-am06"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM06",
+        "level": 1,
+        "name": {
+          "local": "Լոռի",
+          "en": "Lori",
+          "slug": "lori-am06"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 10
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "40.987",
+      "lon": "44.656"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM06_vanadzor",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Vanadzor",
+      "en": "Vanadzor",
+      "slug": "vanadzor"
+    },
+    "code": {
+      "id": "AM06_vanadzor",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM06",
+      "level": 1,
+      "name": {
+        "local": "Լոռի",
+        "en": "Lori",
+        "slug": "lori-am06"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM06",
+        "level": 1,
+        "name": {
+          "local": "Լոռի",
+          "en": "Lori",
+          "slug": "lori-am06"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 3
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "40.813",
+      "lon": "44.488"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM08_akhuryan",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Akhuryan",
+      "en": "Akhuryan",
+      "slug": "akhuryan"
+    },
+    "code": {
+      "id": "AM08_akhuryan",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM08",
+      "level": 1,
+      "name": {
+        "local": "Շիրակ",
+        "en": "Shirak",
+        "slug": "shirak-am08"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM08",
+        "level": 1,
+        "name": {
+          "local": "Շիրակ",
+          "en": "Shirak",
+          "slug": "shirak-am08"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 35
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "40.781",
+      "lon": "43.896"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM08_amasia",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Amasia",
+      "en": "Amasia",
+      "slug": "amasia"
+    },
+    "code": {
+      "id": "AM08_amasia",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM08",
+      "level": 1,
+      "name": {
+        "local": "Շիրակ",
+        "en": "Shirak",
+        "slug": "shirak-am08"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM08",
+        "level": 1,
+        "name": {
+          "local": "Շիրակ",
+          "en": "Shirak",
+          "slug": "shirak-am08"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 26
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "40.083",
+      "lon": "43.967"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM08_ani",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Ani",
+      "en": "Ani",
+      "slug": "ani"
+    },
+    "code": {
+      "id": "AM08_ani",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM08",
+      "level": 1,
+      "name": {
+        "local": "Շիրակ",
+        "en": "Shirak",
+        "slug": "shirak-am08"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM08",
+        "level": 1,
+        "name": {
+          "local": "Շիրակ",
+          "en": "Shirak",
+          "slug": "shirak-am08"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 19
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "40.797",
+      "lon": "43.868"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM08_artik",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Artik",
+      "en": "Artik",
+      "slug": "artik"
+    },
+    "code": {
+      "id": "AM08_artik",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM08",
+      "level": 1,
+      "name": {
+        "local": "Շիրակ",
+        "en": "Shirak",
+        "slug": "shirak-am08"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM08",
+        "level": 1,
+        "name": {
+          "local": "Շիրակ",
+          "en": "Shirak",
+          "slug": "shirak-am08"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 24
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "40.617",
+      "lon": "43.976"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM08_gyumri",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Gyumri",
+      "en": "Gyumri",
+      "slug": "gyumri"
+    },
+    "code": {
+      "id": "AM08_gyumri",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM08",
+      "level": 1,
+      "name": {
+        "local": "Շիրակ",
+        "en": "Shirak",
+        "slug": "shirak-am08"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM08",
+        "level": 1,
+        "name": {
+          "local": "Շիրակ",
+          "en": "Shirak",
+          "slug": "shirak-am08"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 1
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "40.789",
+      "lon": "43.847"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM09_goris",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Goris",
+      "en": "Goris",
+      "slug": "goris"
+    },
+    "code": {
+      "id": "AM09_goris",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM09",
+      "level": 1,
+      "name": {
+        "local": "Սյունիք",
+        "en": "Syunik",
+        "slug": "syunik-am09"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM09",
+        "level": 1,
+        "name": {
+          "local": "Սյունիք",
+          "en": "Syunik",
+          "slug": "syunik-am09"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 12
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "39.508",
+      "lon": "46.339"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM09_kapan",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Kapan",
+      "en": "Kapan",
+      "slug": "kapan"
+    },
+    "code": {
+      "id": "AM09_kapan",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM09",
+      "level": 1,
+      "name": {
+        "local": "Սյունիք",
+        "en": "Syunik",
+        "slug": "syunik-am09"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM09",
+        "level": 1,
+        "name": {
+          "local": "Սյունիք",
+          "en": "Syunik",
+          "slug": "syunik-am09"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 38
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "39.201",
+      "lon": "46.415"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM09_meghri",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Meghri",
+      "en": "Meghri",
+      "slug": "meghri"
+    },
+    "code": {
+      "id": "AM09_meghri",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM09",
+      "level": 1,
+      "name": {
+        "local": "Սյունիք",
+        "en": "Syunik",
+        "slug": "syunik-am09"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM09",
+        "level": 1,
+        "name": {
+          "local": "Սյունիք",
+          "en": "Syunik",
+          "slug": "syunik-am09"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 15
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "38.903",
+      "lon": "46.246"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM09_sisian",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Sisian",
+      "en": "Sisian",
+      "slug": "sisian"
+    },
+    "code": {
+      "id": "AM09_sisian",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM09",
+      "level": 1,
+      "name": {
+        "local": "Սյունիք",
+        "en": "Syunik",
+        "slug": "syunik-am09"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM09",
+        "level": 1,
+        "name": {
+          "local": "Սյունիք",
+          "en": "Syunik",
+          "slug": "syunik-am09"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 31
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "39.521",
+      "lon": "46.032"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM09_tatev",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Tatev",
+      "en": "Tatev",
+      "slug": "tatev"
+    },
+    "code": {
+      "id": "AM09_tatev",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM09",
+      "level": 1,
+      "name": {
+        "local": "Սյունիք",
+        "en": "Syunik",
+        "slug": "syunik-am09"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM09",
+        "level": 1,
+        "name": {
+          "local": "Սյունիք",
+          "en": "Syunik",
+          "slug": "syunik-am09"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 8
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "39.382",
+      "lon": "46.24"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM09_tegh",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Tegh",
+      "en": "Tegh",
+      "slug": "tegh"
+    },
+    "code": {
+      "id": "AM09_tegh",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM09",
+      "level": 1,
+      "name": {
+        "local": "Սյունիք",
+        "en": "Syunik",
+        "slug": "syunik-am09"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM09",
+        "level": 1,
+        "name": {
+          "local": "Սյունիք",
+          "en": "Syunik",
+          "slug": "syunik-am09"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 7
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "39.555",
+      "lon": "46.476"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM11_berd",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Berd",
+      "en": "Berd",
+      "slug": "berd"
+    },
+    "code": {
+      "id": "AM11_berd",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM11",
+      "level": 1,
+      "name": {
+        "local": "Տավուշ",
+        "en": "Tavush",
+        "slug": "tavush-am11"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM11",
+        "level": 1,
+        "name": {
+          "local": "Տավուշ",
+          "en": "Tavush",
+          "slug": "tavush-am11"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 16
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "40.881",
+      "lon": "45.392"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM11_dilijan",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Dilijan",
+      "en": "Dilijan",
+      "slug": "dilijan"
+    },
+    "code": {
+      "id": "AM11_dilijan",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM11",
+      "level": 1,
+      "name": {
+        "local": "Տավուշ",
+        "en": "Tavush",
+        "slug": "tavush-am11"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM11",
+        "level": 1,
+        "name": {
+          "local": "Տավուշ",
+          "en": "Tavush",
+          "slug": "tavush-am11"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 8
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "40.741",
+      "lon": "44.863"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM11_ijevan",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Ijevan",
+      "en": "Ijevan",
+      "slug": "ijevan"
+    },
+    "code": {
+      "id": "AM11_ijevan",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM11",
+      "level": 1,
+      "name": {
+        "local": "Տավուշ",
+        "en": "Tavush",
+        "slug": "tavush-am11"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM11",
+        "level": 1,
+        "name": {
+          "local": "Տավուշ",
+          "en": "Tavush",
+          "slug": "tavush-am11"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 19
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "40.879",
+      "lon": "45.147"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM11_noyemberyan",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Noyemberyan",
+      "en": "Noyemberyan",
+      "slug": "noyemberyan"
+    },
+    "code": {
+      "id": "AM11_noyemberyan",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM11",
+      "level": 1,
+      "name": {
+        "local": "Տավուշ",
+        "en": "Tavush",
+        "slug": "tavush-am11"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM11",
+        "level": 1,
+        "name": {
+          "local": "Տավուշ",
+          "en": "Tavush",
+          "slug": "tavush-am11"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 18
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "41.172",
+      "lon": "44.994"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM10_areni",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Areni",
+      "en": "Areni",
+      "slug": "areni"
+    },
+    "code": {
+      "id": "AM10_areni",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM10",
+      "level": 1,
+      "name": {
+        "local": "Վայոց Ձոր",
+        "en": "Vayots Dzor",
+        "slug": "vayots-dzor-am10"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM10",
+        "level": 1,
+        "name": {
+          "local": "Վայոց Ձոր",
+          "en": "Vayots Dzor",
+          "slug": "vayots-dzor-am10"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 11
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "39.721",
+      "lon": "45.184"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM10_jermuk",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Jermuk",
+      "en": "Jermuk",
+      "slug": "jermuk"
+    },
+    "code": {
+      "id": "AM10_jermuk",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM10",
+      "level": 1,
+      "name": {
+        "local": "Վայոց Ձոր",
+        "en": "Vayots Dzor",
+        "slug": "vayots-dzor-am10"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM10",
+        "level": 1,
+        "name": {
+          "local": "Վայոց Ձոր",
+          "en": "Vayots Dzor",
+          "slug": "vayots-dzor-am10"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 3
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "39.842",
+      "lon": "45.672"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM10_yeghegis",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Yeghegis",
+      "en": "Yeghegis",
+      "slug": "yeghegis"
+    },
+    "code": {
+      "id": "AM10_yeghegis",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM10",
+      "level": 1,
+      "name": {
+        "local": "Վայոց Ձոր",
+        "en": "Vayots Dzor",
+        "slug": "vayots-dzor-am10"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM10",
+        "level": 1,
+        "name": {
+          "local": "Վայոց Ձոր",
+          "en": "Vayots Dzor",
+          "slug": "vayots-dzor-am10"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 16
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "39.872",
+      "lon": "45.36"
+    },
+    "metadata": {},
+    "source": {}
+  },
+  {
+    "id": "AM10_yeghegnadzor",
+    "level": 2,
+    "level_name": {
+      "local": "Համայնք",
+      "en": "Community"
+    },
+    "name": {
+      "local": "Yeghegnadzor",
+      "en": "Yeghegnadzor",
+      "slug": "yeghegnadzor"
+    },
+    "code": {
+      "id": "AM10_yeghegnadzor",
+      "iso": null
+    },
+    "parent": {
+      "id": "AM10",
+      "level": 1,
+      "name": {
+        "local": "Վայոց Ձոր",
+        "en": "Vayots Dzor",
+        "slug": "vayots-dzor-am10"
+      }
+    },
+    "ancestors": [
+      {
+        "id": "AM10",
+        "level": 1,
+        "name": {
+          "local": "Վայոց Ձոր",
+          "en": "Vayots Dzor",
+          "slug": "vayots-dzor-am10"
+        }
+      }
+    ],
+    "children_count": {
+      "settlement": 5
+    },
+    "zip_codes": [],
+    "geo": {
+      "lat": "39.761",
+      "lon": "45.333"
+    },
+    "metadata": {},
+    "source": {}
+  }
+]

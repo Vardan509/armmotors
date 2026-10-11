@@ -25,7 +25,6 @@ const ALLOWED_FIELDS = [
 function createError(message, status) {
     const error = new Error(message);
     error.status = status;
-
     return error;
 }
 
@@ -52,20 +51,30 @@ export function pickFields(body) {
 }
 
 export async function getAllProduct() {
-    const products = await Product.find({ status: { $nin: ["draft", "sold"] } })
+    return Product.find({
+        status: { $nin: ["draft", "sold"] },
+    })
         .select("-__v")
         .sort({ createdAt: -1 });
+}
 
-    return products;
+export async function getMyProducts(userId) {
+    return Product.find({ owner: userId })
+        .select("-__v")
+        .sort({ createdAt: -1 });
 }
 
 export async function getProductById(id) {
     validateId(id);
 
-    const product = await Product.findOne({
-        _id: id,
-        status: { $ne: "draft" },
-    }).select("-__v");
+    const product = await Product.findOneAndUpdate(
+        {
+            _id: id,
+            status: { $ne: "draft" },
+        },
+        { $inc: { views: 1 } },
+        { new: true },
+    ).select("-__v");
 
     if (!product) {
         throw createError("Հայտարարությունը չի գտնվել։", 404);
@@ -77,34 +86,54 @@ export async function getProductById(id) {
 export async function addProduct(body, userId) {
     const data = pickFields(body);
 
-    return await Product.create({
+    return Product.create({
         ...data,
         owner: userId,
     });
 }
 
 export async function updateById(id, body, userId) {
-    const product = await getProductById(id);
+    validateId(id);
 
-    if (!product.owner || product.owner.toString() !== userId.toString()) {
+    const product = await Product.findById(id);
+
+    if (!product) {
+        throw createError("Հայտարարությունը չի գտնվել։", 404);
+    }
+
+    if (!product.owner || String(product.owner) !== String(userId)) {
         throw createError("Կարող եք խմբագրել միայն Ձեր հայտարարությունը։", 403);
     }
 
     const data = pickFields(body);
 
-    if (Object.keys(data).length === 0) {
+    if (body.status !== undefined) {
+        if (!["active", "draft", "sold"].includes(body.status)) {
+            throw createError("Սխալ կարգավիճակ։", 400);
+        }
+
+        data.status = body.status;
+    }
+
+    if (!Object.keys(data).length) {
         throw createError("Խմբագրման տվյալներ չկան։", 400);
     }
 
     Object.assign(product, data);
 
-    return await product.save();
+    return product.save();
 }
 
 export async function deleteProduct(id, userId) {
-    const product = await getProductById(id);
+    validateId(id);
 
-    if (!product.owner || product.owner.toString() !== userId.toString()) {
+    const product = await Product.findById(id);
+
+    if (!product) {
+        throw createError("Հայտարարությունը չի գտնվել։", 404);
+    }
+
+    if (!product.owner || String(product.owner) !== String(userId)) {
         throw createError("Կարող եք ջնջել միայն Ձեր հայտարարությունը։", 403);
     }
 
