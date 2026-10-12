@@ -20,7 +20,7 @@ function currentPage() {
     let path = window.location.pathname;
 
     if (base && (path === base || path.startsWith(base + "/"))) {
-        path = path.slice(base.length);
+        path = path.slice(base.length);  
     }
 
     return path.replace(/\/+$/, "") || "/";
