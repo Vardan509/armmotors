@@ -8,6 +8,7 @@ import useRemote from "../utils/useRemote";
 import { pageUrl } from "../utils/navigation";
 
 import "./Account.css";
+import "./FavoritesPagePremium.css";
 
 export default function FavoritesPage() {
     const favorites = useFavorites();

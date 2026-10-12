@@ -9,6 +9,7 @@ import GoogleAccountLink from "../components/GoogleAccountLink";
 
 import "./Account.css";
 import "./Forms.css";
+import "./AuthPagePremium.css";
 
 const EMPTY_FORM = {
     name: "",

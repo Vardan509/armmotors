@@ -3,6 +3,7 @@ import { useState } from "react";
 import Header from "../components/header/Header";
 import ImageUploader from "../components/uploads/ImageUploader";
 import LocationFields from "../components/add-product/LocationFields";
+import PublicationNotice from "../components/monetization/PublicationNotice";
 
 import {
     CAR_BRANDS,
@@ -65,7 +66,7 @@ const STEERING_OPTIONS = [
     ["right", "Աջ"],
 ];
 
-function InputField({
+function Field({
     label,
     value,
     onChange,
@@ -73,7 +74,6 @@ function InputField({
     placeholder = "",
     required = false,
     min,
-    max,
     maxLength,
 }) {
     return (
@@ -86,17 +86,16 @@ function InputField({
             <input
                 type={type}
                 value={value}
-                onChange={(event) => onChange(event.target.value)}
+                onChange={(e) => onChange(e.target.value)}
                 placeholder={placeholder}
                 min={min}
-                max={max}
                 maxLength={maxLength}
             />
         </label>
     );
 }
 
-function SelectField({
+function Select({
     label,
     value,
     onChange,
@@ -114,19 +113,19 @@ function SelectField({
 
             <select
                 value={value}
-                onChange={(event) => onChange(event.target.value)}
+                onChange={(e) => onChange(e.target.value)}
                 disabled={disabled}
             >
                 <option value="">{placeholder}</option>
 
                 {options.map((option) => {
-                    const [optionValue, optionLabel] = Array.isArray(option)
+                    const [key, title] = Array.isArray(option)
                         ? option
-                        : [String(option), String(option)];
+                        : [option, option];
 
                     return (
-                        <option key={optionValue} value={optionValue}>
-                            {optionLabel}
+                        <option key={key} value={key}>
+                            {title}
                         </option>
                     );
                 })}
@@ -135,20 +134,20 @@ function SelectField({
     );
 }
 
-function SectionTitle({ number, title, description }) {
+function SectionHeading({ number, title, description }) {
     return (
         <div className="ap-section-title">
             <span className="ap-section-number">{number}</span>
 
             <div>
                 <h2>{title}</h2>
-                <p>{description}</p>
+                {description && <p>{description}</p>}
             </div>
         </div>
     );
 }
 
-function SummaryItem({ label, value }) {
+function Summary({ label, value }) {
     return (
         <div className="ap-summary-item">
             <span>{label}</span>
@@ -157,11 +156,7 @@ function SummaryItem({ label, value }) {
     );
 }
 
-function getLabel(options, value) {
-    return options.find((item) => item[0] === value)?.[1] || value;
-}
-
-function formatPrice(value) {
+function formatNumber(value) {
     return Number(value || 0).toLocaleString("en-US");
 }
 
@@ -169,28 +164,23 @@ export default function AddProductPage() {
     const [form, setForm] = useState(INITIAL_FORM);
     const [location, setLocation] = useState(INITIAL_LOCATION);
     const [images, setImages] = useState([]);
+
     const [step, setStep] = useState(0);
+    const [loading, setLoading] = useState(false);
+
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
-    const [loading, setLoading] = useState(false);
 
     const token = localStorage.getItem("token");
     const isCar = form.type === "car";
 
-    const modelOptions = form.brand
-        ? [
-              ...CAR_MODELS[form.brand].map((model) => [model, model]),
-              ...(CAR_MODELS[form.brand].includes("Այլ մոդել")
-                  ? []
-                  : [["Այլ մոդել", "Այլ մոդել"]]),
-          ]
-        : [];
+    const modelList = form.brand ? CAR_MODELS[form.brand] || [] : [];
 
-    const generatedTitle = [form.brand, form.model, form.year]
-        .filter(Boolean)
-        .join(" ");
+    const modelOptions = modelList.map((model) => [model, model]);
 
-    const title = isCar ? generatedTitle : form.title.trim();
+    const title = isCar
+        ? [form.brand, form.model, form.year].filter(Boolean).join(" ")
+        : form.title.trim();
 
     const locationText = [
         location.region,
@@ -201,35 +191,31 @@ export default function AddProductPage() {
         .join(", ");
 
     function update(name, value) {
-        setForm((current) => ({
-            ...current,
+        setForm((old) => ({
+            ...old,
             [name]: value,
         }));
 
         setError("");
     }
 
-    function changeBrand(brand) {
-        setForm((current) => ({
-            ...current,
-            brand,
-            model: "",
-        }));
+    function changeType(type) {
+        setForm({
+            ...INITIAL_FORM,
+            type,
+            price: form.price,
+            currency: form.currency,
+            phone: form.phone,
+        });
 
         setError("");
     }
 
-    function changeType(type) {
-        setForm((current) => ({
-            ...current,
-            type,
-            title: "",
-            brand: "",
+    function changeBrand(brand) {
+        setForm((old) => ({
+            ...old,
+            brand,
             model: "",
-            year: "",
-            mileage: "",
-            color: "",
-            vin: "",
         }));
 
         setError("");
@@ -248,13 +234,13 @@ export default function AddProductPage() {
                 (url) => typeof url === "string" && url.startsWith("https://"),
             );
 
-        setImages((current) => {
-            const next = [...new Set([...current, ...urls])];
+        setImages((old) => {
+            const next = [...new Set([...old, ...urls])];
 
             if (next.length > 12) {
-                setError("Կարող եք ավելացնել առավելագույնը 12 նկար։");
+                setError("Կարելի է վերբեռնել առավելագույնը 12 նկար։");
 
-                return current;
+                return old;
             }
 
             setError("");
@@ -263,22 +249,17 @@ export default function AddProductPage() {
     }
 
     function removeImage(url) {
-        setImages((current) => current.filter((item) => item !== url));
+        setImages((old) => old.filter((img) => img !== url));
     }
 
     function makeMainImage(url) {
-        setImages((current) => [
-            url,
-            ...current.filter((item) => item !== url),
-        ]);
+        setImages((old) => [url, ...old.filter((img) => img !== url)]);
     }
 
-    function validate(currentStep) {
-        if (currentStep === 0) {
-            if (!title) {
-                return isCar
-                    ? "Լրացրեք մեքենայի տվյալները։"
-                    : "Լրացրեք պահեստամասի անվանումը։";
+    function validate(index) {
+        if (index === 0) {
+            if (!isCar && !title) {
+                return "Լրացրեք պահեստամասի անվանումը։";
             }
 
             if (
@@ -289,26 +270,14 @@ export default function AddProductPage() {
                 return "Նշեք ճիշտ գին։";
             }
 
-            if (!location.regionId) {
-                return "Ընտրեք մարզը։";
-            }
-
-            if (!location.communityId) {
-                return "Ընտրեք համայնքը։";
+            if (!location.regionId || !location.communityId) {
+                return "Ընտրեք մարզը և համայնքը։";
             }
         }
 
-        if (currentStep === 1 && isCar) {
-            if (!form.brand) {
-                return "Ընտրեք մակնիշը։";
-            }
-
-            if (!form.model) {
-                return "Ընտրեք մոդելը։";
-            }
-
-            if (!form.year) {
-                return "Ընտրեք տարեթիվը։";
+        if (index === 1 && isCar) {
+            if (!form.brand || !form.model || !form.year) {
+                return "Լրացրեք մակնիշը, մոդելը և տարեթիվը։";
             }
 
             if (
@@ -331,15 +300,15 @@ export default function AddProductPage() {
             }
         }
 
-        if (currentStep === 2) {
+        if (index === 2) {
             const phone = form.phone.replace(/[\s()-]/g, "");
 
             if (!/^\+?[0-9]{8,15}$/.test(phone)) {
                 return "Նշեք ճիշտ հեռախոսահամար։";
             }
 
-            if (!images.length) {
-                return "Վերբեռնեք առնվազն մեկ լուսանկար։";
+            if (images.length === 0) {
+                return "Ավելացրեք առնվազն մեկ նկար։";
             }
         }
 
@@ -347,32 +316,15 @@ export default function AddProductPage() {
     }
 
     function nextStep() {
-        // Մեքենայի վերնագիրը լրացվում է երկրորդ քայլում։
-        if (step === 0 && isCar) {
-            if (
-                form.price === "" ||
-                !Number.isFinite(Number(form.price)) ||
-                Number(form.price) < 0
-            ) {
-                setError("Նշեք ճիշտ գին։");
-                return;
-            }
+        const message = validate(step);
 
-            if (!location.regionId || !location.communityId) {
-                setError("Ընտրեք մարզը և համայնքը։");
-                return;
-            }
-        } else {
-            const message = validate(step);
-
-            if (message) {
-                setError(message);
-                return;
-            }
+        if (message) {
+            setError(message);
+            return;
         }
 
         setError("");
-        setStep((current) => Math.min(3, current + 1));
+        setStep((old) => Math.min(old + 1, 3));
 
         window.scrollTo({
             top: 0,
@@ -382,7 +334,7 @@ export default function AddProductPage() {
 
     function previousStep() {
         setError("");
-        setStep((current) => Math.max(0, current - 1));
+        setStep((old) => Math.max(old - 1, 0));
 
         window.scrollTo({
             top: 0,
@@ -396,17 +348,16 @@ export default function AddProductPage() {
         }
 
         if (!isCar) {
-            return `Պահեստամաս՝ ${title}. Վիճակ՝ ${form.condition}. Գտնվելու վայր՝ ${locationText}.`;
+            return `Պահեստամաս՝ ${title}։ Վիճակ՝ ${form.condition}։ Գտնվելու վայր՝ ${locationText}։`;
         }
 
         return [
-            `Մեքենա՝ ${title}.`,
-            `Վազք՝ ${formatPrice(form.mileage)} կմ.`,
-            `Վառելիք՝ ${getLabel(FUEL_OPTIONS, form.fuel)}.`,
-            `Ղեկ՝ ${getLabel(STEERING_OPTIONS, form.steering)}.`,
-            `Գույն՝ ${form.color}.`,
-            `Վիճակ՝ ${form.condition}.`,
-            `Գտնվելու վայր՝ ${locationText}.`,
+            `Մեքենա՝ ${title}։`,
+            `Վազք՝ ${formatNumber(form.mileage)} կմ։`,
+            `Վառելիք՝ ${form.fuel}։`,
+            `Ղեկ՝ ${form.steering}։`,
+            `Գույն՝ ${form.color}։`,
+            `Գտնվելու վայր՝ ${locationText}։`,
         ].join(" ");
     }
 
@@ -415,12 +366,12 @@ export default function AddProductPage() {
 
         if (loading || step !== 3) return;
 
-        for (let index = 0; index < 3; index++) {
-            const message = validate(index);
+        for (let i = 0; i < 3; i++) {
+            const message = validate(i);
 
             if (message) {
                 setError(message);
-                setStep(index);
+                setStep(i);
                 return;
             }
         }
@@ -462,31 +413,41 @@ export default function AddProductPage() {
                 timeoutMs: 30000,
             });
 
+            // Առաջին 5 հայտարարությունը հրապարակվում է անվճար։
+            // Դրանից հետո backend-ը վերադարձնում է
+            // requiresPayment և 100 դրամ վճարման հայտ։
+            if (result?.requiresPayment) {
+                window.location.assign(`${BASE}monetization`);
+
+                return;
+            }
+
             setSuccess("Հայտարարությունը հաջողությամբ հրապարակվեց։");
 
-            const productId =
+            const id =
                 result?.product?._id ||
                 result?.product?.id ||
                 result?._id ||
                 result?.id;
 
-            if (productId) {
-                window.location.assign(
-                    `${BASE}cars/${encodeURIComponent(productId)}`,
-                );
-            } else {
-                setForm(INITIAL_FORM);
-                setLocation(INITIAL_LOCATION);
-                setImages([]);
-                setStep(0);
-            }
-        } catch (err) {
-            if (err.status === 401) {
-                window.location.assign(`${BASE}login?next=/add-product`);
+            if (id) {
+                window.location.assign(`${BASE}cars/${encodeURIComponent(id)}`);
+
                 return;
             }
 
-            setError(err.message || "Հայտարարությունը չհրապարակվեց։");
+            setForm(INITIAL_FORM);
+            setLocation(INITIAL_LOCATION);
+            setImages([]);
+            setStep(0);
+        } catch (err) {
+            if (err.status === 401) {
+                window.location.assign(`${BASE}login?next=/add-product`);
+
+                return;
+            }
+
+            setError(err.message || "Հայտարարությունը հրապարակել չհաջողվեց։");
         } finally {
             setLoading(false);
         }
@@ -512,15 +473,15 @@ export default function AddProductPage() {
 
                         <div className="ap-auth-actions">
                             <a
-                                href={`${BASE}login?next=/add-product`}
                                 className="ap-primary-link"
+                                href={`${BASE}login?next=/add-product`}
                             >
                                 Մուտք
                             </a>
 
                             <a
-                                href={`${BASE}registration?next=/add-product`}
                                 className="ap-secondary-link"
+                                href={`${BASE}registration?next=/add-product`}
                             >
                                 Գրանցվել
                             </a>
@@ -543,14 +504,12 @@ export default function AddProductPage() {
 
                     <div className="ap-heading">
                         <div>
-                            <span className="ap-eyebrow">
-                                ARMMOTORS / ՀԱՅՏԱՐԱՐՈՒԹՅՈՒՆ
-                            </span>
+                            <span className="ap-eyebrow">ARMMOTORS</span>
 
                             <h1>Տեղադրել հայտարարություն</h1>
 
                             <p>
-                                Ընտրեք տվյալները, ավելացրեք լուսանկարներ և
+                                Լրացրեք տվյալները, ավելացրեք լուսանկարներ և
                                 հրապարակեք։
                             </p>
                         </div>
@@ -585,14 +544,14 @@ export default function AddProductPage() {
                     >
                         {step === 0 && (
                             <section className="ap-section">
-                                <SectionTitle
+                                <SectionHeading
                                     number="01"
                                     title="Հիմնական տվյալներ"
-                                    description="Ընտրեք հայտարարության տեսակը, գինը և գտնվելու վայրը։"
+                                    description="Նշեք հայտարարության տեսակը, գինը և գտնվելու վայրը։"
                                 />
 
                                 <div className="ap-grid">
-                                    <SelectField
+                                    <Select
                                         label="Բաժին"
                                         value={form.type}
                                         onChange={changeType}
@@ -602,7 +561,7 @@ export default function AddProductPage() {
                                         ]}
                                     />
 
-                                    <SelectField
+                                    <Select
                                         label="Վիճակ"
                                         value={form.condition}
                                         onChange={(value) =>
@@ -613,7 +572,7 @@ export default function AddProductPage() {
 
                                     {!isCar && (
                                         <div className="ap-full">
-                                            <InputField
+                                            <Field
                                                 label="Պահեստամասի անվանում"
                                                 value={form.title}
                                                 onChange={(value) =>
@@ -625,7 +584,7 @@ export default function AddProductPage() {
                                         </div>
                                     )}
 
-                                    <InputField
+                                    <Field
                                         label="Գին"
                                         type="number"
                                         value={form.price}
@@ -637,7 +596,7 @@ export default function AddProductPage() {
                                         required
                                     />
 
-                                    <SelectField
+                                    <Select
                                         label="Արժույթ"
                                         value={form.currency}
                                         onChange={(value) =>
@@ -669,7 +628,7 @@ export default function AddProductPage() {
 
                         {step === 1 && (
                             <section className="ap-section">
-                                <SectionTitle
+                                <SectionHeading
                                     number="02"
                                     title={
                                         isCar
@@ -678,14 +637,14 @@ export default function AddProductPage() {
                                     }
                                     description={
                                         isCar
-                                            ? "Մակնիշն ընտրելուց հետո հասանելի կլինեն համապատասխան մոդելները։"
-                                            : "Պահեստամասի հիմնական տվյալներն արդեն լրացված են։"
+                                            ? "Ընտրեք մակնիշը, մոդելը և տեխնիկական տվյալները։"
+                                            : "Կարող եք ավելացնել լրացուցիչ նկարագրություն հաջորդ քայլում։"
                                     }
                                 />
 
                                 {isCar ? (
                                     <div className="ap-grid">
-                                        <SelectField
+                                        <Select
                                             label="Մեքենայի տեսակ"
                                             value={form.vehicleType}
                                             onChange={(value) =>
@@ -697,32 +656,31 @@ export default function AddProductPage() {
                                             ]}
                                         />
 
-                                        <SelectField
+                                        <Select
                                             label="Մակնիշ"
                                             value={form.brand}
                                             onChange={changeBrand}
                                             options={CAR_BRANDS}
-                                            placeholder="Ընտրեք մակնիշը"
                                             required
                                         />
 
-                                        <SelectField
+                                        <Select
                                             label="Մոդել"
                                             value={form.model}
                                             onChange={(value) =>
                                                 update("model", value)
                                             }
                                             options={modelOptions}
+                                            disabled={!form.brand}
                                             placeholder={
                                                 form.brand
-                                                    ? "Ընտրեք մոդելը"
+                                                    ? "Ընտրել մոդելը"
                                                     : "Նախ ընտրեք մակնիշը"
                                             }
-                                            disabled={!form.brand}
                                             required
                                         />
 
-                                        <SelectField
+                                        <Select
                                             label="Տարեթիվ"
                                             value={form.year}
                                             onChange={(value) =>
@@ -732,23 +690,21 @@ export default function AddProductPage() {
                                                 String(year),
                                                 String(year),
                                             ])}
-                                            placeholder="Ընտրեք տարեթիվը"
                                             required
                                         />
 
-                                        <InputField
+                                        <Field
                                             label="Վազք (կմ)"
                                             type="number"
                                             value={form.mileage}
                                             onChange={(value) =>
                                                 update("mileage", value)
                                             }
-                                            placeholder="Օրինակ՝ 85000"
                                             min="0"
                                             required
                                         />
 
-                                        <SelectField
+                                        <Select
                                             label="Վառելիք"
                                             value={form.fuel}
                                             onChange={(value) =>
@@ -757,7 +713,7 @@ export default function AddProductPage() {
                                             options={FUEL_OPTIONS}
                                         />
 
-                                        <SelectField
+                                        <Select
                                             label="Ղեկ"
                                             value={form.steering}
                                             onChange={(value) =>
@@ -766,43 +722,33 @@ export default function AddProductPage() {
                                             options={STEERING_OPTIONS}
                                         />
 
-                                        <SelectField
+                                        <Select
                                             label="Գույն"
                                             value={form.color}
                                             onChange={(value) =>
                                                 update("color", value)
                                             }
                                             options={CAR_COLORS}
-                                            placeholder="Ընտրեք գույնը"
                                             required
                                         />
 
-                                        <div className="ap-full">
-                                            <InputField
-                                                label="VIN (ըստ ցանկության)"
-                                                value={form.vin}
-                                                onChange={(value) =>
-                                                    update("vin", value)
-                                                }
-                                                placeholder="17 նիշ"
-                                                maxLength={17}
-                                            />
-                                        </div>
-
-                                        {generatedTitle && (
-                                            <div className="ap-full">
-                                                <div className="ap-info-box">
-                                                    Վերնագիրը կստեղծվի ավտոմատ՝{" "}
-                                                    <strong>
-                                                        {generatedTitle}
-                                                    </strong>
-                                                </div>
-                                            </div>
-                                        )}
+                                        <Field
+                                            label="VIN (ըստ ցանկության)"
+                                            value={form.vin}
+                                            onChange={(value) =>
+                                                update(
+                                                    "vin",
+                                                    value.toUpperCase(),
+                                                )
+                                            }
+                                            maxLength={17}
+                                        />
                                     </div>
                                 ) : (
                                     <div className="ap-info-box">
-                                        Կարող եք անցնել հաջորդ քայլին։
+                                        Պահեստամասի հիմնական տվյալները լրացված
+                                        են։ Շարունակեք նկարների և կապի տվյալների
+                                        քայլին։
                                     </div>
                                 )}
                             </section>
@@ -810,53 +756,51 @@ export default function AddProductPage() {
 
                         {step === 2 && (
                             <section className="ap-section">
-                                <SectionTitle
+                                <SectionHeading
                                     number="03"
                                     title="Նկարներ և կապ"
-                                    description="Ավելացրեք նկարները և հեռախոսահամարը։"
+                                    description="Ավելացրեք նկարները, հեռախոսահամարը և նկարագրությունը։"
                                 />
 
                                 <div className="ap-grid">
-                                    <div className="ap-full">
-                                        <InputField
-                                            label="Հեռախոսահամար"
-                                            type="tel"
-                                            value={form.phone}
-                                            onChange={(value) =>
-                                                update("phone", value)
+                                    <Field
+                                        label="Հեռախոսահամար"
+                                        value={form.phone}
+                                        onChange={(value) =>
+                                            update("phone", value)
+                                        }
+                                        placeholder="+374XXXXXXXX"
+                                        required
+                                    />
+
+                                    <label className="ap-field ap-full">
+                                        <span className="ap-field-label">
+                                            Նկարագրություն
+                                        </span>
+
+                                        <textarea
+                                            value={form.description}
+                                            onChange={(e) =>
+                                                update(
+                                                    "description",
+                                                    e.target.value,
+                                                )
                                             }
-                                            placeholder="+374XXXXXXXX"
-                                            required
+                                            placeholder="Նկարագրեք մեքենան կամ պահեստամասը..."
+                                            maxLength={7000}
                                         />
-                                    </div>
-
-                                    <div className="ap-full">
-                                        <label className="ap-field">
-                                            <span className="ap-field-label">
-                                                Նկարագրություն (ըստ ցանկության)
-                                            </span>
-
-                                            <textarea
-                                                value={form.description}
-                                                onChange={(event) =>
-                                                    update(
-                                                        "description",
-                                                        event.target.value,
-                                                    )
-                                                }
-                                                rows={5}
-                                                maxLength={7000}
-                                                placeholder="Կարող եք գրել լրացուցիչ տեղեկություններ։ Եթե թողնեք դատարկ, հիմնական տվյալներից նկարագրությունը կստեղծվի ավտոմատ։"
-                                            />
-                                        </label>
-                                    </div>
+                                    </label>
                                 </div>
 
                                 <div className="ap-upload-section">
                                     <div className="ap-upload-heading">
                                         <div>
                                             <h3>Լուսանկարներ</h3>
-                                            <p>Առավելագույնը 12 նկար։</p>
+
+                                            <p>
+                                                Առավելագույնը 12 նկար։ Առաջինը
+                                                կլինի գլխավոր։
+                                            </p>
                                         </div>
 
                                         <span className="ap-image-count">
@@ -877,8 +821,8 @@ export default function AddProductPage() {
                                         <div className="ap-images-grid">
                                             {images.map((url, index) => (
                                                 <div
-                                                    className="ap-image-card"
                                                     key={url}
+                                                    className="ap-image-card"
                                                 >
                                                     <img
                                                         src={url}
@@ -924,101 +868,114 @@ export default function AddProductPage() {
                         )}
 
                         {step === 3 && (
-                            <section className="ap-section">
-                                <SectionTitle
-                                    number="04"
-                                    title="Հայտարարության ամփոփում"
-                                    description="Ստուգեք տվյալները նախքան հրապարակելը։"
-                                />
+                            <>
+                                <PublicationNotice />
 
-                                {images[0] && (
-                                    <div className="ap-review-cover">
-                                        <img
-                                            src={images[0]}
-                                            alt="Գլխավոր նկար"
-                                        />
-                                    </div>
-                                )}
-
-                                <div className="ap-review-title">
-                                    <h2>{title}</h2>
-                                    <strong>
-                                        {formatPrice(form.price)}{" "}
-                                        {form.currency}
-                                    </strong>
-                                </div>
-
-                                <div className="ap-summary-grid">
-                                    <SummaryItem
-                                        label="Բաժին"
-                                        value={isCar ? "Մեքենա" : "Պահեստամաս"}
+                                <section className="ap-section">
+                                    <SectionHeading
+                                        number="04"
+                                        title="Հայտարարության ամփոփում"
+                                        description="Ստուգեք տվյալները հրապարակելուց առաջ։"
                                     />
 
-                                    <SummaryItem
-                                        label="Վիճակ"
-                                        value={form.condition}
-                                    />
-
-                                    <SummaryItem
-                                        label="Գտնվելու վայր"
-                                        value={locationText}
-                                    />
-
-                                    <SummaryItem
-                                        label="Հեռախոս"
-                                        value={form.phone}
-                                    />
-
-                                    {isCar && (
-                                        <>
-                                            <SummaryItem
-                                                label="Մակնիշ"
-                                                value={form.brand}
+                                    {images[0] && (
+                                        <div className="ap-review-cover">
+                                            <img
+                                                src={images[0]}
+                                                alt="Գլխավոր նկար"
                                             />
-
-                                            <SummaryItem
-                                                label="Մոդել"
-                                                value={form.model}
-                                            />
-
-                                            <SummaryItem
-                                                label="Տարեթիվ"
-                                                value={form.year}
-                                            />
-
-                                            <SummaryItem
-                                                label="Վազք"
-                                                value={`${formatPrice(
-                                                    form.mileage,
-                                                )} կմ`}
-                                            />
-
-                                            <SummaryItem
-                                                label="Գույն"
-                                                value={form.color}
-                                            />
-
-                                            <SummaryItem
-                                                label="Վառելիք"
-                                                value={getLabel(
-                                                    FUEL_OPTIONS,
-                                                    form.fuel,
-                                                )}
-                                            />
-                                        </>
+                                        </div>
                                     )}
 
-                                    <SummaryItem
-                                        label="Լուսանկարներ"
-                                        value={`${images.length} հատ`}
-                                    />
-                                </div>
+                                    <div className="ap-review-title">
+                                        <h2>{title}</h2>
 
-                                <div className="ap-review-description">
-                                    <h3>Նկարագրություն</h3>
-                                    <p>{createDescription()}</p>
-                                </div>
-                            </section>
+                                        <strong>
+                                            {formatNumber(form.price)}{" "}
+                                            {form.currency}
+                                        </strong>
+                                    </div>
+
+                                    <div className="ap-summary-grid">
+                                        <Summary
+                                            label="Տեսակ"
+                                            value={
+                                                isCar ? "Մեքենա" : "Պահեստամաս"
+                                            }
+                                        />
+
+                                        <Summary
+                                            label="Վիճակ"
+                                            value={form.condition}
+                                        />
+
+                                        <Summary
+                                            label="Գտնվելու վայր"
+                                            value={locationText}
+                                        />
+
+                                        <Summary
+                                            label="Հեռախոսահամար"
+                                            value={form.phone}
+                                        />
+
+                                        {isCar && (
+                                            <>
+                                                <Summary
+                                                    label="Մակնիշ"
+                                                    value={form.brand}
+                                                />
+
+                                                <Summary
+                                                    label="Մոդել"
+                                                    value={form.model}
+                                                />
+
+                                                <Summary
+                                                    label="Տարեթիվ"
+                                                    value={form.year}
+                                                />
+
+                                                <Summary
+                                                    label="Վազք"
+                                                    value={`${formatNumber(
+                                                        form.mileage,
+                                                    )} կմ`}
+                                                />
+
+                                                <Summary
+                                                    label="Վառելիք"
+                                                    value={form.fuel}
+                                                />
+
+                                                <Summary
+                                                    label="Գույն"
+                                                    value={form.color}
+                                                />
+                                            </>
+                                        )}
+
+                                        <Summary
+                                            label="Նկարներ"
+                                            value={`${images.length} հատ`}
+                                        />
+                                    </div>
+
+                                    <div className="ap-review-description">
+                                        <h3>Նկարագրություն</h3>
+                                        <p>{createDescription()}</p>
+                                    </div>
+
+                                    <div className="ap-info-box">
+                                        Առաջին 5 հայտարարությունն անվճար է։
+                                        Հաջորդ յուրաքանչյուր հրապարակման արժեքը՝
+                                        100 դրամ։ Եթե անվճար տեղերը սպառված են,
+                                        կստեղծվի վճարման հայտ, և
+                                        հայտարարությունը կհրապարակվի վճարումը
+                                        հաստատվելուց հետո։
+                                    </div>
+                                </section>
+                            </>
                         )}
 
                         {error && (

@@ -1,0 +1,18 @@
+.publication-notice {
+    padding: 17px 20px;
+    border: 1px solid #e4d6ba;
+    border-radius: 12px;
+    background: #fff9ea;
+    color: #806027;
+}
+
+.publication-notice b {
+    font-size: 14px;
+}
+
+.publication-notice p {
+    margin: 8px 0 0;
+    color: #8b7859;
+    line-height: 1.7;
+    font-size: 12px;
+}

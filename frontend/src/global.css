@@ -1,96 +1,103 @@
+/* ArmMotors — Global design system */
+
+:root {
+    font-family: Arial, "Noto Sans Armenian", sans-serif;
+    color: #292929;
+    background: #fafaf9;
+
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+
+    --am-gold: #c5a05a;
+    --am-gold-dark: #8c6a2d;
+    --am-bg: #fafaf9;
+    --am-border: #eae6df;
+}
+
 *,
 *::before,
 *::after {
-  box-sizing: border-box;
+    box-sizing: border-box;
 }
 
 html {
-  scroll-behavior: smooth;
-  scroll-padding-top: 170px;
+    scroll-behavior: smooth;
+    scroll-padding-top: 170px;
 }
 
 body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #f7f8fa;
-  color: #202020;
+    margin: 0;
+    min-width: 320px;
+    background: var(--am-bg);
+    color: #292929;
 }
 
 button,
 input,
 select,
 textarea {
-  font: inherit;
+    font: inherit;
 }
 
 button {
-  cursor: pointer;
+    cursor: pointer;
 }
 
 button:disabled {
-  cursor: not-allowed;
+    cursor: not-allowed;
+}
+
+a {
+    color: inherit;
 }
 
 a.product-card {
-  display: flex;
-  text-decoration: none;
-  color: inherit;
+    display: flex;
+    text-decoration: none;
+    color: inherit;
 }
 
-.product-card:focus-visible,
 a:focus-visible,
-button:focus-visible {
-  outline: 3px solid #ac8434;
-  outline-offset: 4px;
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: 2px solid #b18a42;
+    outline-offset: 3px;
 }
 
 .demo-label {
-  display: block;
-  margin-bottom: 7px;
-  color: #8a681b;
-  font-size: 10px;
-}
-
-.brand-card small {
-  color: #737373;
-  font-size: 11px;
+    display: block;
+    margin-bottom: 7px;
+    color: var(--am-gold-dark);
+    font-size: 10px;
 }
 
 .category-card {
-  text-decoration: none;
-  color: inherit;
+    color: inherit;
+    text-decoration: none;
 }
 
-.catalog-notice {
-  padding: 14px 18px;
-  border: 1px solid #eee0bb;
-  border-radius: 12px;
-  background: #fff8e7;
-  color: #735b25;
-  font-size: 13px;
-  line-height: 1.8;
+.product-card:hover .product-title {
+    color: var(--am-gold-dark);
 }
 
 .site-form input,
 .site-form textarea,
 .site-form select {
-  max-width: 100%;
-}
-
-.product-card:hover .product-title {
-  color: #8a681b;
+    max-width: 100%;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
+    html {
+        scroll-behavior: auto;
+    }
 
-  *,
-  *::before,
-  *::after {
-    animation: none !important;
-    transition: none !important;
-  }
+    *,
+    *::before,
+    *::after {
+        animation: none !important;
+        transition: none !important;
+    }
 }
-    

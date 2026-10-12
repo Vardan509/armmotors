@@ -305,9 +305,6 @@ export default function CarDetailsPage({ id }) {
 
                     <a href={`${BASE}cars`}>Հայտարարություններ</a>
 
-                    <span>/</span>
-
-                    <span>{car?.title || "Մանրամասներ"}</span>
                 </nav>
 
                 {loading ? (
@@ -325,13 +322,7 @@ export default function CarDetailsPage({ id }) {
                         <>
                             <div className="detail-heading">
                                 <div>
-                                    <span className="section-label">
-                                        {car.region}
-                                        {" · "}
-                                        {car.year || car.condition}
-                                    </span>
-
-                                    <p>Հայտարարություն #{getProductId(car)}</p>
+                                    <span className="section-label"> </span>
                                 </div>
 
                                 <button
@@ -435,13 +426,6 @@ export default function CarDetailsPage({ id }) {
 
                                     <p>{car.region}</p>
 
-                                    {typeof car.views === "number" && (
-                                        <p className="detail-views">
-                                            Դիտումներ՝{" "}
-                                            {car.views.toLocaleString("en-US")}
-                                        </p>
-                                    )}
-
                                     {car.status === "sold" && (
                                         <p className="detail-sold-label">
                                             Վաճառված է
@@ -461,7 +445,18 @@ export default function CarDetailsPage({ id }) {
                                         <div>
                                             <h2>Կապ վաճառողի հետ</h2>
 
-                                            <p>{car.region}</p>
+                                            {(() => {
+                                                const owner =
+                                                    car.owner || car.seller;
+
+                                                const sellerId =
+                                                    typeof owner === "string"
+                                                        ? owner
+                                                        : owner?._id ||
+                                                          owner?.id;
+
+                                                if (!sellerId) return null;
+                                            })()}
                                         </div>
                                     </div>
 
@@ -483,14 +478,6 @@ export default function CarDetailsPage({ id }) {
 
                                     <button
                                         type="button"
-                                        className="detail-secondary"
-                                        onClick={openSupport}
-                                    >
-                                        Կապ ադմինի հետ
-                                    </button>
-
-                                    <button
-                                        type="button"
                                         className="detail-primary"
                                         disabled={
                                             purchase.busy ||
@@ -503,7 +490,7 @@ export default function CarDetailsPage({ id }) {
                                             ? "Վաճառված է"
                                             : purchase.busy
                                               ? "Ուղարկվում է…"
-                                              : "Գնման հայտ ուղարկել"}
+                                              : "Գրել"}
                                     </button>
 
                                     {purchase.message && (
@@ -515,11 +502,6 @@ export default function CarDetailsPage({ id }) {
                                             {purchase.error}
                                         </p>
                                     )}
-
-                                    <small>
-                                        Մինչև գործարքը անձամբ ստուգեք մեքենայի և
-                                        փաստաթղթերի տվյալները։
-                                    </small>
 
                                     {/* ԲՈՂՈՔԱՐԿՄԱՆ ՀԱՄԱԿԱՐԳ */}
                                     <ReportProduct
