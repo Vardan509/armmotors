@@ -1,46 +1,80 @@
-export default function errorHandler(err, req, res, next) {
-    console.error("API ERROR:", err);
-
-    if (err.name === "ValidationError") {
-        return res.status(400).json({
-            message: "Տվյալները սխալ են լրացված։",
-            errors: Object.values(err.errors).map((error) => error.message),
-        });
+export default function errorHandler(error, req, res, next) {
+    if (res.headersSent) {
+        return next(error);
     }
 
-    if (err.name === "CastError") {
-        return res.status(400).json({
-            message: "Սխալ ID։",
-        });
+    const name = error?.name || "Error";
+
+    const mongoUnavailable = [
+        "MongoNetworkError",
+        "MongoServerSelectionError",
+        "MongooseServerSelectionError",
+    ].includes(name);
+
+    const validationError = name === "ValidationError";
+    const invalidId = name === "CastError";
+    const duplicate = error?.code === 11000;
+
+    const tokenError =
+        name === "JsonWebTokenError" || name === "TokenExpiredError";
+
+    const uploadTooLarge = error?.code === "LIMIT_FILE_SIZE";
+
+    const uploadInvalid = name === "MulterError";
+
+    const status = mongoUnavailable
+        ? 503
+        : uploadTooLarge
+          ? 413
+          : validationError || invalidId || uploadInvalid
+            ? 400
+            : duplicate
+              ? 409
+              : tokenError
+                ? 401
+                : Number.isInteger(error?.status) &&
+                    error.status >= 400 &&
+                    error.status < 600
+                  ? error.status
+                  : 500;
+
+    if (status >= 500) {
+        console.error(`[ArmMotors] ${req.method} ${req.originalUrl}: ${name}`);
+
+        if (process.env.NODE_ENV !== "production") {
+            console.error(
+                error?.stack || error?.message || "Unknown server error",
+            );
+        }
     }
 
-    if (err.code === 11000) {
-        return res.status(409).json({
-            message: "Այս տվյալներով գրառում արդեն գոյություն ունի։",
-        });
-    }
+    const message = mongoUnavailable
+        ? "MongoDB-ին միանալ չհաջողվեց։ Փորձեք ավելի ուշ։"
+        : uploadTooLarge
+          ? "Նկարի չափը գերազանցում է 5 ՄԲ-ը։"
+          : validationError
+            ? "Տվյալները սխալ են լրացված։"
+            : invalidId
+              ? "Սխալ ID։"
+              : duplicate
+                ? "Այս տվյալներով գրառում արդեն գոյություն ունի։"
+                : tokenError
+                  ? "Մուտքի տվյալները անվավեր են կամ ժամկետանց։"
+                  : status >= 500
+                    ? "Սերվերի ներքին սխալ։"
+                    : error?.message || "Տեղի ունեցավ սխալ։";
 
-    if (err.name === "JsonWebTokenError") {
-        return res.status(401).json({
-            message: "Անվավեր մուտքի տվյալներ։",
-        });
-    }
+    res.status(status).json({
+        message,
 
-    if (err.name === "TokenExpiredError") {
-        return res.status(401).json({
-            message: "Մուտքի ժամկետը լրացել է։",
-        });
-    }
+        ...(mongoUnavailable ? { code: "DATABASE_UNAVAILABLE" } : {}),
 
-    const status =
-        Number.isInteger(err.status) && err.status >= 400 && err.status < 600
-            ? err.status
-            : 500;
-
-    return res.status(status).json({
-        message:
-            status === 500
-                ? "Սերվերի ներքին սխալ։"
-                : err.message || "Տեղի ունեցավ սխալ։",
+        ...(validationError
+            ? {
+                  errors: Object.values(error.errors || {}).map(
+                      (item) => item.message,
+                  ),
+              }
+            : {}),
     });
 }

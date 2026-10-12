@@ -1,6 +1,12 @@
 import mongoose from "mongoose";
 import Product from "../models/product.js";
 
+import {
+    publishOrRequestPayment,
+    autoRefreshDue,
+    sortPublicPipeline,
+} from "./monetizationService.js";
+
 const ALLOWED_FIELDS = [
     "type",
     "title",
@@ -25,6 +31,7 @@ const ALLOWED_FIELDS = [
 function createError(message, status) {
     const error = new Error(message);
     error.status = status;
+
     return error;
 }
 
@@ -50,30 +57,48 @@ export function pickFields(body) {
     return data;
 }
 
+// Բոլոր հրապարակված հայտարարությունները
+// TOP-երը ցուցադրվում են առաջինը։
 export async function getAllProduct() {
+    await autoRefreshDue();
+
+    return Product.aggregate(
+        sortPublicPipeline({
+            status: "active",
+        }),
+    );
+}
+
+// Օգտատիրոջ սեփական հայտարարությունները
+export async function getMyProducts(userId) {
     return Product.find({
-        status: { $nin: ["draft", "sold"] },
+        owner: userId,
     })
         .select("-__v")
-        .sort({ createdAt: -1 });
+        .sort({
+            createdAt: -1,
+        });
 }
 
-export async function getMyProducts(userId) {
-    return Product.find({ owner: userId })
-        .select("-__v")
-        .sort({ createdAt: -1 });
-}
-
+// Մեկ հայտարարության մանրամասները
 export async function getProductById(id) {
     validateId(id);
 
     const product = await Product.findOneAndUpdate(
         {
             _id: id,
-            status: { $ne: "draft" },
+            status: {
+                $ne: "draft",
+            },
         },
-        { $inc: { views: 1 } },
-        { new: true },
+        {
+            $inc: {
+                views: 1,
+            },
+        },
+        {
+            new: true,
+        },
     ).select("-__v");
 
     if (!product) {
@@ -83,15 +108,14 @@ export async function getProductById(id) {
     return product;
 }
 
+// Նոր հայտարարության տեղադրում
 export async function addProduct(body, userId) {
     const data = pickFields(body);
 
-    return Product.create({
-        ...data,
-        owner: userId,
-    });
+    return publishOrRequestPayment(data, userId, pickFields);
 }
 
+// Հայտարարության խմբագրում
 export async function updateById(id, body, userId) {
     validateId(id);
 
@@ -106,6 +130,13 @@ export async function updateById(id, body, userId) {
     }
 
     const data = pickFields(body);
+
+    if (product.paymentPending) {
+        throw createError(
+            "Վճարման սպասող հայտարարությունն այս պահին չի խմբագրվում։",
+            409,
+        );
+    }
 
     if (body.status !== undefined) {
         if (!["active", "draft", "sold"].includes(body.status)) {
@@ -124,6 +155,7 @@ export async function updateById(id, body, userId) {
     return product.save();
 }
 
+// Հայտարարության ջնջում
 export async function deleteProduct(id, userId) {
     validateId(id);
 

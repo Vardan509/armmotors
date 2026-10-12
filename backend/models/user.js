@@ -19,10 +19,12 @@ const userSchema = new mongoose.Schema(
             type: String,
             default: "",
             trim: true,
+
             validate: {
                 validator: (value) =>
                     !value ||
                     /^\+?[0-9]{8,15}$/.test(value.replace(/[\s()-]/g, "")),
+
                 message: "Հեռախոսահամարը սխալ է։",
             },
         },
@@ -40,12 +42,41 @@ const userSchema = new mongoose.Schema(
             select: false,
         },
 
-        googleId: { type: String, unique: true, sparse: true, select: false },
-        role: { type: String, enum: ["user", "admin"], default: "user" },
-        banned: { type: Boolean, default: false },
-        banReason: { type: String, maxlength: 500, default: "" },
-        tokenVersion: { type: Number, default: 0 },
-        favorites: [{ type: mongoose.Schema.Types.ObjectId, ref: "Product" }],
+        googleId: {
+            type: String,
+            unique: true,
+            sparse: true,
+            select: false,
+        },
+
+        role: {
+            type: String,
+            enum: ["user", "admin"],
+            default: "user",
+        },
+
+        banned: {
+            type: Boolean,
+            default: false,
+        },
+
+        banReason: {
+            type: String,
+            maxlength: 500,
+            default: "",
+        },
+
+        tokenVersion: {
+            type: Number,
+            default: 0,
+        },
+
+        favorites: [
+            {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "Product",
+            },
+        ],
 
         isVerified: {
             type: Boolean,
@@ -60,6 +91,13 @@ const userSchema = new mongoose.Schema(
         verificationCodeExpires: {
             type: Date,
             default: null,
+        },
+
+        // Առաջին 5 անվճար հրապարակումները
+        freePublicationsUsed: {
+            type: Number,
+            default: null,
+            min: 0,
         },
 
         bajanortagrutyun: {

@@ -124,8 +124,11 @@ export async function fnLogin(login, password) {
     }
 
     const email = login.trim().toLowerCase();
+    console.log('email  ->', email);
 
     const user = await User.findOne({ email }).select("+password");
+    console.log('user ->', user);
+    
 
     if (!user || !user.password) {
         throw createError("Email-ը կամ գաղտնաբառը սխալ է։", 401);

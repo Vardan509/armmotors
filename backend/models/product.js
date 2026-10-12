@@ -40,6 +40,32 @@ const productSchema = new mongoose.Schema(
             uppercase: true,
         },
 
+        // TOP հայտարարության գործողության ավարտը
+        topUntil: {
+            type: Date,
+            default: null,
+            index: true,
+        },
+
+        // Վերջին թարմացման ժամանակը
+        lastRefreshedAt: {
+            type: Date,
+            default: Date.now,
+            index: true,
+        },
+
+        // Ավտոմատ թարմացման փաթեթի ավարտը
+        autoRefreshUntil: {
+            type: Date,
+            default: null,
+        },
+
+        // Վճարման սպասող հայտարարություն
+        paymentPending: {
+            type: Boolean,
+            default: false,
+        },
+
         views: {
             type: Number,
             default: 0,
@@ -77,10 +103,12 @@ const productSchema = new mongoose.Schema(
             type: Number,
             required: carRequired,
             min: 1886,
+
             validate: {
                 validator: (value) =>
                     Number.isInteger(value) &&
                     value <= new Date().getFullYear() + 1,
+
                 message: "Տարեթիվը սխալ է։",
             },
         },
@@ -137,9 +165,11 @@ const productSchema = new mongoose.Schema(
         phone: {
             type: String,
             required: true,
+
             validate: {
                 validator: (value) =>
                     /^\+?[0-9]{8,15}$/.test(value.replace(/[\s()-]/g, "")),
+
                 message: "Հեռախոսահամարը սխալ է։",
             },
         },
@@ -147,21 +177,48 @@ const productSchema = new mongoose.Schema(
         images: {
             type: [String],
             default: [],
+
             validate: {
                 validator: (images) =>
                     images.length <= 12 &&
                     images.every((image) => /^https?:\/\//i.test(image)),
+
                 message: "Ավելացրեք առավելագույնը 12 նկարի HTTP/HTTPS հղում։",
             },
         },
     },
-    { timestamps: true },
+    {
+        timestamps: true,
+    },
 );
 
-productSchema.index({ status: 1, createdAt: -1 });
-productSchema.index({ status: 1, type: 1, createdAt: -1 });
-productSchema.index({ status: 1, brand: 1, createdAt: -1 });
-productSchema.index({ status: 1, price: 1 });
-productSchema.index({ owner: 1, createdAt: -1 });
+// MongoDB INDEXES
+
+productSchema.index({
+    status: 1,
+    createdAt: -1,
+});
+
+productSchema.index({
+    status: 1,
+    type: 1,
+    createdAt: -1,
+});
+
+productSchema.index({
+    status: 1,
+    brand: 1,
+    createdAt: -1,
+});
+
+productSchema.index({
+    status: 1,
+    price: 1,
+});
+
+productSchema.index({
+    owner: 1,
+    createdAt: -1,
+});
 
 export default mongoose.model("Product", productSchema);
