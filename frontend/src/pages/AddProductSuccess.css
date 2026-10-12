@@ -1,0 +1,204 @@
+/* ARMMOTORS — SUCCESS MODAL */
+
+.ap-success-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 20000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(20, 20, 20, 0.55);
+    backdrop-filter: blur(7px);
+}
+
+.ap-success-modal {
+    position: relative;
+    width: 100%;
+    max-width: 475px;
+    max-height: calc(100dvh - 40px);
+    overflow-y: auto;
+    padding: 40px 34px 30px;
+    border: 1px solid #eadbbf;
+    border-radius: 24px;
+    background: #fff;
+    color: #272727;
+    text-align: center;
+    box-shadow: 0 30px 90px rgba(0, 0, 0, 0.2);
+    animation: successOpen 0.3s ease;
+}
+
+.ap-success-close {
+    position: absolute;
+    top: 16px;
+    right: 17px;
+    width: 35px;
+    height: 35px;
+    border: 1px solid #eee8dd;
+    border-radius: 50%;
+    background: #faf9f7;
+    color: #777;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.ap-success-icon {
+    display: grid;
+    place-items: center;
+    width: 82px;
+    height: 82px;
+    margin: 0 auto 20px;
+    border-radius: 50%;
+    background: #f7ebd1;
+    color: #a07933;
+}
+
+.ap-success-eyebrow {
+    display: block;
+    margin-bottom: 10px;
+    color: #a17a35;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 2px;
+}
+
+.ap-success-modal h2 {
+    margin: 0 0 13px;
+    font-size: 25px;
+    line-height: 1.4;
+}
+
+.ap-success-description {
+    margin: 0 0 24px;
+    color: #85807a;
+    font-size: 13px;
+    line-height: 1.8;
+}
+
+.ap-success-tip {
+    margin-bottom: 23px;
+    padding: 18px;
+    border: 1px solid #eadcc1;
+    border-radius: 15px;
+    background: #fffaf0;
+    text-align: left;
+}
+
+.ap-success-tip-heading {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin-bottom: 9px;
+    color: #8d692b;
+    font-size: 13px;
+}
+
+.ap-success-tip-star {
+    display: grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 8px;
+    background: #f0dfb9;
+    color: #94702d;
+}
+
+.ap-success-tip p {
+    margin: 0;
+    color: #7c715d;
+    font-size: 12px;
+    line-height: 1.8;
+}
+
+.ap-success-primary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    min-height: 48px;
+    padding: 12px 18px;
+    border: 1px solid #ccaa66;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #ecd094, #d8b36a);
+    color: #322713;
+    font-size: 13px;
+    font-weight: 800;
+    text-decoration: none;
+    transition: transform 0.2s;
+}
+
+.ap-success-primary:hover {
+    transform: translateY(-2px);
+}
+
+.ap-success-actions {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 18px;
+}
+
+.ap-success-actions a {
+    padding: 10px 13px;
+    border: 1px solid #e9e4da;
+    border-radius: 9px;
+    color: #736b5d;
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.ap-success-actions a:hover {
+    background: #fff8e9;
+    color: #96702d;
+}
+
+.ap-success-plans {
+    display: inline-block;
+    margin-top: 19px;
+    color: #99712e;
+    font-size: 12px;
+    font-weight: 800;
+    text-decoration: none;
+}
+
+.ap-existing-location {
+    margin: 7px 0 12px;
+    color: #74664d;
+    font-size: 12px;
+    line-height: 1.7;
+}
+
+@keyframes successOpen {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.96);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@media (max-width: 520px) {
+    .ap-success-overlay {
+        padding: 12px;
+    }
+
+    .ap-success-modal {
+        padding: 34px 20px 25px;
+        border-radius: 20px;
+    }
+
+    .ap-success-modal h2 {
+        font-size: 21px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ap-success-modal {
+        animation: none;
+    }
+}

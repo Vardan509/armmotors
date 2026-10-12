@@ -1,135 +1,107 @@
 import { useState } from "react";
 
-import useSEO from "../../utils/useSEO";
-
 import Header from "./Header";
-
 import ProductCard from "../ProductCard/ProductCard";
-
 import Filter from "../filterCar/filter.jsx";
 
-import "./HomePage.css";
-
 import useProducts from "../../utils/useProducts";
-
 import { useI18n } from "../../utils/i18n";
-
 import { asset } from "../../utils/asset";
 
-import CategoryCards from "../categories/CategoryCards";
-
-const BASE = import.meta.env.BASE_URL;
+import "./HomePage.css";
 
 const CATEGORIES = [
     {
         id: 1,
-
         title: {
             hy: "Էլեկտրական",
-
             ru: "Электромобили",
-
             en: "Electric",
         },
-
         value: "electric",
-
-        image: "/electric.png",
+        image: "/categories/electric.png",
     },
-
     {
         id: 2,
-
         title: {
             hy: "Հիբրիդ",
-
             ru: "Гибриды",
-
             en: "Hybrid",
         },
-
         value: "hybrid",
-
-        image: "/lixiang.png",
+        image: "/categories/hybrid.png",
     },
-
     {
         id: 3,
-
         title: {
             hy: "Նոր",
-
             ru: "Новые",
-
             en: "New",
         },
-
         value: "new",
-
-        image: "/new-car.png",
+        image: "/categories/new_cars.png",
     },
-
     {
         id: 4,
-
         title: {
             hy: "Բեռնատարներ",
-
             ru: "Грузовики",
-
             en: "Trucks",
         },
-
         value: "truck",
-
-        image: "/volvo.png",
+        image: "/categories/trucks.png",
     },
-
     {
         id: 5,
-
         title: {
             hy: "Պահեստամասեր",
-
             ru: "Запчасти",
-
             en: "Spare parts",
         },
-
         value: "part",
-
-        image: "/spare-parts.png",
+        image: "/categories/spare_parts.png",
     },
 ];
 
 const BRANDS = [
-    { id: 1, name: "Mercedes-Benz", logo: "/mercedes.png" },
-
-    { id: 2, name: "Toyota", logo: "/toyota.png" },
-
-    { id: 3, name: "BMW", logo: "/bmw.png" },
-
-    { id: 4, name: "Tesla", logo: "/tesla.png" },
-
-    { id: 5, name: "Hyundai", logo: "/hyundai.png" },
-
-    { id: 6, name: "Nissan", logo: "/nissan.png" },
+    {
+        id: 1,
+        name: "Mercedes-Benz",
+        logo: "/mercedes.png",
+    },
+    {
+        id: 2,
+        name: "Toyota",
+        logo: "/toyota.png",
+    },
+    {
+        id: 3,
+        name: "BMW",
+        logo: "/bmw.png",
+    },
+    {
+        id: 4,
+        name: "Tesla",
+        logo: "/tesla.png",
+    },
+    {
+        id: 6,
+        name: "Nissan",
+        logo: "/nissan.png",
+    },
+    {
+        id: 7,
+        name: "Kia",
+        logo: "/kia.png",
+    },
 ];
 
 export default function HomePage() {
-    useSEO({
-        title: "ArmMotors — Գտեք Ձեր հաջորդ մեքենան",
-
-        description:
-            "Գնեք և վաճառեք ավտոմեքենաներ ու պահեստամասեր ArmMotors-ում։",
-    });
-
     const { language, t } = useI18n();
 
     const { products = [], loading, error } = useProducts();
 
     const [search, setSearch] = useState("");
-
     const [searchFocused, setSearchFocused] = useState(false);
 
     const [category, setCategory] = useState(() => {
@@ -144,11 +116,28 @@ export default function HomePage() {
 
     const normalizedSearch = search.trim().toLowerCase();
 
+    // =========================================
+    // OPEN BUSINESS PROPOSAL FORM
+    // =========================================
+
+    function openBusinessProposal() {
+        window.dispatchEvent(
+            new CustomEvent("open-support", {
+                detail: {
+                    type: "business",
+                    source: "homepage-banner",
+                },
+            }),
+        );
+    }
+
+    // =========================================
+    // SEARCH
+    // =========================================
+
     function getSearchValues(product) {
         return [product.title, product.brand, product.model, product.year]
-
             .filter((value) => value !== undefined && value !== null)
-
             .map((value) => String(value).toLowerCase());
     }
 
@@ -160,6 +149,10 @@ export default function HomePage() {
           ).slice(0, 6)
         : [];
 
+    // =========================================
+    // FILTER PRODUCTS
+    // =========================================
+
     const filteredProducts = PRODUCTS.filter((product) => {
         const matchesSearch =
             !normalizedSearch ||
@@ -167,7 +160,9 @@ export default function HomePage() {
                 value.includes(normalizedSearch),
             );
 
-        if (!matchesSearch) return false;
+        if (!matchesSearch) {
+            return false;
+        }
 
         if (category === "electric") {
             return product.type === "car" && product.fuel === "electric";
@@ -201,6 +196,10 @@ export default function HomePage() {
 
     const selectedCategory = CATEGORIES.find((item) => item.value === category);
 
+    // =========================================
+    // CATEGORY ACTIONS
+    // =========================================
+
     function updateCategory(value) {
         setCategory(value);
 
@@ -228,11 +227,13 @@ export default function HomePage() {
 
     function resetFilters() {
         setSearch("");
-
         setSearchFocused(false);
-
         updateCategory("");
     }
+
+    // =========================================
+    // BRANDS AND AD BANNER
+    // =========================================
 
     function renderBrandsAndAd() {
         return (
@@ -251,7 +252,6 @@ export default function HomePage() {
                                     product.type === "car" &&
                                     String(product.brand || "")
                                         .trim()
-
                                         .toLowerCase() ===
                                         brand.name.toLowerCase(),
                             ).length;
@@ -263,7 +263,9 @@ export default function HomePage() {
                                     className="brand-card"
                                     onClick={() => {
                                         window.location.assign(
-                                            `${BASE}cars?brand=${encodeURIComponent(
+                                            `${
+                                                import.meta.env.BASE_URL
+                                            }cars?brand=${encodeURIComponent(
                                                 brand.name,
                                             )}`,
                                         );
@@ -289,35 +291,59 @@ export default function HomePage() {
                     </div>
                 </div>
 
-                <div className="ad-banner">
+                {/* BUSINESS AD BANNER */}
+
+                <button
+                    type="button"
+                    className="ad-banner"
+                    onClick={openBusinessProposal}
+                    aria-label="Կապվել ադմինի հետ գովազդի կամ բիզնես առաջարկի համար"
+                    title="Գրել ադմինին՝ գովազդի վերաբերյալ"
+                    style={{
+                        display: "block",
+                        width: "100%",
+                        padding: 0,
+                        cursor: "pointer",
+                        textAlign: "left",
+                        font: "inherit",
+                    }}
+                >
                     <img
-                        src={asset("/armmotors-banner.png")}
-                        alt="Գովազդային տարածք"
+                        src={asset("/data/armmotors-banner.png")}
+                        alt="Ձեր գովազդը մեր հարթակում․ կապվեք մեզ հետ"
                         className="ad-image"
                         loading="lazy"
+                        style={{
+                            display: "block",
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "cover",
+                        }}
                     />
-                </div>
+                </button>
             </section>
         );
     }
+
+    // =========================================
+    // PAGE
+    // =========================================
 
     return (
         <div className="home-wrapper">
             <Header />
 
             <main className="main-content">
+                {/* SEARCH SECTION */}
+
                 <section className="intro-section">
                     <div
                         className="home-search-controls"
                         style={{
                             display: "flex",
-
                             alignItems: "flex-start",
-
                             gap: "10px",
-
                             width: "100%",
-
                             minWidth: 0,
                         }}
                     >
@@ -325,7 +351,6 @@ export default function HomePage() {
                             className="search-area"
                             style={{
                                 flex: "1 1 0",
-
                                 minWidth: 0,
                             }}
                             onFocus={() => setSearchFocused(true)}
@@ -382,6 +407,8 @@ export default function HomePage() {
                                 )}
                             </div>
 
+                            {/* SEARCH SUGGESTIONS */}
+
                             {searchFocused && normalizedSearch && (
                                 <div className="search-suggestions">
                                     {searchSuggestions.length > 0 ? (
@@ -398,12 +425,9 @@ export default function HomePage() {
                                                         product.title ||
                                                         [
                                                             product.brand,
-
                                                             product.model,
                                                         ]
-
                                                             .filter(Boolean)
-
                                                             .join(" ");
 
                                                     setSearch(value);
@@ -416,26 +440,19 @@ export default function HomePage() {
                                                         {product.title ||
                                                             [
                                                                 product.brand,
-
                                                                 product.model,
                                                             ]
-
                                                                 .filter(Boolean)
-
                                                                 .join(" ")}
                                                     </strong>
 
                                                     <small>
                                                         {[
                                                             product.brand,
-
                                                             product.model,
-
                                                             product.year,
                                                         ]
-
                                                             .filter(Boolean)
-
                                                             .join(" · ")}
                                                     </small>
                                                 </span>
@@ -458,11 +475,38 @@ export default function HomePage() {
                     </div>
                 </section>
 
-                <CategoryCards
-                    language={language}
-                    selectedCategory={category}
-                    onSelect={selectCategory}
-                />
+                {/* CATEGORIES */}
+
+                <section className="categories-section" aria-label="Categories">
+                    <div className="categories-grid">
+                        {CATEGORIES.map((cat) => (
+                            <button
+                                type="button"
+                                key={cat.id}
+                                className={`category-card category-card-${cat.value}`}
+                                aria-pressed={category === cat.value}
+                                onClick={() => selectCategory(cat.value)}
+                            >
+                                <span className="category-title">
+                                    {cat.title[language] || cat.title.hy}
+                                </span>
+
+                                <span className="category-image-wrapper">
+                                    <img
+                                        className="category-image"
+                                        src={asset(cat.image)}
+                                        alt=""
+                                        draggable={false}
+                                        loading="lazy"
+                                    />
+                                </span>
+                            </button>
+                        ))}
+                    </div>
+                </section>
+
+                {/* PRODUCTS */}
+
                 <section
                     className="products-section"
                     id="products"
@@ -545,10 +589,11 @@ export default function HomePage() {
                 </section>
             </main>
 
+            {/* FOOTER */}
+
             <footer className="home-footer">
                 <div className="footer-container">
                     <strong>ArmMotors</strong>
-
                     <span>{t("headerMarket")}</span>
                 </div>
             </footer>

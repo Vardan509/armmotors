@@ -1,203 +1,293 @@
-/* ==========================================
-   ARMMOTORS — PREMIUM ADD PRODUCT PAGE
-========================================== */
+/* =====================================================
+   ARMMOTORS — ADD PRODUCT PAGE
+   COMPLETE RESPONSIVE DESIGN
+   White / Champagne Gold / Charcoal
+===================================================== */
 
-.ap-page,
-.ap-auth-page {
-    --ap-gold: #c5a05a;
-    --ap-gold-dark: #8e6c2e;
-    --ap-border: #eae6de;
-    --ap-text: #292929;
-    --ap-muted: #858585;
+.ap-page {
+    --ap-gold: #caa35c;
+    --ap-gold-dark: #99722f;
+    --ap-gold-light: #e9cd91;
+    --ap-gold-pale: #fffaf0;
 
-    min-height: calc(100vh - 85px);
+    --ap-text: #262626;
+    --ap-muted: #89857d;
+    --ap-border: #e9e5dd;
+
+    --ap-radius: 16px;
+
+    width: 100%;
+    min-height: calc(100vh - 110px);
+
+    padding: 36px 24px 95px;
+
     background: #fafaf9;
     color: var(--ap-text);
-    font-family: Arial, sans-serif;
+
+    font-family: Arial, "Noto Sans Armenian", sans-serif;
 }
 
 .ap-page *,
-.ap-auth-page *,
 .ap-page *::before,
-.ap-auth-page *::before {
+.ap-page *::after {
     box-sizing: border-box;
 }
 
-.ap-page {
-    padding: 40px 20px 100px;
+.ap-page button,
+.ap-page input,
+.ap-page select,
+.ap-page textarea {
+    font-family: inherit;
 }
+
+.ap-page button {
+    cursor: pointer;
+}
+
+.ap-page img {
+    max-width: 100%;
+}
+
+/* =====================================================
+   CONTAINER
+===================================================== */
 
 .ap-container {
     width: 100%;
-    max-width: 1120px;
+    max-width: 1060px;
     margin: 0 auto;
 }
 
-/* PAGE HEADING */
+/* =====================================================
+   BACK LINK
+===================================================== */
 
 .ap-back-link {
     display: inline-flex;
     align-items: center;
-    min-height: 35px;
-    margin-bottom: 23px;
+    gap: 8px;
 
-    color: var(--ap-gold-dark);
+    margin-bottom: 30px;
+
+    color: #827e76;
+
     font-size: 12px;
-    font-weight: 800;
+    font-weight: 700;
+    line-height: 1.5;
     text-decoration: none;
+
+    transition: color 0.2s ease;
 }
 
 .ap-back-link:hover {
-    text-decoration: underline;
+    color: var(--ap-gold-dark);
 }
+
+/* =====================================================
+   PAGE HEADER
+===================================================== */
 
 .ap-heading {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    gap: 25px;
-    margin-bottom: 30px;
+    gap: 24px;
+
+    margin-bottom: 32px;
+}
+
+.ap-heading > div {
+    min-width: 0;
 }
 
 .ap-eyebrow {
     display: block;
-    margin-bottom: 11px;
+
+    margin-bottom: 10px;
 
     color: var(--ap-gold-dark);
+
     font-size: 10px;
     font-weight: 800;
-    letter-spacing: 1.6px;
+    letter-spacing: 1.8px;
+    line-height: 1.5;
 }
 
 .ap-heading h1 {
     margin: 0 0 12px;
 
-    font-size: clamp(25px, 3vw, 36px);
+    color: #252525;
+
+    font-size: clamp(26px, 3vw, 36px);
     font-weight: 800;
-    line-height: 1.3;
-    letter-spacing: -0.6px;
+    line-height: 1.35;
+    letter-spacing: -0.5px;
 }
 
 .ap-heading p {
-    max-width: 620px;
+    max-width: 640px;
+
     margin: 0;
 
-    color: var(--ap-muted);
+    color: #85817b;
+
     font-size: 13px;
-    line-height: 1.8;
+    font-weight: 400;
+    line-height: 1.85;
 }
 
 .ap-heading-badge {
-    flex-shrink: 0;
-    padding: 11px 15px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 
-    border: 1px solid #e8d9b8;
+    flex-shrink: 0;
+
+    min-height: 40px;
+    padding: 9px 15px;
+
+    border: 1px solid #eadbbd;
     border-radius: 10px;
 
-    background: #fff8e9;
-    color: #90702f;
+    background: #fff9ed;
+    color: #99722f;
 
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 800;
+    white-space: nowrap;
 }
 
-/* PROGRESS STEPS */
+/* =====================================================
+   PROGRESS BAR
+===================================================== */
 
 .ap-progress {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 13px;
-    margin-bottom: 27px;
+    gap: 14px;
+
+    width: 100%;
+    margin-bottom: 26px;
 }
 
 .ap-progress-step {
     display: flex;
     flex-direction: column;
     gap: 10px;
+
     min-width: 0;
+
+    color: #a29d95;
 }
 
 .ap-progress-line {
+    display: block;
+
     width: 100%;
     height: 5px;
 
-    border-radius: 10px;
-    background: #e9e6df;
+    border-radius: 20px;
 
-    transition: background 0.2s ease;
-}
+    background: #e8e6e1;
 
-.ap-progress-step.is-active .ap-progress-line,
-.ap-progress-step.is-completed .ap-progress-line {
-    background: linear-gradient(90deg, #d7b56f, #bd9349);
+    transition: background 0.25s ease;
 }
 
 .ap-progress-label {
-    color: #9a9a9a;
+    display: block;
+
     font-size: 11px;
     font-weight: 700;
     line-height: 1.5;
 }
 
-.ap-progress-step.is-active .ap-progress-label {
-    color: #292929;
+.ap-progress-step.is-active {
+    color: #98712e;
 }
 
-.ap-progress-step.is-completed .ap-progress-label {
-    color: #997433;
+.ap-progress-step.is-active .ap-progress-line {
+    background: linear-gradient(90deg, #bb9149 0%, #e5c988 100%);
 }
 
-/* FORM SECTIONS */
+.ap-progress-step.is-completed {
+    color: #837048;
+}
+
+.ap-progress-step.is-completed .ap-progress-line {
+    background: #c7a15d;
+}
+
+/* =====================================================
+   FORM
+===================================================== */
 
 .ap-form {
-    display: flex;
-    flex-direction: column;
-    gap: 19px;
+    display: block;
+
+    width: 100%;
+    margin: 0;
+    padding: 0;
 }
+
+/* MAIN WHITE CARD */
 
 .ap-section {
     width: 100%;
-    padding: 32px;
+
+    padding: 34px 36px 37px;
 
     border: 1px solid var(--ap-border);
-    border-radius: 19px;
+    border-radius: 20px;
 
-    background: #fff;
-    box-shadow: 0 8px 28px rgba(40, 32, 18, 0.035);
+    background: #ffffff;
+
+    box-shadow: 0 8px 35px rgba(36, 30, 18, 0.035);
 }
+
+/* =====================================================
+   SECTION TITLE
+===================================================== */
 
 .ap-section-title {
     display: flex;
     align-items: flex-start;
     gap: 16px;
 
-    margin-bottom: 27px;
+    margin-bottom: 30px;
     padding-bottom: 23px;
 
-    border-bottom: 1px solid #f0ede7;
+    border-bottom: 1px solid #f0eee9;
 }
 
 .ap-section-number {
     display: grid;
     place-items: center;
 
-    width: 44px;
-    height: 44px;
     flex-shrink: 0;
 
-    border: 1px solid #ead9b4;
-    border-radius: 12px;
+    width: 46px;
+    height: 46px;
 
-    background: #faf1dc;
-    color: #97702c;
+    border: 1px solid #ead8b0;
+    border-radius: 13px;
 
-    font-size: 13px;
+    background: #fff8e8;
+    color: #9b742f;
+
+    font-size: 15px;
     font-weight: 800;
 }
 
+.ap-section-title > div {
+    flex: 1;
+    min-width: 0;
+}
+
 .ap-section-title h2 {
-    margin: 0 0 7px;
+    margin: 1px 0 7px;
+
     color: #292929;
+
     font-size: 20px;
     font-weight: 800;
     line-height: 1.4;
@@ -205,72 +295,95 @@
 
 .ap-section-title p {
     margin: 0;
-    color: #929292;
+
+    color: #89847d;
+
     font-size: 12px;
-    line-height: 1.7;
+    line-height: 1.75;
 }
 
-.ap-location-heading {
-    margin: 14px 0 0;
-    color: #333;
-    font-size: 16px;
-    font-weight: 800;
-}
-
-/* FORM GRID */
+/* =====================================================
+   FORM GRID
+===================================================== */
 
 .ap-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 23px 20px;
+
+    gap: 22px 24px;
+
+    width: 100%;
+}
+
+.ap-grid > * {
+    min-width: 0;
 }
 
 .ap-full {
     grid-column: 1 / -1;
 }
 
-/* FORM FIELDS */
+/* =====================================================
+   FORM FIELDS
+===================================================== */
 
 .ap-field {
     display: flex;
     flex-direction: column;
+    align-items: stretch;
+
     gap: 9px;
+
+    width: 100%;
     min-width: 0;
+
+    margin: 0;
 }
 
 .ap-field-label {
-    color: #45403a;
+    display: block;
+
+    color: #45413a;
+
     font-size: 12px;
     font-weight: 800;
-    line-height: 1.5;
+    line-height: 1.6;
 }
 
 .ap-field-label em {
-    margin-left: 4px;
-    color: #c64e48;
+    margin-left: 5px;
+
+    color: #c38d46;
     font-style: normal;
 }
 
-.ap-field input,
-.ap-field select,
-.ap-field textarea {
+/* INPUT / SELECT / TEXTAREA */
+
+.ap-field > input,
+.ap-field > select,
+.ap-field > textarea {
     display: block;
+
     width: 100%;
     min-width: 0;
     min-height: 51px;
 
+    margin: 0;
     padding: 13px 15px;
 
     border: 1px solid #e5e1da;
     border-radius: 11px;
+
     outline: none;
 
-    background: #fdfdfc;
-    color: #292929;
+    background: #fbfaf8;
+    color: #2c2c2c;
 
-    font-family: inherit;
     font-size: 13px;
     font-weight: 500;
+    line-height: 1.5;
+
+    box-shadow: none;
 
     transition:
         border-color 0.2s ease,
@@ -278,123 +391,188 @@
         box-shadow 0.2s ease;
 }
 
-.ap-field input::placeholder,
-.ap-field textarea::placeholder {
-    color: #a5a5a5;
+.ap-field > input::placeholder,
+.ap-field > textarea::placeholder {
+    color: #aaa49c;
+    opacity: 1;
 }
 
-.ap-field input:hover,
-.ap-field select:hover,
-.ap-field textarea:hover {
-    border-color: #d1c5ad;
+.ap-field > input:hover,
+.ap-field > select:hover,
+.ap-field > textarea:hover {
+    border-color: #d8c8aa;
+    background: #ffffff;
 }
 
-.ap-field input:focus,
-.ap-field select:focus,
-.ap-field textarea:focus {
-    border-color: #c5a05a;
-    background: #fff;
-    box-shadow: 0 0 0 4px rgba(197, 160, 90, 0.1);
+.ap-field > input:focus,
+.ap-field > select:focus,
+.ap-field > textarea:focus,
+.ap-field > input:focus-visible,
+.ap-field > select:focus-visible,
+.ap-field > textarea:focus-visible {
+    border-color: var(--ap-gold);
+
+    outline: none;
+
+    background: #ffffff;
+
+    box-shadow: 0 0 0 3px rgba(202, 163, 92, 0.11);
 }
 
-.ap-field select {
+.ap-field > input:disabled,
+.ap-field > select:disabled {
+    background: #f3f2ef;
+    color: #a5a19a;
+    cursor: not-allowed;
+}
+
+.ap-field > select {
+    padding-right: 35px;
+
     cursor: pointer;
+
+    appearance: auto;
 }
 
-.ap-field textarea {
-    min-height: 150px;
+.ap-field > textarea {
+    min-height: 155px;
+
     resize: vertical;
     line-height: 1.8;
 }
 
-.ap-field small {
-    color: #999;
-    font-size: 11px;
-    line-height: 1.6;
+/* =====================================================
+   LOCATION FIELDS
+===================================================== */
+
+.ap-location-heading {
+    margin: 7px 0 0;
+
+    color: #33302b;
+
+    font-size: 16px;
+    font-weight: 800;
 }
 
-.ap-character-count {
-    margin-top: 7px;
-    color: #999;
-    font-size: 11px;
-    text-align: right;
+.ap-existing-location {
+    margin: 8px 0 0;
+
+    color: #766b59;
+
+    font-size: 12px;
+    line-height: 1.8;
 }
 
-/* IMAGE UPLOAD */
+/* LocationFields-ի ներքին input-ները */
+
+.ap-grid input,
+.ap-grid select {
+    max-width: 100%;
+}
+
+.ap-grid select,
+.ap-grid input {
+    box-sizing: border-box;
+}
+
+.ap-grid > div:not(.ap-full) {
+    min-width: 0;
+}
+
+/* =====================================================
+   IMAGE UPLOADER
+===================================================== */
 
 .ap-upload-section {
-    margin-top: 32px;
+    width: 100%;
+
+    margin-top: 33px;
     padding-top: 28px;
-    border-top: 1px solid #efebe5;
+
+    border-top: 1px solid #efede8;
 }
 
 .ap-upload-heading {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 15px;
-    margin-bottom: 19px;
+    gap: 14px;
+
+    margin-bottom: 18px;
+}
+
+.ap-upload-heading > div {
+    min-width: 0;
 }
 
 .ap-upload-heading h3 {
     margin: 0 0 7px;
+
+    color: #2d2d2d;
+
     font-size: 17px;
     font-weight: 800;
+    line-height: 1.45;
 }
 
 .ap-upload-heading p {
     margin: 0;
-    color: #929292;
+
+    color: #8d8880;
+
     font-size: 12px;
     line-height: 1.7;
 }
 
 .ap-image-count {
-    flex-shrink: 0;
-    padding: 9px 13px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 
-    border: 1px solid #e9dbbc;
+    flex-shrink: 0;
+
+    min-height: 34px;
+    padding: 7px 12px;
+
+    border: 1px solid #eadbbf;
     border-radius: 9px;
 
-    background: #fff8e9;
-    color: #95712f;
+    background: #fff9ec;
+    color: #96712d;
 
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 800;
 }
 
+/* UPLOAD CONTAINER */
+
 .ap-uploader {
     width: 100%;
-    margin-bottom: 21px;
-    padding: 22px;
 
-    border: 2px dashed #ddc796;
-    border-radius: 15px;
+    margin: 0 0 21px;
+    padding: 0;
 
-    background: #fffdf8;
-
-    transition:
-        border-color 0.2s ease,
-        background 0.2s ease;
+    border-radius: 14px;
 }
 
-.ap-uploader:focus-within {
-    border-color: #bb934a;
-    background: #fff9eb;
-}
+/* UPLOADED IMAGES */
 
 .ap-images-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
+
     gap: 15px;
+
+    margin-top: 17px;
 }
 
 .ap-image-card {
     position: relative;
+
     min-width: 0;
     overflow: hidden;
 
-    border: 1px solid #eae6df;
+    border: 1px solid #e9e5de;
     border-radius: 13px;
 
     background: #f7f6f3;
@@ -402,9 +580,12 @@
 
 .ap-image-card > img {
     display: block;
+
     width: 100%;
-    aspect-ratio: 4 / 3;
+    height: 168px;
+
     object-fit: cover;
+    object-position: center;
 }
 
 .ap-main-image-badge {
@@ -414,11 +595,11 @@
 
     padding: 7px 10px;
 
-    border: 1px solid #e4c88a;
+    border: 1px solid #dbb970;
     border-radius: 7px;
 
-    background: #f6e4ba;
-    color: #74521d;
+    background: #e7c783;
+    color: #3a2d13;
 
     font-size: 10px;
     font-weight: 800;
@@ -427,182 +608,204 @@
 .ap-image-actions {
     display: flex;
     align-items: center;
-    gap: 7px;
-    padding: 10px;
-    background: #fff;
+    justify-content: center;
+    flex-wrap: wrap;
+
+    gap: 8px;
+    padding: 11px;
 }
 
 .ap-image-actions button {
-    flex: 1;
-    min-height: 34px;
-    padding: 7px 8px;
+    min-height: 33px;
+    padding: 7px 10px;
 
-    border: 1px solid #e8e4dd;
+    border: 1px solid #e7dece;
     border-radius: 8px;
 
-    background: #fff;
-    color: #625d54;
+    background: #ffffff;
+    color: #715b35;
 
-    font-family: inherit;
     font-size: 11px;
     font-weight: 700;
-    cursor: pointer;
 
-    transition: background 0.2s ease;
+    cursor: pointer;
 }
 
 .ap-image-actions button:hover {
-    border-color: #d5bb84;
-    background: #fff9ed;
+    background: #fff7e7;
+    border-color: #d6bd8b;
 }
 
 .ap-image-actions .ap-remove-image {
-    color: #b94843;
+    border-color: #efcece;
+    color: #b65050;
 }
 
 .ap-image-actions .ap-remove-image:hover {
-    border-color: #eabdb9;
-    background: #fff3f1;
+    background: #fff1f1;
 }
 
-/* REVIEW / PREVIEW */
+/* =====================================================
+   REVIEW
+===================================================== */
 
 .ap-review-cover {
     width: 100%;
-    max-height: 370px;
+
+    margin: 0 0 23px;
     overflow: hidden;
 
-    border: 1px solid #eee9e0;
-    border-radius: 15px;
+    border: 1px solid #eee9df;
+    border-radius: 14px;
 
-    background: #f5f4f1;
+    background: #f8f7f4;
 }
 
 .ap-review-cover img {
     display: block;
+
     width: 100%;
-    max-height: 370px;
+    max-height: 380px;
+
     object-fit: contain;
+    object-position: center;
 }
 
 .ap-review-title {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 20px;
+    flex-wrap: wrap;
+    gap: 14px;
 
-    margin: 26px 0;
+    margin-bottom: 25px;
 }
 
 .ap-review-title h2 {
     margin: 0;
-    font-size: 22px;
+
+    color: #262626;
+
+    font-size: 23px;
     font-weight: 800;
     line-height: 1.4;
 }
 
 .ap-review-title strong {
-    flex-shrink: 0;
-    color: #94702f;
+    color: #a07936;
+
     font-size: 23px;
     font-weight: 800;
 }
 
+/* SUMMARY GRID */
+
 .ap-summary-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1px;
 
-    overflow: hidden;
-
-    border: 1px solid #eee9e0;
-    border-radius: 13px;
-    background: #eee9e0;
+    gap: 11px;
 }
 
 .ap-summary-item {
     display: flex;
     flex-direction: column;
-    gap: 9px;
+    gap: 7px;
+
     min-width: 0;
 
-    padding: 17px;
-    background: #fff;
+    padding: 15px 16px;
+
+    border: 1px solid #eeeae2;
+    border-radius: 11px;
+
+    background: #faf9f7;
 }
 
 .ap-summary-item span {
-    color: #999;
+    color: #948f87;
+
     font-size: 11px;
+    font-weight: 600;
+    line-height: 1.5;
 }
 
 .ap-summary-item strong {
-    color: #333;
+    color: #34312b;
+
     font-size: 13px;
     font-weight: 800;
+    line-height: 1.5;
+
     overflow-wrap: anywhere;
 }
 
+/* DESCRIPTION */
+
 .ap-review-description {
-    margin-top: 28px;
+    margin-top: 26px;
+    padding-top: 22px;
+
+    border-top: 1px solid #f0ece7;
 }
 
 .ap-review-description h3 {
     margin: 0 0 12px;
+
+    color: #282828;
+
     font-size: 16px;
     font-weight: 800;
 }
 
 .ap-review-description p {
     margin: 0;
-    color: #666;
+
+    color: #77716b;
+
     font-size: 13px;
-    line-height: 1.9;
+    line-height: 1.85;
+
     white-space: pre-wrap;
     overflow-wrap: anywhere;
 }
 
-.ap-info-box {
-    padding: 17px 19px;
+/* =====================================================
+   INFO AND ERRORS
+===================================================== */
 
-    border: 1px solid #e9d9b5;
+.ap-info-box {
+    margin-top: 20px;
+    padding: 16px 18px;
+
+    border: 1px solid #eadcc1;
     border-radius: 11px;
 
-    background: #fff9ec;
-    color: #816329;
+    background: #fffbf1;
+    color: #826b40;
 
     font-size: 12px;
     line-height: 1.8;
 }
 
-.ap-review-description + .ap-info-box {
-    margin-top: 25px;
-}
+.ap-error {
+    margin-top: 18px;
+    padding: 14px 17px;
 
-/* FEEDBACK */
+    border: 1px solid #efd0cc;
+    border-radius: 10px;
 
-.ap-error,
-.ap-success {
-    padding: 15px 18px;
-    border-radius: 11px;
+    background: #fff3f1;
+    color: #aa453c;
 
     font-size: 12px;
-    line-height: 1.7;
-    overflow-wrap: anywhere;
+    font-weight: 600;
+    line-height: 1.75;
 }
 
-.ap-error {
-    border: 1px solid #efceca;
-    background: #fff3f1;
-    color: #b13e36;
-}
-
-.ap-success {
-    border: 1px solid #cbe4d3;
-    background: #f0faf3;
-    color: #247d45;
-}
-
-/* FORM FOOTER */
+/* =====================================================
+   FORM FOOTER
+===================================================== */
 
 .ap-form-footer {
     display: flex;
@@ -610,17 +813,22 @@
     justify-content: space-between;
     gap: 15px;
 
-    padding: 22px 27px;
+    width: 100%;
 
-    border: 1px solid #eae6df;
+    margin-top: 22px;
+    padding: 20px 23px;
+
+    border: 1px solid var(--ap-border);
     border-radius: 15px;
 
-    background: #fff;
-    box-shadow: 0 5px 20px rgba(40, 32, 18, 0.025);
+    background: #ffffff;
+
+    box-shadow: 0 7px 24px rgba(36, 30, 18, 0.025);
 }
 
 .ap-footer-left {
-    flex: 1;
+    display: flex;
+    align-items: center;
     min-width: 0;
 }
 
@@ -629,157 +837,82 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: 9px;
 
-    min-height: 48px;
-    padding: 12px 23px;
+    min-height: 46px;
+    padding: 11px 21px;
 
     border-radius: 10px;
 
-    font-family: inherit;
     font-size: 12px;
     font-weight: 800;
-    text-decoration: none;
-    cursor: pointer;
+    line-height: 1.5;
+
+    text-align: center;
 
     transition:
-        background 0.2s ease,
-        transform 0.2s ease;
+        transform 0.2s,
+        background 0.2s,
+        border-color 0.2s,
+        box-shadow 0.2s;
 }
 
 .ap-back-button {
-    border: 1px solid #e5e0d8;
-    background: #fff;
-    color: #555;
+    border: 1px solid #e6e1d8;
+
+    background: #ffffff;
+    color: #716b62;
 }
 
 .ap-back-button:hover {
-    background: #faf7f0;
+    border-color: #d2bb8d;
+    background: #fdf8ef;
 }
 
 .ap-next-button {
-    border: 1px solid #cda760;
-    background: linear-gradient(135deg, #e8cc8c, #d4b069);
-    color: #362a14;
+    border: 1px solid #c79f57;
+
+    background: linear-gradient(135deg, #ebce93, #d7af66);
+
+    color: #352914;
+
+    box-shadow: 0 5px 16px rgba(202, 163, 92, 0.13);
 }
 
 .ap-next-button:hover:not(:disabled) {
-    transform: translateY(-1px);
-    background: #d7b168;
+    transform: translateY(-2px);
+
+    background: linear-gradient(135deg, #e9c681, #cca255);
+
+    box-shadow: 0 9px 22px rgba(202, 163, 92, 0.22);
 }
 
-.ap-next-button:disabled,
-.ap-back-button:disabled {
-    opacity: 0.5;
+.ap-page button:disabled {
+    opacity: 0.55;
     cursor: not-allowed;
 }
 
-/* LOGIN REQUIRED */
-
-.ap-auth-page {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 50px 20px;
-}
-
-.ap-auth-card {
-    width: 100%;
-    max-width: 520px;
-    padding: 43px 35px;
-
-    border: 1px solid #eae6df;
-    border-radius: 20px;
-
-    background: #fff;
-    box-shadow: 0 16px 45px rgba(35, 28, 15, 0.05);
-
-    text-align: center;
-}
-
-.ap-auth-symbol {
-    display: grid;
-    place-items: center;
-
-    width: 68px;
-    height: 68px;
-    margin: 0 auto 24px;
-
-    border: 1px solid #e9d6a9;
-    border-radius: 18px;
-
-    background: #faf0d9;
-    color: #98732e;
-
-    font-size: 33px;
-}
-
-.ap-auth-card h1 {
-    margin: 0 0 14px;
-    font-size: 26px;
-    line-height: 1.4;
-}
-
-.ap-auth-card p {
-    max-width: 370px;
-    margin: 0 auto 26px;
-
-    color: #888;
-    font-size: 13px;
-    line-height: 1.9;
-}
-
-.ap-auth-actions {
-    display: flex;
-    justify-content: center;
-    gap: 12px;
-}
-
-.ap-primary-link,
-.ap-secondary-link {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-
-    min-height: 46px;
-    padding: 11px 20px;
-
-    border-radius: 10px;
-
-    font-size: 12px;
-    font-weight: 800;
-    text-decoration: none;
-}
-
-.ap-primary-link {
-    border: 1px solid #d1ae6b;
-    background: #e5c584;
-    color: #352911;
-}
-
-.ap-secondary-link {
-    border: 1px solid #e6e1d9;
-    background: #fff;
-    color: #444;
-}
-
-/* ACCESSIBILITY */
-
 .ap-page button:focus-visible,
-.ap-page a:focus-visible,
-.ap-auth-page a:focus-visible {
-    outline: 2px solid #aa843d;
+.ap-page a:focus-visible {
+    outline: 2px solid #a78240;
     outline-offset: 3px;
 }
 
-/* RESPONSIVE */
+/* =====================================================
+   RESPONSIVE — TABLET
+===================================================== */
 
-@media (max-width: 800px) {
+@media (max-width: 900px) {
     .ap-page {
-        padding: 30px 16px 95px;
+        padding: 30px 18px 80px;
     }
 
     .ap-section {
-        padding: 25px;
+        padding: 28px 25px;
+    }
+
+    .ap-grid {
+        gap: 19px;
     }
 
     .ap-images-grid {
@@ -787,66 +920,118 @@
     }
 }
 
-@media (max-width: 600px) {
+/* =====================================================
+   RESPONSIVE — MOBILE
+===================================================== */
+
+@media (max-width: 650px) {
     .ap-page {
-        padding: 23px 12px 100px;
+        padding: 23px 13px 95px;
     }
 
     .ap-heading {
         flex-direction: column;
+        align-items: flex-start;
+
         gap: 15px;
+        margin-bottom: 25px;
     }
 
     .ap-heading h1 {
         font-size: 25px;
     }
 
+    .ap-heading p {
+        font-size: 12px;
+    }
+
+    .ap-heading-badge {
+        min-height: 33px;
+        padding: 7px 11px;
+
+        font-size: 11px;
+    }
+
+    /* PROGRESS */
+
     .ap-progress {
         gap: 7px;
     }
 
-    .ap-progress-label {
-        font-size: 9px;
+    .ap-progress-line {
+        height: 4px;
     }
 
+    .ap-progress-label {
+        font-size: 9px;
+        line-height: 1.4;
+    }
+
+    /* FORM */
+
     .ap-section {
-        padding: 20px 16px;
-        border-radius: 14px;
+        padding: 22px 17px;
+
+        border-radius: 16px;
     }
 
     .ap-section-title {
-        gap: 12px;
+        gap: 11px;
         margin-bottom: 23px;
         padding-bottom: 19px;
-    }
-
-    .ap-section-title h2 {
-        font-size: 18px;
     }
 
     .ap-section-number {
         width: 38px;
         height: 38px;
+
+        border-radius: 11px;
+
+        font-size: 12px;
+    }
+
+    .ap-section-title h2 {
+        font-size: 17px;
+    }
+
+    .ap-section-title p {
+        font-size: 11px;
     }
 
     .ap-grid {
         grid-template-columns: 1fr;
-        gap: 20px;
+        gap: 18px;
     }
 
     .ap-full {
-        grid-column: auto;
+        grid-column: 1 / -1;
+    }
+
+    .ap-field > input,
+    .ap-field > select {
+        min-height: 49px;
+    }
+
+    .ap-field > textarea {
+        min-height: 135px;
     }
 
     .ap-upload-heading {
         align-items: flex-start;
-        flex-wrap: wrap;
     }
 
-    .ap-review-title {
-        align-items: flex-start;
-        flex-direction: column;
+    .ap-images-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+
         gap: 10px;
+    }
+
+    .ap-image-card > img {
+        height: 128px;
+    }
+
+    .ap-summary-grid {
+        grid-template-columns: 1fr;
     }
 
     .ap-review-title h2,
@@ -854,45 +1039,68 @@
         font-size: 19px;
     }
 
+    /* FOOTER */
+
     .ap-form-footer {
-        padding: 15px;
+        padding: 14px;
     }
 
     .ap-back-button,
     .ap-next-button {
-        min-height: 44px;
-        padding: 11px 13px;
-        font-size: 11px;
-    }
+        min-height: 43px;
+        padding: 10px 13px;
 
-    .ap-auth-card {
-        padding: 35px 20px;
+        font-size: 11px;
     }
 }
 
-@media (max-width: 400px) {
-    .ap-images-grid,
-    .ap-summary-grid {
-        grid-template-columns: 1fr;
-    }
+/* =====================================================
+   SMALL PHONES
+===================================================== */
 
-    .ap-auth-actions {
-        flex-direction: column;
+@media (max-width: 390px) {
+    .ap-page {
+        padding-left: 10px;
+        padding-right: 10px;
     }
 
     .ap-progress-label {
         font-size: 8px;
     }
 
+    .ap-section {
+        padding: 18px 12px;
+    }
+
+    .ap-images-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .ap-image-card > img {
+        height: 180px;
+    }
+
     .ap-form-footer {
-        flex-wrap: wrap;
+        gap: 8px;
+        padding: 11px;
+    }
+
+    .ap-back-button,
+    .ap-next-button {
+        padding: 10px 9px;
+        font-size: 10px;
     }
 }
 
+/* =====================================================
+   REDUCED MOTION
+===================================================== */
+
 @media (prefers-reduced-motion: reduce) {
     .ap-page *,
-    .ap-auth-page * {
-        animation: none !important;
+    .ap-page *::before,
+    .ap-page *::after {
         transition: none !important;
+        animation: none !important;
     }
 }

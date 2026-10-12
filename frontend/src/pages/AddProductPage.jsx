@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import Header from "../components/header/Header";
 import ImageUploader from "../components/uploads/ImageUploader";
@@ -15,6 +15,7 @@ import {
 import { apiRequest } from "../utils/api";
 
 import "./AddProductPage.css";
+import "./AddProductSuccess.css";
 
 const BASE = import.meta.env.BASE_URL;
 
@@ -85,9 +86,10 @@ function Field({
 
             <input
                 type={type}
-                value={value}
-                onChange={(e) => onChange(e.target.value)}
+                value={value ?? ""}
+                onChange={(event) => onChange(event.target.value)}
                 placeholder={placeholder}
+                required={required}
                 min={min}
                 maxLength={maxLength}
             />
@@ -112,11 +114,12 @@ function Select({
             </span>
 
             <select
-                value={value}
-                onChange={(e) => onChange(e.target.value)}
+                value={value ?? ""}
+                onChange={(event) => onChange(event.target.value)}
+                required={required}
                 disabled={disabled}
             >
-                <option value="">{placeholder}</option>
+                {!value && <option value="">{placeholder}</option>}
 
                 {options.map((option) => {
                     const [key, title] = Array.isArray(option)
@@ -124,7 +127,7 @@ function Select({
                         : [option, option];
 
                     return (
-                        <option key={key} value={key}>
+                        <option key={String(key)} value={key}>
                             {title}
                         </option>
                     );
@@ -141,6 +144,7 @@ function SectionHeading({ number, title, description }) {
 
             <div>
                 <h2>{title}</h2>
+
                 {description && <p>{description}</p>}
             </div>
         </div>
@@ -160,18 +164,173 @@ function formatNumber(value) {
     return Number(value || 0).toLocaleString("en-US");
 }
 
+function SuccessIcon() {
+    return (
+        <svg
+            width="37"
+            height="37"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.7"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+        >
+            <circle cx="12" cy="12" r="10" />
+            <path d="m7.5 12 3 3 6-6" />
+        </svg>
+    );
+}
+
+function PublicationSuccess({ productId, editing, onClose }) {
+    const closeRef = useRef(null);
+
+    useEffect(() => {
+        closeRef.current?.focus();
+
+        const previousOverflow = document.body.style.overflow;
+
+        document.body.style.overflow = "hidden";
+
+        function handleEscape(event) {
+            if (event.key === "Escape") {
+                onClose();
+            }
+        }
+
+        window.addEventListener("keydown", handleEscape);
+
+        return () => {
+            document.body.style.overflow = previousOverflow;
+
+            window.removeEventListener("keydown", handleEscape);
+        };
+    }, [onClose]);
+
+    return (
+        <div
+            className="ap-success-overlay"
+            onMouseDown={(event) => {
+                if (event.target === event.currentTarget) {
+                    onClose();
+                }
+            }}
+        >
+            <section
+                className="ap-success-modal"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="ap-success-title"
+                aria-describedby="ap-success-description"
+            >
+                <button
+                    ref={closeRef}
+                    className="ap-success-close"
+                    type="button"
+                    aria-label="Փակել պատուհանը"
+                    onClick={onClose}
+                >
+                    ×
+                </button>
+
+                <div className="ap-success-icon">
+                    <SuccessIcon />
+                </div>
+
+                <span className="ap-success-eyebrow">ARMMOTORS</span>
+
+                <h2 id="ap-success-title">
+                    {editing
+                        ? "Փոփոխությունները պահպանված են"
+                        : "Հայտարարությունը հրապարակված է"}
+                </h2>
+
+                <p
+                    id="ap-success-description"
+                    className="ap-success-description"
+                >
+                    {editing
+                        ? "Ձեր հայտարարության տվյալները հաջողությամբ թարմացվել են։"
+                        : "Շնորհավորում ենք։ Ձեր հայտարարությունը հաջողությամբ ավելացվել է ArmMotors կայքում։"}
+                </p>
+
+                <div className="ap-success-tip">
+                    <div className="ap-success-tip-heading">
+                        <span className="ap-success-tip-star">★</span>
+
+                        <strong>Ավելի շատ տեսանելիություն</strong>
+                    </div>
+
+                    <p>
+                        Յուրաքանչյուր 4 օրը մեկ կարող եք անվճար թարմացնել
+                        հայտարարությունը։ Իսկ TOP և ավտոթարմացման փաթեթները
+                        կօգնեն այն ավելի տեսանելի դարձնել հայտարարությունների
+                        ցուցակում։
+                    </p>
+                </div>
+
+                {productId && (
+                    <a
+                        className="ap-success-primary"
+                        href={`${BASE}cars/${encodeURIComponent(productId)}`}
+                    >
+                        Դիտել հայտարարությունը
+                        <span aria-hidden="true">→</span>
+                    </a>
+                )}
+
+                <div className="ap-success-actions">
+                    {productId && (
+                        <a
+                            href={`${BASE}add-product?edit=${encodeURIComponent(
+                                productId,
+                            )}`}
+                        >
+                            Խմբագրել
+                        </a>
+                    )}
+
+                    <a href={`${BASE}account`}>Իմ հայտարարությունները</a>
+                </div>
+
+                <a className="ap-success-plans" href={`${BASE}monetization`}>
+                    Դիտել TOP փաթեթները ↗
+                </a>
+            </section>
+        </div>
+    );
+}
+
 export default function AddProductPage() {
+    const params = new URLSearchParams(window.location.search);
+
+    const editId = params.get("edit") || "";
+    const isEditing = Boolean(editId);
+
     const [form, setForm] = useState(INITIAL_FORM);
+
     const [location, setLocation] = useState(INITIAL_LOCATION);
+
+    const [savedRegion, setSavedRegion] = useState("");
+
     const [images, setImages] = useState([]);
 
     const [step, setStep] = useState(0);
+
     const [loading, setLoading] = useState(false);
+    const [loadingProduct, setLoadingProduct] = useState(isEditing);
 
     const [error, setError] = useState("");
-    const [success, setSuccess] = useState("");
+
+    const [successProductId, setSuccessProductId] = useState("");
+
+    const [successEditing, setSuccessEditing] = useState(false);
+
+    const [showSuccess, setShowSuccess] = useState(false);
 
     const token = localStorage.getItem("token");
+
     const isCar = form.type === "car";
 
     const modelList = form.brand ? CAR_MODELS[form.brand] || [] : [];
@@ -190,6 +349,125 @@ export default function AddProductPage() {
         .filter(Boolean)
         .join(", ");
 
+    const effectiveRegion = location.region || savedRegion;
+
+    // ==========================================
+    // LOGIN REDIRECT
+    // ==========================================
+
+    useEffect(() => {
+        if (!token) {
+            const next = isEditing
+                ? `/add-product?edit=${editId}`
+                : "/add-product";
+
+            window.location.replace(
+                `${BASE}login?next=${encodeURIComponent(next)}`,
+            );
+        }
+    }, [token, isEditing, editId]);
+
+    // ==========================================
+    // LOAD EXISTING PRODUCT FOR EDITING
+    // ==========================================
+
+    useEffect(() => {
+        if (!isEditing || !token) {
+            return;
+        }
+
+        let cancelled = false;
+
+        async function loadProduct() {
+            setLoadingProduct(true);
+            setError("");
+
+            try {
+                // Վերցնում ենք միայն տվյալ օգտատիրոջ
+                // սեփական հայտարարությունները։
+                const result = await apiRequest("/products/mine");
+
+                const products = Array.isArray(result)
+                    ? result
+                    : Array.isArray(result?.items)
+                      ? result.items
+                      : [];
+
+                const product = products.find(
+                    (item) => String(item._id || item.id) === String(editId),
+                );
+
+                if (!product) {
+                    throw new Error("Հայտարարությունը չի գտնվել Ձեր հաշվում։");
+                }
+
+                if (product.paymentPending) {
+                    throw new Error(
+                        "Վճարման սպասող հայտարարությունը դեռ չի խմբագրվում։",
+                    );
+                }
+
+                if (cancelled) return;
+
+                setForm({
+                    type: product.type || "car",
+                    title: product.title || "",
+                    price:
+                        product.price !== undefined
+                            ? String(product.price)
+                            : "",
+                    currency: product.currency || "AMD",
+                    condition: product.condition || "Օգտագործված",
+                    vehicleType: product.vehicleType || "passenger",
+                    brand: product.brand || "",
+                    model: product.model || "",
+                    year:
+                        product.year !== undefined ? String(product.year) : "",
+                    mileage:
+                        product.mileage !== undefined
+                            ? String(product.mileage)
+                            : "",
+                    fuel: product.fuel || "petrol",
+                    steering: product.steering || "left",
+                    color: product.color || "",
+                    vin: product.vin || "",
+                    description: product.description || "",
+                    phone: product.phone || "",
+                });
+
+                setImages(Array.isArray(product.images) ? product.images : []);
+
+                // Հին տվյալներում պահված է region-ը,
+                // բայց ոչ պարտադիր regionId-ն։
+                // Պահպանում ենք նախկին region-ը,
+                // մինչև օգտատերը նոր վայր ընտրի։
+                setSavedRegion(product.region || "");
+
+                setStep(0);
+            } catch (err) {
+                if (!cancelled) {
+                    setError(
+                        err.message || "Հայտարարությունը բեռնել չհաջողվեց։",
+                    );
+                }
+            } finally {
+                if (!cancelled) {
+                    setLoadingProduct(false);
+                }
+            }
+        }
+
+        void loadProduct();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [editId, isEditing, token]);
+
+    // ==========================================
+    // FORM UPDATE
+    // ==========================================
+
     function update(name, value) {
         setForm((old) => ({
             ...old,
@@ -200,13 +478,13 @@ export default function AddProductPage() {
     }
 
     function changeType(type) {
-        setForm({
+        setForm((old) => ({
             ...INITIAL_FORM,
             type,
-            price: form.price,
-            currency: form.currency,
-            phone: form.phone,
-        });
+            price: old.price,
+            currency: old.currency,
+            phone: old.phone,
+        }));
 
         setError("");
     }
@@ -221,6 +499,10 @@ export default function AddProductPage() {
         setError("");
     }
 
+    // ==========================================
+    // IMAGES
+    // ==========================================
+
     function handleUploaded(result) {
         const raw = Array.isArray(result)
             ? result
@@ -231,14 +513,14 @@ export default function AddProductPage() {
                 typeof item === "string" ? item : item?.url || item?.secure_url,
             )
             .filter(
-                (url) => typeof url === "string" && url.startsWith("https://"),
+                (url) => typeof url === "string" && /^https?:\/\//i.test(url),
             );
 
         setImages((old) => {
             const next = [...new Set([...old, ...urls])];
 
             if (next.length > 12) {
-                setError("Կարելի է վերբեռնել առավելագույնը 12 նկար։");
+                setError("Առավելագույնը 12 նկար կարող եք ավելացնել։");
 
                 return old;
             }
@@ -249,12 +531,16 @@ export default function AddProductPage() {
     }
 
     function removeImage(url) {
-        setImages((old) => old.filter((img) => img !== url));
+        setImages((old) => old.filter((image) => image !== url));
     }
 
     function makeMainImage(url) {
-        setImages((old) => [url, ...old.filter((img) => img !== url)]);
+        setImages((old) => [url, ...old.filter((image) => image !== url)]);
     }
+
+    // ==========================================
+    // VALIDATION
+    // ==========================================
 
     function validate(index) {
         if (index === 0) {
@@ -270,8 +556,11 @@ export default function AddProductPage() {
                 return "Նշեք ճիշտ գին։";
             }
 
-            if (!location.regionId || !location.communityId) {
-                return "Ընտրեք մարզը և համայնքը։";
+            if (
+                !effectiveRegion ||
+                (!isEditing && (!location.regionId || !location.communityId))
+            ) {
+                return "Ընտրեք գտնվելու վայրը։";
             }
         }
 
@@ -342,13 +631,21 @@ export default function AddProductPage() {
         });
     }
 
+    // ==========================================
+    // DESCRIPTION
+    // ==========================================
+
     function createDescription() {
         if (form.description.trim()) {
             return form.description.trim();
         }
 
         if (!isCar) {
-            return `Պահեստամաս՝ ${title}։ Վիճակ՝ ${form.condition}։ Գտնվելու վայր՝ ${locationText}։`;
+            return [
+                `Պահեստամաս՝ ${title}։`,
+                `Վիճակ՝ ${form.condition}։`,
+                `Գտնվելու վայր՝ ${effectiveRegion}։`,
+            ].join(" ");
         }
 
         return [
@@ -357,14 +654,20 @@ export default function AddProductPage() {
             `Վառելիք՝ ${form.fuel}։`,
             `Ղեկ՝ ${form.steering}։`,
             `Գույն՝ ${form.color}։`,
-            `Գտնվելու վայր՝ ${locationText}։`,
+            `Գտնվելու վայր՝ ${effectiveRegion}։`,
         ].join(" ");
     }
+
+    // ==========================================
+    // CREATE / UPDATE
+    // ==========================================
 
     async function handleSubmit(event) {
         event.preventDefault();
 
-        if (loading || step !== 3) return;
+        if (loading || step !== 3) {
+            return;
+        }
 
         for (let i = 0; i < 3; i++) {
             const message = validate(i);
@@ -378,7 +681,6 @@ export default function AddProductPage() {
 
         setLoading(true);
         setError("");
-        setSuccess("");
 
         try {
             const payload = {
@@ -387,7 +689,7 @@ export default function AddProductPage() {
                 price: Number(form.price),
                 currency: form.currency,
                 condition: form.condition,
-                region: location.region,
+                region: effectiveRegion,
                 description: createDescription(),
                 phone: form.phone.replace(/[\s()-]/g, ""),
                 images,
@@ -405,92 +707,101 @@ export default function AddProductPage() {
                     color: form.color,
                     vin: form.vin.trim().toUpperCase(),
                 });
+            } else if (isEditing) {
+                // Եթե մեքենան փոխել են պահեստամասի,
+                // նախկին մեքենայի տվյալները մաքրում ենք։
+                Object.assign(payload, {
+                    vehicleType: null,
+                    brand: "",
+                    model: "",
+                    year: null,
+                    mileage: null,
+                    fuel: null,
+                    steering: null,
+                    color: "",
+                    vin: "",
+                });
             }
 
-            const result = await apiRequest("/products", {
-                method: "POST",
-                body: JSON.stringify(payload),
-                timeoutMs: 30000,
-            });
+            let result;
 
-            // Առաջին 5 հայտարարությունը հրապարակվում է անվճար։
-            // Դրանից հետո backend-ը վերադարձնում է
-            // requiresPayment և 100 դրամ վճարման հայտ։
-            if (result?.requiresPayment) {
+            if (isEditing) {
+                result = await apiRequest(
+                    `/products/${encodeURIComponent(editId)}`,
+                    {
+                        method: "PATCH",
+                        body: JSON.stringify(payload),
+                    },
+                );
+            } else {
+                result = await apiRequest("/products", {
+                    method: "POST",
+                    body: JSON.stringify(payload),
+                    timeoutMs: 30000,
+                });
+            }
+
+            if (!isEditing && result?.requiresPayment) {
                 window.location.assign(`${BASE}monetization`);
 
                 return;
             }
 
-            setSuccess("Հայտարարությունը հաջողությամբ հրապարակվեց։");
-
-            const id =
+            const productId =
                 result?.product?._id ||
                 result?.product?.id ||
                 result?._id ||
-                result?.id;
+                result?.id ||
+                editId;
 
-            if (id) {
-                window.location.assign(`${BASE}cars/${encodeURIComponent(id)}`);
+            setSuccessProductId(String(productId || ""));
 
-                return;
-            }
-
-            setForm(INITIAL_FORM);
-            setLocation(INITIAL_LOCATION);
-            setImages([]);
-            setStep(0);
+            setSuccessEditing(isEditing);
+            setShowSuccess(true);
         } catch (err) {
             if (err.status === 401) {
-                window.location.assign(`${BASE}login?next=/add-product`);
+                window.location.assign(
+                    `${BASE}login?next=${encodeURIComponent(
+                        isEditing
+                            ? `/add-product?edit=${editId}`
+                            : "/add-product",
+                    )}`,
+                );
 
                 return;
             }
 
-            setError(err.message || "Հայտարարությունը հրապարակել չհաջողվեց։");
+            setError(err.message || "Տվյալները պահպանել չհաջողվեց։");
         } finally {
             setLoading(false);
         }
     }
 
+    // ==========================================
+    // AUTH / LOADING
+    // ==========================================
+
     if (!token) {
+        return null;
+    }
+
+    if (loadingProduct) {
         return (
             <>
                 <Header />
 
-                <main className="ap-auth-page">
-                    <div className="ap-auth-card">
-                        <div className="ap-auth-symbol">+</div>
-
-                        <span className="ap-eyebrow">ARMMOTORS</span>
-
-                        <h1>Տեղադրել հայտարարություն</h1>
-
-                        <p>
-                            Հայտարարություն հրապարակելու համար մուտք գործեք կամ
-                            գրանցվեք։
-                        </p>
-
-                        <div className="ap-auth-actions">
-                            <a
-                                className="ap-primary-link"
-                                href={`${BASE}login?next=/add-product`}
-                            >
-                                Մուտք
-                            </a>
-
-                            <a
-                                className="ap-secondary-link"
-                                href={`${BASE}registration?next=/add-product`}
-                            >
-                                Գրանցվել
-                            </a>
-                        </div>
+                <main className="ap-page">
+                    <div className="ap-container">
+                        <p>Հայտարարության տվյալները բեռնվում են...</p>
                     </div>
                 </main>
             </>
         );
     }
+
+    // ==========================================
+    // PAGE
+    // ==========================================
 
     return (
         <>
@@ -498,19 +809,27 @@ export default function AddProductPage() {
 
             <main className="ap-page">
                 <div className="ap-container">
-                    <a href={BASE} className="ap-back-link">
-                        ← Գլխավոր էջ
+                    <a
+                        href={isEditing ? `${BASE}account` : BASE}
+                        className="ap-back-link"
+                    >
+                        ← {isEditing ? "Իմ հայտարարությունները" : "Գլխավոր էջ"}
                     </a>
 
                     <div className="ap-heading">
                         <div>
                             <span className="ap-eyebrow">ARMMOTORS</span>
 
-                            <h1>Տեղադրել հայտարարություն</h1>
+                            <h1>
+                                {isEditing
+                                    ? "Խմբագրել հայտարարությունը"
+                                    : "Տեղադրել հայտարարություն"}
+                            </h1>
 
                             <p>
-                                Լրացրեք տվյալները, ավելացրեք լուսանկարներ և
-                                հրապարակեք։
+                                {isEditing
+                                    ? "Կարող եք փոփոխել հայտարարության բոլոր տվյալներն ու լուսանկարները։"
+                                    : "Լրացրեք տվյալները, ավելացրեք լուսանկարներ և հրապարակեք։"}
                             </p>
                         </div>
 
@@ -530,6 +849,7 @@ export default function AddProductPage() {
                                 ].join(" ")}
                             >
                                 <span className="ap-progress-line" />
+
                                 <span className="ap-progress-label">
                                     {name}
                                 </span>
@@ -542,6 +862,8 @@ export default function AddProductPage() {
                         onSubmit={handleSubmit}
                         noValidate
                     >
+                        {/* STEP 1 */}
+
                         {step === 0 && (
                             <section className="ap-section">
                                 <SectionHeading
@@ -578,8 +900,8 @@ export default function AddProductPage() {
                                                 onChange={(value) =>
                                                     update("title", value)
                                                 }
-                                                placeholder="Օրինակ՝ Mercedes W212 լուսարձակ"
                                                 required
+                                                placeholder="Օրինակ՝ Mercedes W212 լուսարձակ"
                                             />
                                         </div>
                                     )}
@@ -591,9 +913,9 @@ export default function AddProductPage() {
                                         onChange={(value) =>
                                             update("price", value)
                                         }
-                                        placeholder="Օրինակ՝ 8500000"
                                         min="0"
                                         required
+                                        placeholder="Գինը"
                                     />
 
                                     <Select
@@ -613,18 +935,30 @@ export default function AddProductPage() {
                                         <h3 className="ap-location-heading">
                                             Գտնվելու վայր
                                         </h3>
+
+                                        {isEditing && savedRegion && (
+                                            <p className="ap-existing-location">
+                                                Ընթացիկ վայր՝{" "}
+                                                <strong>{savedRegion}</strong>։
+                                                Կարող եք թողնել անփոփոխ կամ
+                                                ընտրել նորը։
+                                            </p>
+                                        )}
                                     </div>
 
                                     <LocationFields
                                         value={location}
                                         onChange={(value) => {
                                             setLocation(value);
+
                                             setError("");
                                         }}
                                     />
                                 </div>
                             </section>
                         )}
+
+                        {/* STEP 2 */}
 
                         {step === 1 && (
                             <section className="ap-section">
@@ -637,8 +971,8 @@ export default function AddProductPage() {
                                     }
                                     description={
                                         isCar
-                                            ? "Ընտրեք մակնիշը, մոդելը և տեխնիկական տվյալները։"
-                                            : "Կարող եք ավելացնել լրացուցիչ նկարագրություն հաջորդ քայլում։"
+                                            ? "Փոփոխեք մեքենայի տեխնիկական տվյալները։"
+                                            : "Շարունակեք նկարների և կապի տվյալների բաժին։"
                                     }
                                 />
 
@@ -672,11 +1006,6 @@ export default function AddProductPage() {
                                             }
                                             options={modelOptions}
                                             disabled={!form.brand}
-                                            placeholder={
-                                                form.brand
-                                                    ? "Ընտրել մոդելը"
-                                                    : "Նախ ընտրեք մակնիշը"
-                                            }
                                             required
                                         />
 
@@ -733,7 +1062,7 @@ export default function AddProductPage() {
                                         />
 
                                         <Field
-                                            label="VIN (ըստ ցանկության)"
+                                            label="VIN"
                                             value={form.vin}
                                             onChange={(value) =>
                                                 update(
@@ -742,24 +1071,25 @@ export default function AddProductPage() {
                                                 )
                                             }
                                             maxLength={17}
+                                            placeholder="Ըստ ցանկության"
                                         />
                                     </div>
                                 ) : (
                                     <div className="ap-info-box">
-                                        Պահեստամասի հիմնական տվյալները լրացված
-                                        են։ Շարունակեք նկարների և կապի տվյալների
-                                        քայլին։
+                                        Շարունակեք հաջորդ քայլ։
                                     </div>
                                 )}
                             </section>
                         )}
+
+                        {/* STEP 3 */}
 
                         {step === 2 && (
                             <section className="ap-section">
                                 <SectionHeading
                                     number="03"
                                     title="Նկարներ և կապ"
-                                    description="Ավելացրեք նկարները, հեռախոսահամարը և նկարագրությունը։"
+                                    description="Փոփոխեք հեռախոսահամարը, նկարագրությունը և լուսանկարները։"
                                 />
 
                                 <div className="ap-grid">
@@ -769,8 +1099,8 @@ export default function AddProductPage() {
                                         onChange={(value) =>
                                             update("phone", value)
                                         }
-                                        placeholder="+374XXXXXXXX"
                                         required
+                                        placeholder="+374XXXXXXXX"
                                     />
 
                                     <label className="ap-field ap-full">
@@ -780,14 +1110,14 @@ export default function AddProductPage() {
 
                                         <textarea
                                             value={form.description}
-                                            onChange={(e) =>
+                                            onChange={(event) =>
                                                 update(
                                                     "description",
-                                                    e.target.value,
+                                                    event.target.value,
                                                 )
                                             }
-                                            placeholder="Նկարագրեք մեքենան կամ պահեստամասը..."
                                             maxLength={7000}
+                                            placeholder="Նկարագրեք մեքենան կամ պահեստամասը..."
                                         />
                                     </label>
                                 </div>
@@ -826,7 +1156,9 @@ export default function AddProductPage() {
                                                 >
                                                     <img
                                                         src={url}
-                                                        alt={`Նկար ${index + 1}`}
+                                                        alt={`Նկար ${
+                                                            index + 1
+                                                        }`}
                                                     />
 
                                                     {index === 0 && (
@@ -867,15 +1199,17 @@ export default function AddProductPage() {
                             </section>
                         )}
 
+                        {/* STEP 4 */}
+
                         {step === 3 && (
                             <>
-                                <PublicationNotice />
+                                {!isEditing && <PublicationNotice />}
 
                                 <section className="ap-section">
                                     <SectionHeading
                                         number="04"
-                                        title="Հայտարարության ամփոփում"
-                                        description="Ստուգեք տվյալները հրապարակելուց առաջ։"
+                                        title="Ստուգեք տվյալները"
+                                        description="Համոզվեք, որ ամեն ինչ ճիշտ է՝ մինչև պահպանելը։"
                                     />
 
                                     {images[0] && (
@@ -911,11 +1245,11 @@ export default function AddProductPage() {
 
                                         <Summary
                                             label="Գտնվելու վայր"
-                                            value={locationText}
+                                            value={locationText || savedRegion}
                                         />
 
                                         <Summary
-                                            label="Հեռախոսահամար"
+                                            label="Հեռախոս"
                                             value={form.phone}
                                         />
 
@@ -963,16 +1297,14 @@ export default function AddProductPage() {
 
                                     <div className="ap-review-description">
                                         <h3>Նկարագրություն</h3>
+
                                         <p>{createDescription()}</p>
                                     </div>
 
                                     <div className="ap-info-box">
-                                        Առաջին 5 հայտարարությունն անվճար է։
-                                        Հաջորդ յուրաքանչյուր հրապարակման արժեքը՝
-                                        100 դրամ։ Եթե անվճար տեղերը սպառված են,
-                                        կստեղծվի վճարման հայտ, և
-                                        հայտարարությունը կհրապարակվի վճարումը
-                                        հաստատվելուց հետո։
+                                        {isEditing
+                                            ? "Տվյալները փոխելու համար նոր հրապարակման վճար չի պահանջվում։ Խմբագրումը ինքնաբերաբար չի բարձրացնում հայտարարությունը ցուցակում։"
+                                            : "Առաջին 5 հայտարարությունն անվճար է, իսկ յուրաքանչյուր հաջորդ հրապարակումը՝ 100 դրամ։"}
                                     </div>
                                 </section>
                             </>
@@ -981,12 +1313,6 @@ export default function AddProductPage() {
                         {error && (
                             <div className="ap-error" role="alert">
                                 {error}
-                            </div>
-                        )}
-
-                        {success && (
-                            <div className="ap-success" role="status">
-                                {success}
                             </div>
                         )}
 
@@ -1019,14 +1345,24 @@ export default function AddProductPage() {
                                     disabled={loading}
                                 >
                                     {loading
-                                        ? "Հրապարակվում է..."
-                                        : "Հրապարակել →"}
+                                        ? "Պահպանվում է..."
+                                        : isEditing
+                                          ? "Պահպանել փոփոխությունները"
+                                          : "Հրապարակել հայտարարությունը"}
                                 </button>
                             )}
                         </div>
                     </form>
                 </div>
             </main>
+
+            {showSuccess && (
+                <PublicationSuccess
+                    productId={successProductId}
+                    editing={successEditing}
+                    onClose={() => setShowSuccess(false)}
+                />
+            )}
         </>
     );
 }
