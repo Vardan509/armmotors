@@ -1,11 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 
-import Header from "../components/header/Header";
 import ProductCard from "../components/ProductCard/ProductCard";
 import ProductSkeleton from "../components/ProductSkeleton";
 
 import useProducts from "../utils/useProducts";
-import { pageUrl } from "../utils/navigation";
 
 import "./SearchPage.css";
 
@@ -17,9 +16,7 @@ const normalize = (value) =>
         .trim()
         .toLocaleLowerCase();
 
-const readParams = () => {
-    const params = new URLSearchParams(window.location.search);
-
+const readParams = (params) => {
     return {
         query: params.get("q") || "",
         type: params.get("type") || "all",
@@ -31,7 +28,6 @@ const readParams = () => {
 function readSavedSearches() {
     try {
         const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-
         return Array.isArray(saved) ? saved : [];
     } catch {
         return [];
@@ -44,16 +40,32 @@ function getPrice(product) {
 }
 
 export default function SearchPage() {
-    const initial = readParams();
+    const [searchParams, setSearchParams] = useSearchParams();
+    const { query, type, sort, brand } = readParams(searchParams);
 
-    const [query, setQuery] = useState(initial.query);
-    const [type, setType] = useState(initial.type);
-    const [sort, setSort] = useState(initial.sort);
-    const [brand, setBrand] = useState(initial.brand);
+    function updateParams(changes) {
+        const next = new URLSearchParams(searchParams);
+
+        for (const [key, value] of Object.entries(changes)) {
+            if (
+                !value ||
+                value === "all" ||
+                (key === "sort" && value === "newest")
+            ) {
+                next.delete(key);
+            } else {
+                next.set(key, value);
+            }
+        }
+
+        setSearchParams(next, {
+            replace: true,
+            preventScrollReset: true,
+        });
+    }
+
     const [page, setPage] = useState(1);
-
     const [savedSearches, setSavedSearches] = useState(readSavedSearches);
-
     const [notice, setNotice] = useState("");
 
     const { products = [], loading, error } = useProducts();
@@ -126,7 +138,6 @@ export default function SearchPage() {
     }, [products, query, type, brand, sort]);
 
     const totalPages = Math.max(1, Math.ceil(results.length / PAGE_SIZE));
-
     const currentPage = Math.min(page, totalPages);
 
     const visibleProducts = results.slice(
@@ -134,46 +145,36 @@ export default function SearchPage() {
         currentPage * PAGE_SIZE,
     );
 
-    useEffect(() => {
-        const params = new URLSearchParams();
-
-        if (query.trim()) params.set("q", query.trim());
-        if (type !== "all") params.set("type", type);
-        if (brand !== "all") params.set("brand", brand);
-        if (sort !== "newest") params.set("sort", sort);
-
-        const url =
-            window.location.pathname + (params.toString() ? `?${params}` : "");
-
-        window.history.replaceState(null, "", url);
-    }, [query, type, brand, sort]);
-
     function updateQuery(value) {
-        setQuery(value);
+        updateParams({ q: value });
         setPage(1);
         setNotice("");
     }
 
     function updateType(value) {
-        setType(value);
+        updateParams({ type: value });
         setPage(1);
     }
 
     function updateBrand(value) {
-        setBrand(value);
+        updateParams({ brand: value });
         setPage(1);
     }
 
     function updateSort(value) {
-        setSort(value);
+        updateParams({ sort: value });
         setPage(1);
     }
 
     function clearFilters() {
-        setQuery("");
-        setType("all");
-        setBrand("all");
-        setSort("newest");
+        setSearchParams(
+            {},
+            {
+                replace: true,
+                preventScrollReset: true,
+            },
+        );
+
         setPage(1);
         setNotice("");
     }
@@ -197,7 +198,6 @@ export default function SearchPage() {
 
         try {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-
             setSavedSearches(updated);
             setNotice("Որոնումը պահպանվեց։");
         } catch {
@@ -206,10 +206,18 @@ export default function SearchPage() {
     }
 
     function applySavedSearch(item) {
-        setQuery(item.query);
-        setType(item.type);
-        setBrand(item.brand);
-        setSort(item.sort);
+        const next = new URLSearchParams();
+
+        if (item.query) next.set("q", item.query);
+        if (item.type && item.type !== "all") next.set("type", item.type);
+        if (item.brand && item.brand !== "all") next.set("brand", item.brand);
+        if (item.sort && item.sort !== "newest") next.set("sort", item.sort);
+
+        setSearchParams(next, {
+            replace: true,
+            preventScrollReset: true,
+        });
+
         setPage(1);
         setNotice("");
     }
@@ -220,14 +228,12 @@ export default function SearchPage() {
         );
 
         localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-
         setSavedSearches(updated);
     }
 
     async function shareSearch() {
         try {
             await navigator.clipboard.writeText(window.location.href);
-
             setNotice("Որոնման հղումը պատճենվեց։");
         } catch {
             setNotice("Հղումը պատճենել չհաջողվեց։");
@@ -244,254 +250,236 @@ export default function SearchPage() {
     }
 
     return (
-        <>
-            <Header />
+        <main className="search-page">
+            <div className="search-heading">
+                <span>ARMMOTORS / SEARCH</span>
 
-            <main className="search-page">
-                <div className="search-heading">
-                    <span>ARMMOTORS / SEARCH</span>
+                <h1>Գտեք Ձեր հաջորդ մեքենան</h1>
 
-                    <h1>Գտեք Ձեր հաջորդ մեքենան</h1>
+                <p>
+                    Որոնեք մեքենաներ և պահեստամասեր՝ արագ, պարզ և հարմար
+                    եղանակով։
+                </p>
+            </div>
+
+            <section className="search-panel">
+                <div className="search-main-input">
+                    <label htmlFor="armmotors-search">Ի՞նչ եք փնտրում</label>
+
+                    <div className="search-input-wrapper">
+                        <input
+                            id="armmotors-search"
+                            type="search"
+                            placeholder="Օրինակ՝ Mercedes C-Class"
+                            value={query}
+                            onChange={(event) =>
+                                updateQuery(event.target.value)
+                            }
+                        />
+
+                        {query && (
+                            <button
+                                type="button"
+                                onClick={() => updateQuery("")}
+                            >
+                                Մաքրել
+                            </button>
+                        )}
+                    </div>
+                </div>
+
+                <div className="search-controls">
+                    <label>
+                        Տեսակ
+                        <select
+                            value={type}
+                            onChange={(event) => updateType(event.target.value)}
+                        >
+                            <option value="all">
+                                Բոլոր հայտարարությունները
+                            </option>
+                            <option value="car">Մեքենաներ</option>
+                            <option value="part">Պահեստամասեր</option>
+                        </select>
+                    </label>
+
+                    <label>
+                        Մակնիշ
+                        <select
+                            value={brand}
+                            onChange={(event) =>
+                                updateBrand(event.target.value)
+                            }
+                        >
+                            <option value="all">Բոլոր մակնիշները</option>
+
+                            {brands.map((name) => (
+                                <option key={name} value={name}>
+                                    {name}
+                                </option>
+                            ))}
+                        </select>
+                    </label>
+
+                    <label>
+                        Դասավորել
+                        <select
+                            value={sort}
+                            onChange={(event) => updateSort(event.target.value)}
+                        >
+                            <option value="newest">Նորերը սկզբում</option>
+                            <option value="priceAsc">Գին՝ էժանից թանկ</option>
+                            <option value="priceDesc">Գին՝ թանկից էժան</option>
+                            <option value="yearDesc">Տարի՝ նորից հին</option>
+                            <option value="yearAsc">Տարի՝ հնից նոր</option>
+                        </select>
+                    </label>
+                </div>
+
+                <div className="search-actions">
+                    <button
+                        type="button"
+                        onClick={clearFilters}
+                        className="search-action-light"
+                    >
+                        Մաքրել ֆիլտրերը
+                    </button>
+
+                    <button
+                        type="button"
+                        onClick={shareSearch}
+                        className="search-action-light"
+                    >
+                        Կիսվել որոնմամբ
+                    </button>
+
+                    <button
+                        type="button"
+                        onClick={saveSearch}
+                        className="search-action-primary"
+                    >
+                        Պահպանել որոնումը
+                    </button>
+                </div>
+
+                {notice && (
+                    <p className="search-notice" role="status">
+                        {notice}
+                    </p>
+                )}
+            </section>
+
+            {savedSearches.length > 0 && (
+                <section className="saved-searches">
+                    <div className="saved-searches-heading">
+                        <h2>Պահպանված որոնումներ</h2>
+                        <span>{savedSearches.length} / 8</span>
+                    </div>
+
+                    <div className="saved-search-list">
+                        {savedSearches.map((item, index) => (
+                            <div className="saved-search-item" key={index}>
+                                <button
+                                    type="button"
+                                    onClick={() => applySavedSearch(item)}
+                                >
+                                    {item.query || item.brand !== "all"
+                                        ? [
+                                              item.query,
+                                              item.brand !== "all"
+                                                  ? item.brand
+                                                  : "",
+                                          ]
+                                              .filter(Boolean)
+                                              .join(" · ")
+                                        : "Բոլոր հայտարարությունները"}
+                                </button>
+
+                                <button
+                                    type="button"
+                                    className="saved-search-remove"
+                                    aria-label="Հեռացնել որոնումը"
+                                    onClick={() => removeSavedSearch(index)}
+                                >
+                                    ×
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+            )}
+
+            <div className="search-results-heading">
+                <div>
+                    <h2>Որոնման արդյունքներ</h2>
 
                     <p>
-                        Որոնեք մեքենաներ և պահեստամասեր՝ արագ, պարզ և հարմար
-                        եղանակով։
+                        {loading
+                            ? "Բեռնվում է..."
+                            : `Գտնվել է ${results.length} հայտարարություն`}
                     </p>
                 </div>
 
-                <section className="search-panel">
-                    <div className="search-main-input">
-                        <label htmlFor="armmotors-search">
-                            Ի՞նչ եք փնտրում
-                        </label>
+                <Link to="/cars">Բոլոր մեքենաները →</Link>
+            </div>
 
-                        <div className="search-input-wrapper">
-                            <input
-                                id="armmotors-search"
-                                type="search"
-                                placeholder="Օրինակ՝ Mercedes C-Class"
-                                value={query}
-                                onChange={(event) =>
-                                    updateQuery(event.target.value)
-                                }
-                            />
-
-                            {query && (
-                                <button
-                                    type="button"
-                                    onClick={() => updateQuery("")}
-                                >
-                                    Մաքրել
-                                </button>
-                            )}
-                        </div>
-                    </div>
-
-                    <div className="search-controls">
-                        <label>
-                            Տեսակ
-                            <select
-                                value={type}
-                                onChange={(event) =>
-                                    updateType(event.target.value)
-                                }
-                            >
-                                <option value="all">
-                                    Բոլոր հայտարարությունները
-                                </option>
-                                <option value="car">Մեքենաներ</option>
-                                <option value="part">Պահեստամասեր</option>
-                            </select>
-                        </label>
-
-                        <label>
-                            Մակնիշ
-                            <select
-                                value={brand}
-                                onChange={(event) =>
-                                    updateBrand(event.target.value)
-                                }
-                            >
-                                <option value="all">Բոլոր մակնիշները</option>
-
-                                {brands.map((name) => (
-                                    <option key={name} value={name}>
-                                        {name}
-                                    </option>
-                                ))}
-                            </select>
-                        </label>
-
-                        <label>
-                            Դասավորել
-                            <select
-                                value={sort}
-                                onChange={(event) =>
-                                    updateSort(event.target.value)
-                                }
-                            >
-                                <option value="newest">Նորերը սկզբում</option>
-                                <option value="priceAsc">
-                                    Գին՝ էժանից թանկ
-                                </option>
-                                <option value="priceDesc">
-                                    Գին՝ թանկից էժան
-                                </option>
-                                <option value="yearDesc">
-                                    Տարի՝ նորից հին
-                                </option>
-                                <option value="yearAsc">Տարի՝ հնից նոր</option>
-                            </select>
-                        </label>
-                    </div>
-
-                    <div className="search-actions">
-                        <button
-                            type="button"
-                            onClick={clearFilters}
-                            className="search-action-light"
-                        >
-                            Մաքրել ֆիլտրերը
-                        </button>
-
-                        <button
-                            type="button"
-                            onClick={shareSearch}
-                            className="search-action-light"
-                        >
-                            Կիսվել որոնմամբ
-                        </button>
-
-                        <button
-                            type="button"
-                            onClick={saveSearch}
-                            className="search-action-primary"
-                        >
-                            Պահպանել որոնումը
-                        </button>
-                    </div>
-
-                    {notice && (
-                        <p className="search-notice" role="status">
-                            {notice}
-                        </p>
-                    )}
-                </section>
-
-                {savedSearches.length > 0 && (
-                    <section className="saved-searches">
-                        <div className="saved-searches-heading">
-                            <h2>Պահպանված որոնումներ</h2>
-                            <span>{savedSearches.length} / 8</span>
-                        </div>
-
-                        <div className="saved-search-list">
-                            {savedSearches.map((item, index) => (
-                                <div className="saved-search-item" key={index}>
-                                    <button
-                                        type="button"
-                                        onClick={() => applySavedSearch(item)}
-                                    >
-                                        {item.query || item.brand !== "all"
-                                            ? [
-                                                  item.query,
-                                                  item.brand !== "all"
-                                                      ? item.brand
-                                                      : "",
-                                              ]
-                                                  .filter(Boolean)
-                                                  .join(" · ")
-                                            : "Բոլոր հայտարարությունները"}
-                                    </button>
-
-                                    <button
-                                        type="button"
-                                        className="saved-search-remove"
-                                        aria-label="Հեռացնել որոնումը"
-                                        onClick={() => removeSavedSearch(index)}
-                                    >
-                                        ×
-                                    </button>
-                                </div>
-                            ))}
-                        </div>
-                    </section>
-                )}
-
-                <div className="search-results-heading">
-                    <div>
-                        <h2>Որոնման արդյունքներ</h2>
-                        <p>
-                            {loading
-                                ? "Բեռնվում է..."
-                                : `Գտնվել է ${results.length} հայտարարություն`}
-                        </p>
-                    </div>
-
-                    <a href={pageUrl("/cars")}>Բոլոր մեքենաները →</a>
+            {error && (
+                <div className="search-error" role="alert">
+                    {error}
                 </div>
+            )}
 
-                {error && (
-                    <div className="search-error" role="alert">
-                        {error}
-                    </div>
-                )}
+            {loading && <ProductSkeleton count={8} />}
 
-                {loading && <ProductSkeleton count={8} />}
+            {!loading && !error && results.length === 0 && (
+                <div className="search-empty">
+                    <h3>Ոչինչ չի գտնվել</h3>
 
-                {!loading && !error && results.length === 0 && (
-                    <div className="search-empty">
-                        <h3>Ոչինչ չի գտնվել</h3>
+                    <p>
+                        Փորձեք փոխել որոնման բառերը, մակնիշը կամ հայտարարության
+                        տեսակը։
+                    </p>
 
-                        <p>
-                            Փորձեք փոխել որոնման բառերը, մակնիշը կամ
-                            հայտարարության տեսակը։
-                        </p>
+                    <button type="button" onClick={clearFilters}>
+                        Ցույց տալ բոլորը
+                    </button>
+                </div>
+            )}
 
-                        <button type="button" onClick={clearFilters}>
-                            Ցույց տալ բոլորը
-                        </button>
-                    </div>
-                )}
+            {!loading && !error && (
+                <div className="search-results-grid">
+                    {visibleProducts.map((item) => (
+                        <ProductCard key={item._id || item.id} item={item} />
+                    ))}
+                </div>
+            )}
 
-                {!loading && !error && (
-                    <div className="search-results-grid">
-                        {visibleProducts.map((item) => (
-                            <ProductCard
-                                key={item._id || item.id}
-                                item={item}
-                            />
-                        ))}
-                    </div>
-                )}
-
-                {!loading && !error && totalPages > 1 && (
-                    <nav
-                        className="search-pagination"
-                        aria-label="Արդյունքների էջեր"
+            {!loading && !error && totalPages > 1 && (
+                <nav
+                    className="search-pagination"
+                    aria-label="Արդյունքների էջեր"
+                >
+                    <button
+                        type="button"
+                        disabled={currentPage === 1}
+                        onClick={() => changePage(currentPage - 1)}
                     >
-                        <button
-                            type="button"
-                            disabled={currentPage === 1}
-                            onClick={() => changePage(currentPage - 1)}
-                        >
-                            ← Նախորդ
-                        </button>
+                        ← Նախորդ
+                    </button>
 
-                        <span>
-                            Էջ {currentPage} / {totalPages}
-                        </span>
+                    <span>
+                        Էջ {currentPage} / {totalPages}
+                    </span>
 
-                        <button
-                            type="button"
-                            disabled={currentPage === totalPages}
-                            onClick={() => changePage(currentPage + 1)}
-                        >
-                            Հաջորդ →
-                        </button>
-                    </nav>
-                )}
-            </main>
-        </>
+                    <button
+                        type="button"
+                        disabled={currentPage === totalPages}
+                        onClick={() => changePage(currentPage + 1)}
+                    >
+                        Հաջորդ →
+                    </button>
+                </nav>
+            )}
+        </main>
     );
 }

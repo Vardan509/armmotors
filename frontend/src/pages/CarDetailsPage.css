@@ -637,3 +637,122 @@
         transition: none !important;
     }
 }
+
+/* =========================================
+   ARMMOTORS — DETAILS FAVORITE HEART
+========================================= */
+
+.details-page .listing-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+    min-width: 0;
+}
+
+.details-page .listing-heading h1 {
+    flex: 1;
+    min-width: 0;
+    margin: 0 0 18px;
+
+    color: #262626;
+    font-size: clamp(23px, 2.5vw, 31px);
+    font-weight: 800;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+}
+
+.details-page .detail-favorite {
+    appearance: none;
+    -webkit-appearance: none;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 46px;
+
+    width: 46px;
+    height: 46px;
+    min-width: 46px;
+    min-height: 46px;
+    padding: 0;
+
+    border: 1px solid #eee7e0;
+    border-radius: 50% !important;
+
+    background: #ffffff;
+    color: #333333;
+
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
+
+    cursor: pointer;
+
+    transition:
+        transform 0.2s ease,
+        background 0.2s ease,
+        color 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.details-page .detail-favorite svg {
+    display: block;
+    width: 23px;
+    height: 23px;
+    flex-shrink: 0;
+}
+
+.details-page .detail-favorite:hover {
+    transform: scale(1.08);
+    border-color: #f3cdd5;
+    background: #fff4f6;
+    color: #e84967;
+    box-shadow: 0 6px 20px rgba(232, 73, 103, 0.14);
+}
+
+.details-page .detail-favorite[aria-pressed="true"] {
+    border-color: #ffd6df;
+    background: #fff0f3;
+    color: #e84967;
+}
+
+.details-page .detail-favorite:active {
+    transform: scale(0.95);
+}
+
+.details-page .detail-favorite:focus-visible {
+    outline: 3px solid rgba(197, 160, 90, 0.4);
+    outline-offset: 3px;
+}
+
+/* MOBILE */
+
+@media (max-width: 600px) {
+    .details-page .listing-heading {
+        gap: 10px;
+    }
+
+    .details-page .listing-heading h1 {
+        font-size: 23px;
+        line-height: 1.3;
+    }
+
+    .details-page .detail-favorite {
+        flex-basis: 40px;
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+        min-height: 40px;
+    }
+
+    .details-page .detail-favorite svg {
+        width: 21px;
+        height: 21px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .details-page .detail-favorite {
+        transition: none;
+    }
+}

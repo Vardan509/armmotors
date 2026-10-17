@@ -811,3 +811,11 @@
         animation: none !important;
     }
 }
+
+
+
+@media (max-width: 650px) {
+  .site-header .am-header-actions .am-add-button {
+    display: none !important;
+  }
+}

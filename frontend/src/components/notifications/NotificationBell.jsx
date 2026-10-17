@@ -1,5 +1,5 @@
-
 import { useCallback, useEffect, useRef, useState } from "react";
+
 import { apiRequest } from "../../utils/api";
 
 import "./NotificationBell.css";
@@ -11,6 +11,7 @@ export default function NotificationBell() {
     const [items, setItems] = useState([]);
     const [unreadCount, setUnreadCount] = useState(0);
     const [loading, setLoading] = useState(false);
+    const [selected, setSelected] = useState(null);
 
     const rootRef = useRef(null);
 
@@ -22,18 +23,15 @@ export default function NotificationBell() {
         }
 
         try {
-            const result = await apiRequest(
-                "/notifications",
-                { timeoutMs: 10000 }
-            );
+            const result = await apiRequest("/notifications", {
+                timeoutMs: 10000,
+            });
 
-            setItems(result.items || []);
-            setUnreadCount(
-                Number(result.unreadCount || 0)
-            );
-        } catch {
-            // Մի խանգարիր Header-ի աշխատանքին,
-            // եթե backend-ը ժամանակավորապես անհասանելի է։
+            setItems(Array.isArray(result.items) ? result.items : []);
+
+            setUnreadCount(Number(result.unreadCount || 0));
+        } catch (error) {
+            console.error("Notifications:", error.message);
         }
     }, []);
 
@@ -50,37 +48,26 @@ export default function NotificationBell() {
             void loadNotifications();
         };
 
-        window.addEventListener(
-            "session-changed",
-            refresh
-        );
+        window.addEventListener("session-changed", refresh);
 
-        window.addEventListener(
-            "focus",
-            refresh
-        );
+        window.addEventListener("focus", refresh);
+
+        window.addEventListener("notifications-updated", refresh);
 
         return () => {
             window.clearInterval(interval);
 
-            window.removeEventListener(
-                "session-changed",
-                refresh
-            );
+            window.removeEventListener("session-changed", refresh);
 
-            window.removeEventListener(
-                "focus",
-                refresh
-            );
+            window.removeEventListener("focus", refresh);
+
+            window.removeEventListener("notifications-updated", refresh);
         };
     }, [loadNotifications]);
 
     useEffect(() => {
         function onPointerDown(event) {
-            if (
-                rootRef.current &&
-                !rootRef.current.contains(event.target)
-            ) {
+            if (rootRef.current && !rootRef.current.contains(event.target)) {
                 setOpen(false);
             }
         }
@@ -91,71 +78,95 @@ export default function NotificationBell() {
             }
         }
 
-        document.addEventListener(
-            "pointerdown",
-            onPointerDown
-        );
+        document.addEventListener("pointerdown", onPointerDown);
 
-        document.addEventListener(
-            "keydown",
-            onKeyDown
-        );
+        document.addEventListener("keydown", onKeyDown);
 
         return () => {
-            document.removeEventListener(
-                "pointerdown",
-                onPointerDown
-            );
+            document.removeEventListener("pointerdown", onPointerDown);
 
-            document.removeEventListener(
-                "keydown",
-                onKeyDown
-            );
+            document.removeEventListener("keydown", onKeyDown);
         };
     }, []);
 
     async function toggle() {
         if (!localStorage.getItem("token")) {
-            window.location.assign(
-                `${BASE}login?next=%2Fmessages`
-            );
+            window.location.assign(`${BASE}login?next=%2Faccount`);
             return;
         }
 
         const next = !open;
+
         setOpen(next);
+        setSelected(null);
 
         if (next) {
             setLoading(true);
-            await loadNotifications();
-            setLoading(false);
+
+            try {
+                await loadNotifications();
+            } finally {
+                setLoading(false);
+            }
         }
     }
 
-    function openConversation(conversationId) {
-        const url = new URL(
-            `${BASE}messages`,
-            window.location.origin
-        );
+    async function openNotification(item) {
+        if (item.type === "message") {
+            const url = new URL(`${BASE}messages`, window.location.origin);
 
-        url.searchParams.set(
-            "conversation",
-            conversationId
-        );
+            url.searchParams.set("conversation", item.conversationId);
 
-        window.location.assign(url.href);
+            window.location.assign(url.href);
+            return;
+        }
+
+        if (item.type !== "broadcast") return;
+
+        setSelected(item);
+
+        if (!item.read) {
+            try {
+                await apiRequest(
+                    `/notifications/broadcasts/${encodeURIComponent(
+                        item.deliveryId,
+                    )}/read`,
+                    {
+                        method: "PATCH",
+                    },
+                );
+
+                await loadNotifications();
+
+                window.dispatchEvent(new Event("notifications-updated"));
+            } catch (error) {
+                console.error("Mark notification read:", error.message);
+            }
+        }
+    }
+
+    function formatDate(value) {
+        if (!value) return "";
+
+        const date = new Date(value);
+
+        if (Number.isNaN(date.getTime())) {
+            return "";
+        }
+
+        return date.toLocaleString("hy-AM", {
+            dateStyle: "medium",
+            timeStyle: "short",
+        });
     }
 
     return (
-        <div
-            className="am-notifications"
-            ref={rootRef}
-        >
+        <div className="am-notifications" ref={rootRef}>
             <button
                 type="button"
                 className="am-notifications-trigger"
                 onClick={toggle}
-                aria-label={`Ծանուցումներ, ${unreadCount} չկարդացված հաղորդագրություն`}
+                aria-label={`Ծանուցումներ, ${unreadCount} չկարդացված`}
                 aria-expanded={open}
                 aria-haspopup="dialog"
                 title="Ծանուցումներ"
@@ -177,9 +188,7 @@ export default function NotificationBell() {
 
                 {unreadCount > 0 && (
                     <span className="am-notifications-count">
-                        {unreadCount > 99
-                            ? "99+"
-                            : unreadCount}
+                        {unreadCount > 99 ? "99+" : unreadCount}
                     </span>
                 )}
             </button>
@@ -194,14 +203,15 @@ export default function NotificationBell() {
                         <div>
                             <strong>Ծանուցումներ</strong>
 
-                            <small>
-                                {unreadCount} չկարդացված
-                            </small>
+                            <small>{unreadCount} չկարդացված</small>
                         </div>
 
                         <button
                             type="button"
-                            onClick={() => setOpen(false)}
+                            onClick={() => {
+                                setOpen(false);
+                                setSelected(null);
+                            }}
                             aria-label="Փակել"
                         >
                             ×
@@ -209,18 +219,46 @@ export default function NotificationBell() {
                     </div>
 
                     <div className="am-notifications-body">
-                        {loading && items.length === 0 ? (
+                        {selected ? (
+                            <div
+                                style={{
+                                    padding: "16px",
+                                }}
+                            >
+                                <button
+                                    type="button"
+                                    onClick={() => setSelected(null)}
+                                    style={{
+                                        marginBottom: 14,
+                                    }}
+                                >
+                                    ← Հետ
+                                </button>
+
+                                <h3>{selected.title}</h3>
+
+                                <small>{formatDate(selected.createdAt)}</small>
+
+                                <p
+                                    style={{
+                                        whiteSpace: "pre-wrap",
+                                        lineHeight: 1.7,
+                                        overflowWrap: "anywhere",
+                                    }}
+                                >
+                                    {selected.text}
+                                </p>
+                            </div>
+                        ) : loading && items.length === 0 ? (
                             <p className="am-notifications-empty">
                                 Բեռնվում է...
                             </p>
                         ) : items.length === 0 ? (
                             <div className="am-notifications-empty">
-                                <strong>
-                                    Նոր ծանուցումներ չկան
-                                </strong>
+                                <strong>Ծանուցումներ չկան</strong>
 
                                 <p>
-                                    Նոր հաղորդագրություններն
+                                    Ադմինի նամակները և նոր հաղորդագրություններն
                                     այստեղ կերևան։
                                 </p>
                             </div>
@@ -230,25 +268,27 @@ export default function NotificationBell() {
                                     type="button"
                                     key={item.id}
                                     className="am-notification-item"
-                                    onClick={() =>
-                                        openConversation(
-                                            item.conversationId
-                                        )
-                                    }
+                                    onClick={() => openNotification(item)}
                                 >
-                                    <span className="am-notification-dot" />
+                                    <span
+                                        className="am-notification-dot"
+                                        style={{
+                                            opacity:
+                                                item.unreadCount > 0 ? 1 : 0,
+                                        }}
+                                    />
 
                                     <span className="am-notification-content">
                                         <strong>
+                                            {item.type === "broadcast" &&
+                                                "ARMMOTORS · "}
                                             {item.title}
                                         </strong>
 
-                                        <span>
-                                            {item.description}
-                                        </span>
+                                        <span>{item.description}</span>
 
                                         <small>
-                                            {item.unreadCount} նոր հաղորդագրություն
+                                            {formatDate(item.createdAt)}
                                         </small>
                                     </span>
                                 </button>
@@ -258,9 +298,9 @@ export default function NotificationBell() {
 
                     <a
                         className="am-notifications-footer"
-                        href={`${BASE}messages`}
+                        href={`${BASE}account`}
                     >
-                        Բոլոր հաղորդագրությունները →
+                        Իմ հաշիվը →
                     </a>
                 </div>
             )}

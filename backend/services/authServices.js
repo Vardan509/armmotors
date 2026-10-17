@@ -20,7 +20,9 @@ export function createAuthResult(user) {
             version: user.tokenVersion || 0,
         },
         process.env.JWT_SECRET,
-        { expiresIn: "1h" },
+        {
+            expiresIn: "1h",
+        },
     );
 
     return {
@@ -93,7 +95,9 @@ export async function fnRegistration(
         throw createError("Այս email-ով հանրային գրանցումը փակ է։", 403);
     }
 
-    const existing = await User.findOne({ email });
+    const existing = await User.findOne({
+        email,
+    });
 
     if (existing) {
         throw createError("Այս email-ն արդեն գրանցված է։", 409);
@@ -124,11 +128,10 @@ export async function fnLogin(login, password) {
     }
 
     const email = login.trim().toLowerCase();
-    console.log('email  ->', email);
 
-    const user = await User.findOne({ email }).select("+password");
-    console.log('user ->', user);
-    
+    const user = await User.findOne({
+        email,
+    }).select("+password");
 
     if (!user || !user.password) {
         throw createError("Email-ը կամ գաղտնաբառը սխալ է։", 401);

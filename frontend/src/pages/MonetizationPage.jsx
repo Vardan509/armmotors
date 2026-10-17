@@ -1,8 +1,5 @@
 import { useEffect, useState } from "react";
-
-import Header from "../components/header/Header";
 import { apiRequest } from "../utils/api";
-
 import "./MonetizationPage.css";
 
 const BASE = import.meta.env.BASE_URL;
@@ -21,14 +18,11 @@ export default function MonetizationPage({ admin = false }) {
 
     const [plans, setPlans] = useState(null);
     const [payments, setPayments] = useState([]);
-
     const [busy, setBusy] = useState("");
     const [error, setError] = useState("");
     const [notice, setNotice] = useState("");
-
     const [revision, setRevision] = useState(0);
     const [reference, setReference] = useState({});
-
     const [isAdmin, setIsAdmin] = useState(false);
 
     useEffect(() => {
@@ -40,7 +34,6 @@ export default function MonetizationPage({ admin = false }) {
             try {
                 const [pricing, list] = await Promise.all([
                     apiRequest("/monetization/plans"),
-
                     apiRequest(
                         admin
                             ? "/monetization/admin/payments"
@@ -51,9 +44,7 @@ export default function MonetizationPage({ admin = false }) {
                 if (!active) return;
 
                 setPlans(pricing);
-
                 setPayments(Array.isArray(list) ? list : []);
-
                 setError("");
                 setIsAdmin(admin);
             } catch (err) {
@@ -81,14 +72,12 @@ export default function MonetizationPage({ admin = false }) {
 
             await apiRequest(`/monetization/admin/payments/${id}/${action}`, {
                 method: "POST",
-
                 body: JSON.stringify({
                     paymentReference: String(reference[id] || "").trim(),
                 }),
             });
 
             setNotice("Կարգավիճակը թարմացվեց։");
-
             setRevision((n) => n + 1);
         } catch (err) {
             setError(err.message);
@@ -98,246 +87,221 @@ export default function MonetizationPage({ admin = false }) {
     }
 
     return (
-        <>
-            <Header />
+        <main className="money-page">
+            <div className="money-container">
+                <h1>{admin ? "Վճարումների հաստատում" : ""}</h1>
 
-            <main className="money-page">
-                <div className="money-container">
-                    <span className="money-kicker"> PREMIUM</span>
+                <p className="money-lead">
+                    {admin
+                        ? "Հաստատեք միայն բանկային կամ վճարային ծառայությունում իսկապես ստացված գումարները։"
+                        : " "}
+                </p>
 
-                    <h1>
-                        {admin
-                            ? "Վճարումների հաստատում"
-                            : "Ձեր հայտարարությունների առավելությունները"}
-                    </h1>
-
-                    <p className="money-lead">
-                        {admin
-                            ? "Հաստատեք միայն բանկային կամ վճարային ծառայությունում իսկապես ստացված գումարները։"
-                            : " "}
+                {error && (
+                    <p className="money-error" role="alert">
+                        {error}
                     </p>
+                )}
 
-                    {error && (
-                        <p className="money-error" role="alert">
-                            {error}
-                        </p>
-                    )}
+                {notice && (
+                    <p className="money-notice" role="status">
+                        {notice}
+                    </p>
+                )}
 
-                    {notice && (
-                        <p className="money-notice" role="status">
-                            {notice}
-                        </p>
-                    )}
+                {!token && (
+                    <p>
+                        Նախ{" "}
+                        <a href={`${BASE}login?next=/monetization`}>
+                            մուտք գործեք
+                        </a>
+                        ։
+                    </p>
+                )}
 
-                    {!token && (
-                        <p>
-                            Նախ{" "}
-                            <a href={`${BASE}login?next=/monetization`}>
-                                մուտք գործեք
-                            </a>
-                            ։
-                        </p>
-                    )}
+                {!admin && plans && (
+                    <>
+                        <section className="money-quota">
+                            <strong>{Math.min(5, plans.used)} / 5</strong>
 
-                    {!admin && plans && (
-                        <>
-                            <section className="money-quota">
-                                <strong>{Math.min(5, plans.used)} / 5</strong>
+                            <div>
+                                <b>Անվճար հրապարակումներ</b>
 
-                                <div>
-                                    <b>Անվճար հրապարակումներ</b>
-
-                                    <p>
-                                        {Math.max(0, 5 - plans.used)} անվճար տեղ
-                                        մնացել է։ 6-րդից սկսած ամեն նոր
-                                        հրապարակումը՝ 100 ֏։
-                                    </p>
-                                </div>
-
-                                <a href={`${BASE}add-product`}>
-                                    + Տեղադրել հայտարարություն
-                                </a>
-                            </section>
-
-                            <h2>Առավելությունների փաթեթներ</h2>
-
-                            <div className="money-grid">
-                                <article className="money-plan">
-                                    <span>TOP START</span>
-
-                                    <h3>200 ֏</h3>
-
-                                    <b>7 օր</b>
-
-                                    <p>
-                                        Ոսկեգույն TOP նշան՝ մեքենայի նկարին,
-                                        առաջնահերթ ցուցադրում և ավելի մեծ
-                                        տեսանելիություն։
-                                    </p>
-                                </article>
-
-                                <article className="money-plan featured">
-                                    <span>TOP MONTH</span>
-
-                                    <h3>500 ֏</h3>
-
-                                    <b>30 օր</b>
-
-                                    <p>
-                                        TOP նշան և հայտարարություններիի վերին
-                                        հատվածում առաջնահերթություն ամբողջ ամսվա
-                                        ընթացքում։
-                                    </p>
-                                </article>
-
-                                <article className="money-plan">
-                                    <span>AUTO REFRESH</span>
-
-                                    <h3>100 ֏</h3>
-
-                                    <b>7 օր</b>
-
-                                    <p>
-                                        Ամեն օր ավտոմատ թարմացում։ Սովորական
-                                        ձեռքով թարմացումը հասանելի է 4 օրը մեկ։
-                                    </p>
-                                </article>
+                                <p>
+                                    {Math.max(0, 5 - plans.used)} անվճար տեղ
+                                    մնացել է։ 6-րդից սկսած ամեն նոր
+                                    հրապարակումը՝ 100 ֏։
+                                </p>
                             </div>
+                        </section>
 
-                            <p className="money-explain">
-                                Փաթեթ ընտրելու համար բացեք{" "}
-                                <a href={`${BASE}account`}>
-                                    ձեր հայտարարությունների կառավարումը
-                                </a>
-                                ։ Հաստատված TOP հայտարարությունները հայտնվում են
-                                ցուցակի վերևում։
-                            </p>
+                        <h2>Առավելությունների փաթեթներ</h2>
 
-                            <p className="money-warning">
-                                Վճարային համակարգ դեռ միացված չէ։ Հայտերն այստեղ
-                                գրանցվում են «սպասող» կարգավիճակով և կարող են
-                                ակտիվացվել միայն ադմինի կողմից՝ իրական վճարումը
-                                ստուգելուց հետո։
-                            </p>
-                        </>
-                    )}
+                        <div className="money-grid">
+                            <article className="money-plan">
+                                <span>TOP START</span>
 
-                    {token && (
-                        <section className="money-history">
-                            <h2>
-                                {admin
-                                    ? "Սպասող վճարման հայտեր"
-                                    : "Իմ վճարման հայտերը"}
-                            </h2>
+                                <h3>200 ֏</h3>
 
-                            {payments.length === 0 ? (
-                                <p>Հայտեր դեռ չկան։</p>
-                            ) : (
-                                <div className="money-list">
-                                    {payments.map((payment) => (
-                                        <article
-                                            key={payment._id}
-                                            className="money-transaction"
-                                        >
-                                            <div>
-                                                <strong>
-                                                    {KINDS[payment.kind] ||
-                                                        payment.kind}
-                                                </strong>
+                                <b>7 օր</b>
 
-                                                <small>
-                                                    {new Date(
-                                                        payment.createdAt,
-                                                    ).toLocaleDateString(
-                                                        "hy-AM",
-                                                    )}
-                                                </small>
+                                <p>
+                                    Ոսկեգույն TOP նշան՝ մեքենայի նկարին,
+                                    առաջնահերթ ցուցադրում և ավելի մեծ
+                                    տեսանելիություն։
+                                </p>
+                            </article>
 
-                                                {admin && (
-                                                    <small>
-                                                        {payment.user?.email ||
-                                                            ""}
-                                                        {" · "}
-                                                        {payment.product
-                                                            ?.title || ""}
-                                                    </small>
-                                                )}
-                                            </div>
+                            <article className="money-plan featured">
+                                <span>TOP MONTH</span>
 
+                                <h3>600 ֏</h3>
+
+                                <b>30 օր</b>
+
+                                <p>
+                                    TOP նշան և ցուցակի վերին հատվածում
+                                    առաջնահերթություն ամբողջ ամսվա ընթացքում։
+                                </p>
+                            </article>
+
+                            <article className="money-plan">
+                                <span>AUTO REFRESH</span>
+
+                                <h3>100 ֏</h3>
+
+                                <b>7 օր</b>
+
+                                <p>
+                                    Ամեն օր ավտոմատ թարմացում. սովորական ձեռքով
+                                    թարմացումը հասանելի է 4 օրը մեկ։
+                                </p>
+                            </article>
+                        </div>
+
+                        <p className="money-explain">
+                            Փաթեթ ընտրելու համար բացեք{" "}
+                            <a href={`${BASE}account`}>
+                                ձեր հայտարարությունների կառավարումը
+                            </a>
+                            ։ Հաստատված TOP հայտարարությունները հայտնվում են
+                            ցուցակի վերևում։
+                        </p>
+
+                        <p className="money-warning">
+                            Վճարային համակարգ դեռ միացված չէ։ Հայտերն այստեղ
+                            գրանցվում են «սպասող» կարգավիճակով և կարող են
+                            ակտիվացվել միայն ադմինի կողմից՝ իրական վճարումը
+                            ստուգելուց հետո։
+                        </p>
+                    </>
+                )}
+
+                {token && (
+                    <section className="money-history">
+                        <h2>
+                            {admin
+                                ? "Սպասող վճարման հայտեր"
+                                : "Իմ վճարման հայտերը"}
+                        </h2>
+
+                        {payments.length === 0 ? (
+                            <p>Հայտեր դեռ չկան։</p>
+                        ) : (
+                            <div className="money-list">
+                                {payments.map((payment) => (
+                                    <article
+                                        key={payment._id}
+                                        className="money-transaction"
+                                    >
+                                        <div>
                                             <strong>
-                                                {DRAM(payment.amount)}
+                                                {KINDS[payment.kind] ||
+                                                    payment.kind}
                                             </strong>
 
-                                            <span
-                                                className={`money-status ${payment.status}`}
-                                            >
-                                                {payment.status === "paid"
-                                                    ? "Հաստատված"
-                                                    : payment.status ===
-                                                        "rejected"
-                                                      ? "Մերժված"
-                                                      : "Սպասող"}
-                                            </span>
+                                            <small>
+                                                {new Date(
+                                                    payment.createdAt,
+                                                ).toLocaleDateString("hy-AM")}
+                                            </small>
 
-                                            {isAdmin && (
-                                                <div className="money-admin-actions">
-                                                    <input
-                                                        aria-label="Վճարման հաստատման համար"
-                                                        placeholder="Վճարման ստուգված համարը"
-                                                        value={
-                                                            reference[
-                                                                payment._id
-                                                            ] || ""
-                                                        }
-                                                        onChange={(event) =>
-                                                            setReference(
-                                                                (old) => ({
-                                                                    ...old,
-
-                                                                    [payment._id]:
-                                                                        event
-                                                                            .target
-                                                                            .value,
-                                                                }),
-                                                            )
-                                                        }
-                                                    />
-
-                                                    <button
-                                                        type="button"
-                                                        disabled={Boolean(busy)}
-                                                        onClick={() =>
-                                                            approve(
-                                                                payment._id,
-                                                                "approve",
-                                                            )
-                                                        }
-                                                    >
-                                                        Հաստատել
-                                                    </button>
-
-                                                    <button
-                                                        type="button"
-                                                        disabled={Boolean(busy)}
-                                                        onClick={() =>
-                                                            approve(
-                                                                payment._id,
-                                                                "reject",
-                                                            )
-                                                        }
-                                                    >
-                                                        Մերժել
-                                                    </button>
-                                                </div>
+                                            {admin && (
+                                                <small>
+                                                    {payment.user?.email || ""}{" "}
+                                                    ·{" "}
+                                                    {payment.product?.title ||
+                                                        ""}
+                                                </small>
                                             )}
-                                        </article>
-                                    ))}
-                                </div>
-                            )}
-                        </section>
-                    )}
-                </div>
-            </main>
-        </>
+                                        </div>
+
+                                        <strong>{DRAM(payment.amount)}</strong>
+
+                                        <span
+                                            className={`money-status ${payment.status}`}
+                                        >
+                                            {payment.status === "paid"
+                                                ? "Հաստատված"
+                                                : payment.status === "rejected"
+                                                  ? "Մերժված"
+                                                  : "Սպասող"}
+                                        </span>
+
+                                        {isAdmin && (
+                                            <div className="money-admin-actions">
+                                                <input
+                                                    aria-label="Վճարման հաստատման համար"
+                                                    placeholder="Վճարման ստուգված համարը"
+                                                    value={
+                                                        reference[
+                                                            payment._id
+                                                        ] || ""
+                                                    }
+                                                    onChange={(event) =>
+                                                        setReference((old) => ({
+                                                            ...old,
+                                                            [payment._id]:
+                                                                event.target
+                                                                    .value,
+                                                        }))
+                                                    }
+                                                />
+
+                                                <button
+                                                    type="button"
+                                                    disabled={Boolean(busy)}
+                                                    onClick={() =>
+                                                        approve(
+                                                            payment._id,
+                                                            "approve",
+                                                        )
+                                                    }
+                                                >
+                                                    Հաստատել
+                                                </button>
+
+                                                <button
+                                                    type="button"
+                                                    disabled={Boolean(busy)}
+                                                    onClick={() =>
+                                                        approve(
+                                                            payment._id,
+                                                            "reject",
+                                                        )
+                                                    }
+                                                >
+                                                    Մերժել
+                                                </button>
+                                            </div>
+                                        )}
+                                    </article>
+                                ))}
+                            </div>
+                        )}
+                    </section>
+                )}
+            </div>
+        </main>
     );
 }

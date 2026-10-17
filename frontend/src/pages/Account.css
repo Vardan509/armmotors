@@ -609,3 +609,144 @@
         animation: none !important;
     }
 }
+
+/* ==========================================
+   ARMMOTORS ACCOUNT — COMPACT PRODUCT GRID
+========================================== */
+
+.account-listings {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+    align-items: start;
+}
+
+.account-listing {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    width: 100%;
+    height: 100%;
+    padding: 12px;
+    gap: 12px;
+    border: 1px solid #e9e1d3;
+    border-radius: 16px;
+    background: #fff;
+    overflow: hidden;
+}
+
+.account-listing > img,
+.account-listing > .account-listing-placeholder {
+    display: block;
+    width: 100%;
+    height: 205px;
+    min-height: 0;
+    max-width: 100%;
+    flex: none;
+    object-fit: cover;
+    border-radius: 11px;
+}
+
+.account-listing-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f7f5f0;
+    color: #999;
+}
+
+.account-listing-info {
+    width: 100%;
+    min-width: 0;
+    flex: none;
+}
+
+.account-listing-info h3 {
+    margin: 0 0 8px;
+    font-size: 17px;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+.account-listing-info > p {
+    margin: 0 0 10px;
+    font-size: 19px;
+    font-weight: 800;
+    color: #a77c2e;
+}
+
+.account-listing-info > small {
+    display: block;
+    margin-top: 10px;
+}
+
+.account-listing-actions {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
+    width: 100%;
+    margin-top: auto;
+}
+
+.account-listing-actions > button,
+.account-listing-actions > a {
+    flex: 1 1 105px;
+    min-width: 0;
+    text-align: center;
+}
+
+.account-listing > .listing-promotion,
+.account-listing > .money-pending-article {
+    width: 100%;
+    min-width: 0;
+    grid-column: auto;
+}
+
+/* Tablet */
+@media (max-width: 1100px) {
+    .account-listings {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 15px;
+    }
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+    .account-listings {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    .account-listing {
+        padding: 8px;
+        gap: 9px;
+        border-radius: 12px;
+    }
+
+    .account-listing > img,
+    .account-listing > .account-listing-placeholder {
+        width: 100%;
+        height: 125px;
+        border-radius: 8px;
+    }
+
+    .account-listing-info h3 {
+        font-size: 13px;
+    }
+
+    .account-listing-info > p {
+        font-size: 15px;
+    }
+
+    .account-listing-actions {
+        gap: 6px;
+    }
+
+    .account-listing-actions > button,
+    .account-listing-actions > a {
+        flex: 1 1 100%;
+        font-size: 11px;
+        padding: 9px 5px;
+    }
+}

@@ -1104,3 +1104,169 @@
         animation: none !important;
     }
 }
+
+/* ARMMOTORS — EXTRA VEHICLE FIELDS */
+
+.ap-extra-section {
+    margin-top: 30px;
+    padding: 26px;
+    border: 1px solid #eae5dc;
+    border-radius: 17px;
+    background: #fff;
+}
+
+.ap-extra-heading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+    padding-bottom: 17px;
+    border-bottom: 1px solid #f0ece5;
+}
+
+.ap-extra-heading > span {
+    display: grid;
+    width: 35px;
+    height: 35px;
+    flex-shrink: 0;
+    place-items: center;
+    border-radius: 10px;
+    background: #f8f0df;
+    color: #a27d36;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.ap-extra-heading h3 {
+    margin: 0;
+    color: #292929;
+    font-size: 17px;
+    font-weight: 800;
+}
+
+.ap-extra-group {
+    margin-top: 25px;
+}
+
+.ap-extra-group-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.ap-extra-group-heading h3 {
+    margin: 0;
+    color: #343434;
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.ap-extra-group-heading > span {
+    padding: 6px 10px;
+    border-radius: 7px;
+    background: #f8f3e8;
+    color: #98763b;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.ap-extra-options {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.ap-extra-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    min-height: 49px;
+    padding: 12px;
+    border: 1px solid #eae7e0;
+    border-radius: 10px;
+    background: #fafaf9;
+    color: #555;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.4;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.ap-extra-option input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+}
+
+.ap-extra-check {
+    display: grid;
+    width: 19px;
+    height: 19px;
+    flex: 0 0 19px;
+    place-items: center;
+    border: 1px solid #d8d4ca;
+    border-radius: 5px;
+    background: #fff;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.ap-extra-option:hover {
+    border-color: #d3b575;
+    background: #fffaf1;
+}
+
+.ap-extra-option.is-selected {
+    border-color: #c6a35d;
+    background: #fbf4e5;
+    color: #6d5126;
+}
+
+.ap-extra-option.is-selected .ap-extra-check {
+    border-color: #bc9346;
+    background: #bc9346;
+}
+
+.ap-extra-option:focus-within {
+    outline: 2px solid #c6a35d;
+    outline-offset: 2px;
+}
+
+@media (max-width: 900px) {
+    .ap-extra-options {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 600px) {
+    .ap-extra-section {
+        margin-top: 20px;
+        padding: 17px 13px;
+        border-radius: 13px;
+    }
+
+    .ap-extra-heading {
+        margin-bottom: 18px;
+    }
+
+    .ap-extra-heading h3 {
+        font-size: 15px;
+    }
+
+    .ap-extra-options {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .ap-extra-option {
+        min-height: 46px;
+        padding: 10px 12px;
+    }
+}

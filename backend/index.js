@@ -105,14 +105,14 @@ function start() {
     }
 
     if (process.env.JWT_SECRET.length < 32) {
-        console.warn(
-            "[ArmMotors] JWT_SECRET-ը խորհուրդ է տրվում ունենալ առնվազն 32 պատահական նիշ։",
-        );
+        console.error("[ArmMotors] JWT_SECRET must be at least 32 characters.");
+
+        process.exitCode = 1;
+        return;
     }
 
     const app = createApp();
 
-    // HTTP սերվերը գործարկվում է նույնիսկ MongoDB-ի բացակայության դեպքում։
     server = app.listen(PORT, "0.0.0.0", () => {
         console.log(`[ArmMotors] API listening on port ${PORT}`);
         console.log(`[ArmMotors] Health: http://localhost:${PORT}/api/health`);
@@ -136,6 +136,7 @@ function start() {
 }
 
 process.on("SIGTERM", () => void shutdown("SIGTERM"));
+
 process.on("SIGINT", () => void shutdown("SIGINT"));
 
 start();

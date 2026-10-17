@@ -93,7 +93,26 @@ const userSchema = new mongoose.Schema(
             default: null,
         },
 
-        // Առաջին 5 անվճար հրապարակումները
+        // ==========================================
+        // PASSWORD RESET
+        // ==========================================
+
+        passwordResetTokenHash: {
+            type: String,
+            default: null,
+            select: false,
+        },
+
+        passwordResetExpires: {
+            type: Date,
+            default: null,
+            select: false,
+        },
+
+        // ==========================================
+        // PUBLICATIONS
+        // ==========================================
+
         freePublicationsUsed: {
             type: Number,
             default: null,

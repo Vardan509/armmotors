@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { apiRequest } from "../utils/api";
 
 let scriptPromise;
@@ -29,6 +30,7 @@ export default function GoogleSignIn({
     link = false,
     onLinked,
 }) {
+    const navigate = useNavigate();
     const target = useRef(null);
     const linked = useRef(onLinked);
     const [message, setMessage] = useState("");
@@ -46,18 +48,21 @@ export default function GoogleSignIn({
                 const config = await apiRequest("/auth/config");
 
                 if (!config.googleClientId) {
-                    if (active)
+                    if (active) {
                         setMessage(
                             "Google մուտքը հասանելի կլինի GOOGLE_CLIENT_ID-ը կարգավորելուց հետո։",
                         );
+                    }
                     return;
                 }
 
                 await loadGoogle();
+
                 if (!active || !target.current) return;
 
                 window.google.accounts.id.initialize({
                     client_id: config.googleClientId,
+
                     callback: async ({ credential }) => {
                         if (!active) return;
 
@@ -84,13 +89,16 @@ export default function GoogleSignIn({
                                     "user",
                                     JSON.stringify(result.user),
                                 );
+
                                 window.dispatchEvent(
                                     new Event("session-changed"),
                                 );
-                                window.location.assign(
+
+                                navigate(
                                     destination === "/" && result.user.isAdmin
                                         ? "/admin"
                                         : destination,
+                                    { replace: true },
                                 );
                             }
                         } catch (error) {
@@ -102,12 +110,13 @@ export default function GoogleSignIn({
                 });
 
                 target.current.innerHTML = "";
+
                 window.google.accounts.id.renderButton(target.current, {
                     type: "standard",
                     theme: "outline",
                     size: "large",
                     shape: "rectangular",
-                    text: link ? "continue_with" : "continue_with",
+                    text: "continue_with",
                     logo_alignment: "left",
                     width: Math.max(
                         240,
@@ -120,19 +129,22 @@ export default function GoogleSignIn({
         }
 
         void load();
+
         return () => {
             active = false;
         };
-    }, [destination, link]);
+    }, [destination, link, navigate]);
 
     return (
         <div className="google-signin-modern">
             <div className="google-button-shell" ref={target} />
+
             {busy && (
                 <p role="status" className="google-status">
                     Google հաշիվը ստուգվում է…
                 </p>
             )}
+
             {message && (
                 <p className="google-unavailable" role="status">
                     {message}

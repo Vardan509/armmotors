@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 
-import Header from "../components/header/Header";
 import ImageUploader from "../components/uploads/ImageUploader";
 import LocationFields from "../components/add-product/LocationFields";
 import PublicationNotice from "../components/monetization/PublicationNotice";
@@ -13,11 +13,87 @@ import {
 } from "../components/add-product/vehicleData";
 
 import { apiRequest } from "../utils/api";
+import { useI18n } from "../utils/i18n";
 
 import "./AddProductPage.css";
 import "./AddProductSuccess.css";
 
-const BASE = import.meta.env.BASE_URL;
+/* =========================================
+   OPTIONS
+========================================= */
+
+const COMFORT_OPTIONS = [
+    ["airConditioning", "Օդորակիչ", "Кондиционер", "Air conditioning"],
+    ["climateControl", "Կլիմատ-կոնտրոլ", "Климат-контроль", "Climate control"],
+    ["heatedSeats", "Նստատեղերի տաքացում", "Подогрев сидений", "Heated seats"],
+    [
+        "ventilatedSeats",
+        "Նստատեղերի օդափոխություն",
+        "Вентиляция сидений",
+        "Ventilated seats",
+    ],
+    [
+        "heatedSteering",
+        "Ղեկի տաքացում",
+        "Подогрев руля",
+        "Heated steering wheel",
+    ],
+    [
+        "heatedWindshield",
+        "Դիմապակու տաքացում",
+        "Обогрев лобового стекла",
+        "Heated windshield",
+    ],
+    ["cruiseControl", "Կրուիզ-կոնտրոլ", "Круиз-контроль", "Cruise control"],
+    [
+        "adaptiveCruise",
+        "Ադապտիվ կրուիզ-կոնտրոլ",
+        "Адаптивный круиз-контроль",
+        "Adaptive cruise",
+    ],
+    ["parkingSensors", "Կայանման սենսորներ", "Парктроники", "Parking sensors"],
+    ["rearCamera", "Հետևի տեսախցիկ", "Камера заднего вида", "Rear camera"],
+    ["camera360", "360° տեսախցիկ", "Камера 360°", "360° camera"],
+    [
+        "keylessEntry",
+        "Առանց բանալիի մուտք",
+        "Бесключевой доступ",
+        "Keyless entry",
+    ],
+    [
+        "startStop",
+        "Start/Stop համակարգ",
+        "Система Start/Stop",
+        "Start/Stop system",
+    ],
+    [
+        "electricSeats",
+        "Էլեկտրական նստատեղեր",
+        "Электрорегулировка сидений",
+        "Electric seats",
+    ],
+    [
+        "memorySeats",
+        "Նստատեղերի հիշողություն",
+        "Память сидений",
+        "Memory seats",
+    ],
+    ["navigation", "Նավիգացիա", "Навигация", "Navigation"],
+    ["bluetooth", "Bluetooth", "Bluetooth", "Bluetooth"],
+    ["appleCarplay", "Apple CarPlay", "Apple CarPlay", "Apple CarPlay"],
+    ["androidAuto", "Android Auto", "Android Auto", "Android Auto"],
+];
+
+const HEADLIGHT_OPTIONS = [
+    ["halogen", "Հալոգեն", "Галогенные", "Halogen"],
+    ["xenon", "Քսենոն", "Ксеноновые", "Xenon"],
+    ["led", "LED", "Светодиодные", "LED"],
+];
+
+const WHEEL_OPTIONS = Array.from({ length: 12 }, (_, index) => {
+    const value = `R${index + 13}`;
+    return [value, value];
+});
 
 const INITIAL_FORM = {
     type: "car",
@@ -25,6 +101,7 @@ const INITIAL_FORM = {
     price: "",
     currency: "AMD",
     condition: "Օգտագործված",
+
     vehicleType: "passenger",
     brand: "",
     model: "",
@@ -34,6 +111,17 @@ const INITIAL_FORM = {
     steering: "left",
     color: "",
     vin: "",
+
+    customsCleared: "",
+    paintCondition: "",
+    gasEquipment: "",
+    gasCylinderReplaced: "",
+    wheelSize: "",
+    interiorMaterial: "",
+    sunroof: "",
+    headlights: [],
+    comfort: [],
+
     description: "",
     phone: "",
 };
@@ -47,25 +135,348 @@ const INITIAL_LOCATION = {
     settlement: "",
 };
 
-const STEPS = [
-    "Հիմնական տվյալներ",
-    "Մեքենայի տվյալներ",
-    "Նկարներ և կապ",
-    "Հրապարակում",
-];
+/* =========================================
+   TRANSLATIONS
+========================================= */
 
-const FUEL_OPTIONS = [
-    ["petrol", "Բենզին"],
-    ["diesel", "Դիզել"],
-    ["gas", "Գազ"],
-    ["hybrid", "Հիբրիդ"],
-    ["electric", "Էլեկտրական"],
-];
+const TEXT = {
+    hy: {
+        steps: [
+            "Հիմնական տվյալներ",
+            "Մեքենայի տվյալներ",
+            "Նկարներ և կապ",
+            "Հրապարակում",
+        ],
+        add: "Տեղադրել հայտարարություն",
+        edit: "Խմբագրել հայտարարությունը",
+        help: "Լրացրեք տվյալները և հրապարակեք Ձեր հայտարարությունը։",
+        home: "Գլխավոր էջ",
+        mine: "Իմ հայտարարությունները",
+        step: "Քայլ",
+        basic: "Հիմնական տվյալներ",
+        carDetails: "Մեքենայի տվյալներ",
+        partDetails: "Պահեստամասի տվյալներ",
+        contact: "Նկարներ և կապ",
+        review: "Ստուգեք տվյալները",
+        category: "Բաժին",
+        car: "Մեքենա",
+        part: "Պահեստամաս",
+        condition: "Վիճակ",
+        new: "Նոր",
+        used: "Օգտագործված",
+        partTitle: "Պահեստամասի անվանում",
+        price: "Գին",
+        currency: "Արժույթ",
+        location: "Գտնվելու վայր",
+        currentLocation: "Ընթացիկ վայր",
+        vehicleType: "Մեքենայի տեսակ",
+        passenger: "Մարդատար",
+        truck: "Բեռնատար",
+        brand: "Մակնիշ",
+        model: "Մոդել",
+        year: "Տարեթիվ",
+        mileage: "Վազք (կմ)",
+        fuel: "Վառելիք",
+        steering: "Ղեկ",
+        color: "Գույն",
+        petrol: "Բենզին",
+        diesel: "Դիզել",
+        gas: "Գազ",
+        hybrid: "Հիբրիդ",
+        electric: "Էլեկտրական",
+        left: "Ձախ",
+        right: "Աջ",
+        optional: "Ըստ ցանկության",
+        choose: "Ընտրել",
+        technical: "Լրացուցիչ տեխնիկական տվյալներ",
+        interior: "Սրահ և հարմարավետություն",
+        exterior: "Արտաքին տվյալներ",
+        customsCleared: "Մաքսազերծված է",
+        paintCondition: "Ներկի վիճակ",
+        gasEquipment: "Գազի սարքավորում",
+        gasCylinderReplaced: "Գազի բալոնը փոխված է",
+        wheelSize: "Անվահեծերի չափ",
+        interiorMaterial: "Սրահի նյութ",
+        sunroof: "Լյուկ",
+        headlights: "Լուսարձակներ",
+        comfort: "Կոմֆորտ և հնարավորություններ",
+        yes: "Այո",
+        no: "Ոչ",
+        original: "Գործարանային ներկ",
+        repainted: "Վերաներկված",
+        installed: "Տեղադրված է",
+        notInstalled: "Տեղադրված չէ",
+        fabric: "Կտոր",
+        leather: "Կաշի",
+        artificial: "Արհեստական կաշի",
+        alcantara: "Ալկանտարա",
+        other: "Այլ",
+        standard: "Սովորական լյուկ",
+        panoramic: "Պանորամային լյուկ",
+        none: "Չկա",
+        selected: "Ընտրված է",
+        phone: "Հեռախոսահամար",
+        description: "Նկարագրություն",
+        descriptionPlaceholder: "Նկարագրեք մեքենան կամ պահեստամասը...",
+        photos: "Լուսանկարներ",
+        photosHelp: "Առավելագույնը 12 նկար։ Առաջինը կլինի գլխավոր։",
+        main: "Գլխավոր",
+        remove: "Հեռացնել",
+        previous: "Նախորդ քայլ",
+        next: "Շարունակել",
+        publish: "Հրապարակել հայտարարությունը",
+        save: "Պահպանել փոփոխությունները",
+        saving: "Պահպանվում է...",
+        loading: "Տվյալները բեռնվում են...",
+        invalidTitle: "Լրացրեք պահեստամասի անվանումը։",
+        invalidPrice: "Նշեք ճիշտ գին։",
+        invalidLocation: "Ընտրեք գտնվելու վայրը։",
+        invalidVehicle: "Լրացրեք մակնիշը, մոդելը և տարեթիվը։",
+        invalidMileage: "Նշեք ճիշտ վազքը։",
+        invalidColor: "Ընտրեք մեքենայի գույնը։",
+        invalidVin: "VIN-ը պետք է ունենա 17 ճիշտ նիշ։",
+        invalidPhone: "Նշեք ճիշտ հեռախոսահամար։",
+        invalidImages: "Ավելացրեք առնվազն մեկ նկար։",
+        tooManyImages: "Առավելագույնը 12 նկար։",
+        notFound: "Հայտարարությունը չի գտնվել։",
+        paymentPending: "Վճարման սպասող հայտարարությունը դեռ չի խմբագրվում։",
+        saveError: "Տվյալները պահպանել չհաջողվեց։",
+        successCreate: "Հայտարարությունը հրապարակված է",
+        successEdit: "Փոփոխությունները պահպանված են",
+        view: "Դիտել հայտարարությունը",
+        packages: "Դիտել TOP փաթեթները",
+        close: "Փակել",
+        paymentCreate:
+            "Առաջին 5 հայտարարությունն անվճար է, հաջորդները՝ 100 դրամ։",
+        paymentEdit: "Խմբագրման համար նոր վճար չի պահանջվում։",
+    },
 
-const STEERING_OPTIONS = [
-    ["left", "Ձախ"],
-    ["right", "Աջ"],
-];
+    ru: {
+        steps: [
+            "Основные данные",
+            "Данные автомобиля",
+            "Фото и контакты",
+            "Публикация",
+        ],
+        add: "Разместить объявление",
+        edit: "Редактировать объявление",
+        help: "Заполните данные и опубликуйте объявление.",
+        home: "Главная",
+        mine: "Мои объявления",
+        step: "Шаг",
+        basic: "Основные данные",
+        carDetails: "Данные автомобиля",
+        partDetails: "Данные запчасти",
+        contact: "Фото и контакты",
+        review: "Проверьте данные",
+        category: "Категория",
+        car: "Автомобиль",
+        part: "Запчасть",
+        condition: "Состояние",
+        new: "Новое",
+        used: "Б/у",
+        partTitle: "Название запчасти",
+        price: "Цена",
+        currency: "Валюта",
+        location: "Местоположение",
+        currentLocation: "Текущее местоположение",
+        vehicleType: "Тип автомобиля",
+        passenger: "Легковой",
+        truck: "Грузовой",
+        brand: "Марка",
+        model: "Модель",
+        year: "Год",
+        mileage: "Пробег (км)",
+        fuel: "Топливо",
+        steering: "Руль",
+        color: "Цвет",
+        petrol: "Бензин",
+        diesel: "Дизель",
+        gas: "Газ",
+        hybrid: "Гибрид",
+        electric: "Электро",
+        left: "Левый",
+        right: "Правый",
+        optional: "Необязательно",
+        choose: "Выбрать",
+        technical: "Дополнительные характеристики",
+        interior: "Салон и комфорт",
+        exterior: "Внешние характеристики",
+        customsCleared: "Растаможен",
+        paintCondition: "Состояние краски",
+        gasEquipment: "Газовое оборудование",
+        gasCylinderReplaced: "Газовый баллон заменён",
+        wheelSize: "Размер дисков",
+        interiorMaterial: "Материал салона",
+        sunroof: "Люк",
+        headlights: "Фары",
+        comfort: "Комфорт и оснащение",
+        yes: "Да",
+        no: "Нет",
+        original: "Заводская краска",
+        repainted: "Перекрашен",
+        installed: "Установлено",
+        notInstalled: "Не установлено",
+        fabric: "Ткань",
+        leather: "Кожа",
+        artificial: "Искусственная кожа",
+        alcantara: "Алькантара",
+        other: "Другое",
+        standard: "Обычный люк",
+        panoramic: "Панорамный люк",
+        none: "Нет",
+        selected: "Выбрано",
+        phone: "Номер телефона",
+        description: "Описание",
+        descriptionPlaceholder: "Опишите автомобиль или запчасть...",
+        photos: "Фотографии",
+        photosHelp: "До 12 фотографий. Первая будет главной.",
+        main: "Главное",
+        remove: "Удалить",
+        previous: "Назад",
+        next: "Продолжить",
+        publish: "Опубликовать объявление",
+        save: "Сохранить изменения",
+        saving: "Сохранение...",
+        loading: "Загрузка данных...",
+        invalidTitle: "Укажите название запчасти.",
+        invalidPrice: "Укажите корректную цену.",
+        invalidLocation: "Выберите местоположение.",
+        invalidVehicle: "Укажите марку, модель и год.",
+        invalidMileage: "Укажите корректный пробег.",
+        invalidColor: "Выберите цвет автомобиля.",
+        invalidVin: "VIN должен содержать 17 допустимых символов.",
+        invalidPhone: "Укажите корректный номер телефона.",
+        invalidImages: "Добавьте хотя бы одну фотографию.",
+        tooManyImages: "Максимум 12 фотографий.",
+        notFound: "Объявление не найдено.",
+        paymentPending: "Объявление ожидает оплаты.",
+        saveError: "Не удалось сохранить данные.",
+        successCreate: "Объявление опубликовано",
+        successEdit: "Изменения сохранены",
+        view: "Посмотреть объявление",
+        packages: "Посмотреть TOP-пакеты",
+        close: "Закрыть",
+        paymentCreate:
+            "Первые 5 объявлений бесплатные, следующие — 100 драмов.",
+        paymentEdit: "За редактирование повторная оплата не требуется.",
+    },
+
+    en: {
+        steps: [
+            "Basic information",
+            "Vehicle details",
+            "Photos and contact",
+            "Publish",
+        ],
+        add: "Add listing",
+        edit: "Edit listing",
+        help: "Enter the details and publish your listing.",
+        home: "Home",
+        mine: "My listings",
+        step: "Step",
+        basic: "Basic information",
+        carDetails: "Vehicle details",
+        partDetails: "Spare part details",
+        contact: "Photos and contact",
+        review: "Review your listing",
+        category: "Category",
+        car: "Car",
+        part: "Spare part",
+        condition: "Condition",
+        new: "New",
+        used: "Used",
+        partTitle: "Spare part title",
+        price: "Price",
+        currency: "Currency",
+        location: "Location",
+        currentLocation: "Current location",
+        vehicleType: "Vehicle type",
+        passenger: "Passenger car",
+        truck: "Truck",
+        brand: "Brand",
+        model: "Model",
+        year: "Year",
+        mileage: "Mileage (km)",
+        fuel: "Fuel",
+        steering: "Steering",
+        color: "Color",
+        petrol: "Petrol",
+        diesel: "Diesel",
+        gas: "Gas",
+        hybrid: "Hybrid",
+        electric: "Electric",
+        left: "Left",
+        right: "Right",
+        optional: "Optional",
+        choose: "Select",
+        technical: "Additional specifications",
+        interior: "Interior and comfort",
+        exterior: "Exterior features",
+        customsCleared: "Customs cleared",
+        paintCondition: "Paint condition",
+        gasEquipment: "Gas equipment",
+        gasCylinderReplaced: "Gas cylinder replaced",
+        wheelSize: "Wheel size",
+        interiorMaterial: "Interior material",
+        sunroof: "Sunroof",
+        headlights: "Headlights",
+        comfort: "Comfort and features",
+        yes: "Yes",
+        no: "No",
+        original: "Original paint",
+        repainted: "Repainted",
+        installed: "Installed",
+        notInstalled: "Not installed",
+        fabric: "Fabric",
+        leather: "Leather",
+        artificial: "Artificial leather",
+        alcantara: "Alcantara",
+        other: "Other",
+        standard: "Standard sunroof",
+        panoramic: "Panoramic sunroof",
+        none: "None",
+        selected: "Selected",
+        phone: "Phone number",
+        description: "Description",
+        descriptionPlaceholder: "Describe the car or spare part...",
+        photos: "Photos",
+        photosHelp: "Maximum 12 photos. The first is the cover.",
+        main: "Cover",
+        remove: "Remove",
+        previous: "Previous",
+        next: "Continue",
+        publish: "Publish listing",
+        save: "Save changes",
+        saving: "Saving...",
+        loading: "Loading data...",
+        invalidTitle: "Enter a spare part title.",
+        invalidPrice: "Enter a valid price.",
+        invalidLocation: "Select a location.",
+        invalidVehicle: "Select a brand, model and year.",
+        invalidMileage: "Enter valid mileage.",
+        invalidColor: "Select a vehicle color.",
+        invalidVin: "VIN must contain 17 valid characters.",
+        invalidPhone: "Enter a valid phone number.",
+        invalidImages: "Add at least one photo.",
+        tooManyImages: "Maximum 12 photos.",
+        notFound: "Listing not found.",
+        paymentPending: "Listing is awaiting payment.",
+        saveError: "Unable to save the listing.",
+        successCreate: "Listing published",
+        successEdit: "Changes saved",
+        view: "View listing",
+        packages: "View TOP packages",
+        close: "Close",
+        paymentCreate:
+            "The first 5 listings are free. Additional listings cost AMD 100.",
+        paymentEdit: "Editing does not require another payment.",
+    },
+};
+
+/* =========================================
+   FORM COMPONENTS
+========================================= */
 
 function Field({
     label,
@@ -102,7 +513,7 @@ function Select({
     value,
     onChange,
     options,
-    placeholder = "Ընտրել",
+    placeholder,
     required = false,
     disabled = false,
 }) {
@@ -119,16 +530,16 @@ function Select({
                 required={required}
                 disabled={disabled}
             >
-                {!value && <option value="">{placeholder}</option>}
+                <option value="">{placeholder}</option>
 
                 {options.map((option) => {
-                    const [key, title] = Array.isArray(option)
+                    const [key, text] = Array.isArray(option)
                         ? option
                         : [option, option];
 
                     return (
                         <option key={String(key)} value={key}>
-                            {title}
+                            {text}
                         </option>
                     );
                 })}
@@ -140,11 +551,8 @@ function Select({
 function SectionHeading({ number, title, description }) {
     return (
         <div className="ap-section-title">
-            <span className="ap-section-number">{number}</span>
-
             <div>
                 <h2>{title}</h2>
-
                 {description && <p>{description}</p>}
             </div>
         </div>
@@ -160,177 +568,190 @@ function Summary({ label, value }) {
     );
 }
 
-function formatNumber(value) {
-    return Number(value || 0).toLocaleString("en-US");
-}
+function MultiSelect({
+    label,
+    options,
+    values,
+    onChange,
+    language,
+    selectedLabel,
+}) {
+    const languageIndex = language === "ru" ? 2 : language === "en" ? 3 : 1;
 
-function SuccessIcon() {
+    function toggle(value) {
+        if (values.includes(value)) {
+            onChange(values.filter((item) => item !== value));
+        } else {
+            onChange([...values, value]);
+        }
+    }
+
     return (
-        <svg
-            width="37"
-            height="37"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.7"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-        >
-            <circle cx="12" cy="12" r="10" />
-            <path d="m7.5 12 3 3 6-6" />
-        </svg>
+        <div className="ap-extra-group">
+            <div className="ap-extra-group-heading">
+                <h3>{label}</h3>
+                <span>{/* {selectedLabel}: {values.length} */}</span>
+            </div>
+
+            <div className="ap-extra-options">
+                {options.map((option) => {
+                    const [value] = option;
+                    const checked = values.includes(value);
+
+                    return (
+                        <label
+                            key={value}
+                            className={`ap-extra-option ${
+                                checked ? "is-selected" : ""
+                            }`}
+                        >
+                            <input
+                                type="checkbox"
+                                checked={checked}
+                                onChange={() => toggle(value)}
+                            />
+
+                            <span className="ap-extra-check">
+                                {checked ? "✓" : ""}
+                            </span>
+
+                            <span>{option[languageIndex]}</span>
+                        </label>
+                    );
+                })}
+            </div>
+        </div>
     );
 }
 
-function PublicationSuccess({ productId, editing, onClose }) {
+function PublicationSuccess({ productId, editing, onClose, t }) {
     const closeRef = useRef(null);
 
     useEffect(() => {
         closeRef.current?.focus();
 
         const previousOverflow = document.body.style.overflow;
-
         document.body.style.overflow = "hidden";
 
         function handleEscape(event) {
-            if (event.key === "Escape") {
-                onClose();
-            }
+            if (event.key === "Escape") onClose();
         }
 
         window.addEventListener("keydown", handleEscape);
 
         return () => {
             document.body.style.overflow = previousOverflow;
-
             window.removeEventListener("keydown", handleEscape);
         };
     }, [onClose]);
 
     return (
-        <div
-            className="ap-success-overlay"
-            onMouseDown={(event) => {
-                if (event.target === event.currentTarget) {
-                    onClose();
-                }
-            }}
-        >
+        <div className="ap-success-overlay">
             <section
                 className="ap-success-modal"
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="ap-success-title"
-                aria-describedby="ap-success-description"
             >
                 <button
                     ref={closeRef}
-                    className="ap-success-close"
                     type="button"
-                    aria-label="Փակել պատուհանը"
+                    className="ap-success-close"
                     onClick={onClose}
+                    aria-label={t.close}
                 >
                     ×
                 </button>
 
                 <div className="ap-success-icon">
-                    <SuccessIcon />
+                    <svg
+                        width="37"
+                        height="37"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.7"
+                    >
+                        <circle cx="12" cy="12" r="10" />
+                        <path d="m7.5 12 3 3 6-6" />
+                    </svg>
                 </div>
 
                 <span className="ap-success-eyebrow">ARMMOTORS</span>
 
                 <h2 id="ap-success-title">
-                    {editing
-                        ? "Փոփոխությունները պահպանված են"
-                        : "Հայտարարությունը հրապարակված է"}
+                    {editing ? t.successEdit : t.successCreate}
                 </h2>
 
-                <p
-                    id="ap-success-description"
-                    className="ap-success-description"
-                >
-                    {editing
-                        ? "Ձեր հայտարարության տվյալները հաջողությամբ թարմացվել են։"
-                        : "Շնորհավորում ենք։ Ձեր հայտարարությունը հաջողությամբ ավելացվել է ArmMotors կայքում։"}
+                <p className="ap-success-description">
+                    {editing ? t.successEdit : t.successCreate}
                 </p>
 
-                <div className="ap-success-tip">
-                    <div className="ap-success-tip-heading">
-                        <span className="ap-success-tip-star">★</span>
-
-                        <strong>Ավելի շատ տեսանելիություն</strong>
-                    </div>
-
-                    <p>
-                        Յուրաքանչյուր 4 օրը մեկ կարող եք անվճար թարմացնել
-                        հայտարարությունը։ Իսկ TOP և ավտոթարմացման փաթեթները
-                        կօգնեն այն ավելի տեսանելի դարձնել հայտարարությունների
-                        ցուցակում։
-                    </p>
-                </div>
-
                 {productId && (
-                    <a
+                    <Link
                         className="ap-success-primary"
-                        href={`${BASE}cars/${encodeURIComponent(productId)}`}
+                        to={`/cars/${encodeURIComponent(productId)}`}
                     >
-                        Դիտել հայտարարությունը
-                        <span aria-hidden="true">→</span>
-                    </a>
+                        {t.view} →
+                    </Link>
                 )}
 
                 <div className="ap-success-actions">
                     {productId && (
-                        <a
-                            href={`${BASE}add-product?edit=${encodeURIComponent(
+                        <Link
+                            to={`/add-product?edit=${encodeURIComponent(
                                 productId,
                             )}`}
                         >
-                            Խմբագրել
-                        </a>
+                            {t.edit}
+                        </Link>
                     )}
 
-                    <a href={`${BASE}account`}>Իմ հայտարարությունները</a>
+                    <Link to="/account">{t.mine}</Link>
                 </div>
 
-                <a className="ap-success-plans" href={`${BASE}monetization`}>
-                    Դիտել TOP փաթեթները ↗
-                </a>
+                <Link className="ap-success-plans" to="/monetization">
+                    {t.packages} ↗
+                </Link>
             </section>
         </div>
     );
 }
 
+function formatNumber(value) {
+    return Number(value || 0).toLocaleString("en-US");
+}
+
+/* =========================================
+   MAIN PAGE
+========================================= */
+
 export default function AddProductPage() {
-    const params = new URLSearchParams(window.location.search);
+    const navigate = useNavigate();
+    const [params] = useSearchParams();
+    const { language } = useI18n();
+
+    const lang = ["hy", "ru", "en"].includes(language) ? language : "hy";
+
+    const t = TEXT[lang];
 
     const editId = params.get("edit") || "";
     const isEditing = Boolean(editId);
 
     const [form, setForm] = useState(INITIAL_FORM);
-
     const [location, setLocation] = useState(INITIAL_LOCATION);
-
     const [savedRegion, setSavedRegion] = useState("");
-
     const [images, setImages] = useState([]);
-
     const [step, setStep] = useState(0);
 
     const [loading, setLoading] = useState(false);
     const [loadingProduct, setLoadingProduct] = useState(isEditing);
-
     const [error, setError] = useState("");
 
     const [successProductId, setSuccessProductId] = useState("");
-
-    const [successEditing, setSuccessEditing] = useState(false);
-
     const [showSuccess, setShowSuccess] = useState(false);
 
     const token = localStorage.getItem("token");
-
     const isCar = form.type === "car";
 
     const modelList = form.brand ? CAR_MODELS[form.brand] || [] : [];
@@ -341,6 +762,8 @@ export default function AddProductPage() {
         ? [form.brand, form.model, form.year].filter(Boolean).join(" ")
         : form.title.trim();
 
+    const effectiveRegion = location.region || savedRegion;
+
     const locationText = [
         location.region,
         location.community,
@@ -349,124 +772,47 @@ export default function AddProductPage() {
         .filter(Boolean)
         .join(", ");
 
-    const effectiveRegion = location.region || savedRegion;
+    const fuelOptions = [
+        ["petrol", t.petrol],
+        ["diesel", t.diesel],
+        ["gas", t.gas],
+        ["hybrid", t.hybrid],
+        ["electric", t.electric],
+    ];
 
-    // ==========================================
-    // LOGIN REDIRECT
-    // ==========================================
+    const steeringOptions = [
+        ["left", t.left],
+        ["right", t.right],
+    ];
 
-    useEffect(() => {
-        if (!token) {
-            const next = isEditing
-                ? `/add-product?edit=${editId}`
-                : "/add-product";
+    const yesNoOptions = [
+        ["yes", t.yes],
+        ["no", t.no],
+    ];
 
-            window.location.replace(
-                `${BASE}login?next=${encodeURIComponent(next)}`,
-            );
-        }
-    }, [token, isEditing, editId]);
+    const paintOptions = [
+        ["original", t.original],
+        ["repainted", t.repainted],
+    ];
 
-    // ==========================================
-    // LOAD EXISTING PRODUCT FOR EDITING
-    // ==========================================
+    const gasOptions = [
+        ["installed", t.installed],
+        ["notInstalled", t.notInstalled],
+    ];
 
-    useEffect(() => {
-        if (!isEditing || !token) {
-            return;
-        }
+    const interiorOptions = [
+        ["fabric", t.fabric],
+        ["leather", t.leather],
+        ["artificial", t.artificial],
+        ["alcantara", t.alcantara],
+        ["other", t.other],
+    ];
 
-        let cancelled = false;
-
-        async function loadProduct() {
-            setLoadingProduct(true);
-            setError("");
-
-            try {
-                // Վերցնում ենք միայն տվյալ օգտատիրոջ
-                // սեփական հայտարարությունները։
-                const result = await apiRequest("/products/mine");
-
-                const products = Array.isArray(result)
-                    ? result
-                    : Array.isArray(result?.items)
-                      ? result.items
-                      : [];
-
-                const product = products.find(
-                    (item) => String(item._id || item.id) === String(editId),
-                );
-
-                if (!product) {
-                    throw new Error("Հայտարարությունը չի գտնվել Ձեր հաշվում։");
-                }
-
-                if (product.paymentPending) {
-                    throw new Error(
-                        "Վճարման սպասող հայտարարությունը դեռ չի խմբագրվում։",
-                    );
-                }
-
-                if (cancelled) return;
-
-                setForm({
-                    type: product.type || "car",
-                    title: product.title || "",
-                    price:
-                        product.price !== undefined
-                            ? String(product.price)
-                            : "",
-                    currency: product.currency || "AMD",
-                    condition: product.condition || "Օգտագործված",
-                    vehicleType: product.vehicleType || "passenger",
-                    brand: product.brand || "",
-                    model: product.model || "",
-                    year:
-                        product.year !== undefined ? String(product.year) : "",
-                    mileage:
-                        product.mileage !== undefined
-                            ? String(product.mileage)
-                            : "",
-                    fuel: product.fuel || "petrol",
-                    steering: product.steering || "left",
-                    color: product.color || "",
-                    vin: product.vin || "",
-                    description: product.description || "",
-                    phone: product.phone || "",
-                });
-
-                setImages(Array.isArray(product.images) ? product.images : []);
-
-                // Հին տվյալներում պահված է region-ը,
-                // բայց ոչ պարտադիր regionId-ն։
-                // Պահպանում ենք նախկին region-ը,
-                // մինչև օգտատերը նոր վայր ընտրի։
-                setSavedRegion(product.region || "");
-
-                setStep(0);
-            } catch (err) {
-                if (!cancelled) {
-                    setError(
-                        err.message || "Հայտարարությունը բեռնել չհաջողվեց։",
-                    );
-                }
-            } finally {
-                if (!cancelled) {
-                    setLoadingProduct(false);
-                }
-            }
-        }
-
-        void loadProduct();
-
-        return () => {
-            cancelled = true;
-        };
-    }, [editId, isEditing, token]);
-
-    // ==========================================
-    // FORM UPDATE
-    // ==========================================
+    const sunroofOptions = [
+        ["standard", t.standard],
+        ["panoramic", t.panoramic],
+        ["none", t.none],
+    ];
 
     function update(name, value) {
         setForm((old) => ({
@@ -499,9 +845,149 @@ export default function AddProductPage() {
         setError("");
     }
 
-    // ==========================================
-    // IMAGES
-    // ==========================================
+    function renderSelect(label, name, options, extra = {}) {
+        return (
+            <Select
+                label={label}
+                value={form[name]}
+                onChange={(value) => update(name, value)}
+                options={options}
+                placeholder={t.choose}
+                {...extra}
+            />
+        );
+    }
+
+    /* =====================================
+       AUTH
+    ===================================== */
+
+    useEffect(() => {
+        if (!token) {
+            const next = isEditing
+                ? `/add-product?edit=${editId}`
+                : "/add-product";
+
+            navigate(`/login?next=${encodeURIComponent(next)}`, {
+                replace: true,
+            });
+        }
+    }, [token, isEditing, editId, navigate]);
+
+    /* =====================================
+       LOAD EDITING PRODUCT
+    ===================================== */
+
+    useEffect(() => {
+        if (!isEditing || !token) {
+            setLoadingProduct(false);
+            return;
+        }
+
+        let cancelled = false;
+
+        async function loadProduct() {
+            setLoadingProduct(true);
+            setError("");
+
+            try {
+                const result = await apiRequest("/products/mine");
+
+                const products = Array.isArray(result)
+                    ? result
+                    : Array.isArray(result?.items)
+                      ? result.items
+                      : [];
+
+                const product = products.find(
+                    (item) => String(item._id || item.id) === String(editId),
+                );
+
+                if (!product) {
+                    throw new Error(t.notFound);
+                }
+
+                if (product.paymentPending) {
+                    throw new Error(t.paymentPending);
+                }
+
+                if (cancelled) return;
+
+                setForm({
+                    ...INITIAL_FORM,
+
+                    type: product.type || "car",
+                    title: product.title || "",
+                    price:
+                        product.price !== undefined
+                            ? String(product.price)
+                            : "",
+                    currency: product.currency || "AMD",
+                    condition: product.condition || "Օգտագործված",
+
+                    vehicleType: product.vehicleType || "passenger",
+                    brand: product.brand || "",
+                    model: product.model || "",
+                    year: product.year != null ? String(product.year) : "",
+                    mileage:
+                        product.mileage != null ? String(product.mileage) : "",
+                    fuel: product.fuel || "petrol",
+                    steering: product.steering || "left",
+                    color: product.color || "",
+                    vin: product.vin || "",
+
+                    customsCleared: product.customsCleared || "",
+                    paintCondition: product.paintCondition || "",
+                    gasEquipment: product.gasEquipment || "",
+                    gasCylinderReplaced: product.gasCylinderReplaced || "",
+                    wheelSize: product.wheelSize || "",
+                    interiorMaterial: product.interiorMaterial || "",
+                    sunroof: product.sunroof || "",
+
+                    headlights: Array.isArray(product.headlights)
+                        ? product.headlights
+                        : [],
+
+                    comfort: Array.isArray(product.comfort)
+                        ? product.comfort
+                        : [],
+
+                    description: product.description || "",
+                    phone: product.phone || "",
+                });
+
+                setImages(Array.isArray(product.images) ? product.images : []);
+
+                setSavedRegion(product.region || "");
+                setLocation({
+                    ...INITIAL_LOCATION,
+                    region: product.region || "",
+                    community: product.community || "",
+                    settlement: product.settlement || "",
+                });
+
+                setStep(0);
+            } catch (err) {
+                if (!cancelled) {
+                    setError(err.message || t.saveError);
+                }
+            } finally {
+                if (!cancelled) {
+                    setLoadingProduct(false);
+                }
+            }
+        }
+
+        void loadProduct();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [editId, isEditing, token]);
+
+    /* =====================================
+       IMAGES
+    ===================================== */
 
     function handleUploaded(result) {
         const raw = Array.isArray(result)
@@ -520,8 +1006,7 @@ export default function AddProductPage() {
             const next = [...new Set([...old, ...urls])];
 
             if (next.length > 12) {
-                setError("Առավելագույնը 12 նկար կարող եք ավելացնել։");
-
+                setError(t.tooManyImages);
                 return old;
             }
 
@@ -538,14 +1023,14 @@ export default function AddProductPage() {
         setImages((old) => [url, ...old.filter((image) => image !== url)]);
     }
 
-    // ==========================================
-    // VALIDATION
-    // ==========================================
+    /* =====================================
+       VALIDATION
+    ===================================== */
 
     function validate(index) {
         if (index === 0) {
             if (!isCar && !title) {
-                return "Լրացրեք պահեստամասի անվանումը։";
+                return t.invalidTitle;
             }
 
             if (
@@ -553,20 +1038,20 @@ export default function AddProductPage() {
                 !Number.isFinite(Number(form.price)) ||
                 Number(form.price) < 0
             ) {
-                return "Նշեք ճիշտ գին։";
+                return t.invalidPrice;
             }
 
             if (
                 !effectiveRegion ||
                 (!isEditing && (!location.regionId || !location.communityId))
             ) {
-                return "Ընտրեք գտնվելու վայրը։";
+                return t.invalidLocation;
             }
         }
 
         if (index === 1 && isCar) {
             if (!form.brand || !form.model || !form.year) {
-                return "Լրացրեք մակնիշը, մոդելը և տարեթիվը։";
+                return t.invalidVehicle;
             }
 
             if (
@@ -574,18 +1059,18 @@ export default function AddProductPage() {
                 !Number.isFinite(Number(form.mileage)) ||
                 Number(form.mileage) < 0
             ) {
-                return "Նշեք ճիշտ վազքը։";
+                return t.invalidMileage;
             }
 
             if (!form.color) {
-                return "Ընտրեք մեքենայի գույնը։";
+                return t.invalidColor;
             }
 
             if (
                 form.vin.trim() &&
                 !/^[A-HJ-NPR-Z0-9]{17}$/i.test(form.vin.trim())
             ) {
-                return "VIN-ը պետք է պարունակի 17 ճիշտ նիշ։";
+                return t.invalidVin;
             }
         }
 
@@ -593,11 +1078,11 @@ export default function AddProductPage() {
             const phone = form.phone.replace(/[\s()-]/g, "");
 
             if (!/^\+?[0-9]{8,15}$/.test(phone)) {
-                return "Նշեք ճիշտ հեռախոսահամար։";
+                return t.invalidPhone;
             }
 
             if (images.length === 0) {
-                return "Ավելացրեք առնվազն մեկ նկար։";
+                return t.invalidImages;
             }
         }
 
@@ -614,26 +1099,18 @@ export default function AddProductPage() {
 
         setError("");
         setStep((old) => Math.min(old + 1, 3));
-
-        window.scrollTo({
-            top: 0,
-            behavior: "smooth",
-        });
+        window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
     function previousStep() {
         setError("");
         setStep((old) => Math.max(old - 1, 0));
-
-        window.scrollTo({
-            top: 0,
-            behavior: "smooth",
-        });
+        window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
-    // ==========================================
-    // DESCRIPTION
-    // ==========================================
+    /* =====================================
+       DESCRIPTION
+    ===================================== */
 
     function createDescription() {
         if (form.description.trim()) {
@@ -641,33 +1118,26 @@ export default function AddProductPage() {
         }
 
         if (!isCar) {
-            return [
-                `Պահեստամաս՝ ${title}։`,
-                `Վիճակ՝ ${form.condition}։`,
-                `Գտնվելու վայր՝ ${effectiveRegion}։`,
-            ].join(" ");
+            return `${t.part}: ${title}. ${t.location}: ${effectiveRegion}.`;
         }
 
         return [
-            `Մեքենա՝ ${title}։`,
-            `Վազք՝ ${formatNumber(form.mileage)} կմ։`,
-            `Վառելիք՝ ${form.fuel}։`,
-            `Ղեկ՝ ${form.steering}։`,
-            `Գույն՝ ${form.color}։`,
-            `Գտնվելու վայր՝ ${effectiveRegion}։`,
+            `${t.car}: ${title}.`,
+            `${t.mileage}: ${formatNumber(form.mileage)} km.`,
+            `${t.fuel}: ${form.fuel}.`,
+            `${t.color}: ${form.color}.`,
+            `${t.location}: ${effectiveRegion}.`,
         ].join(" ");
     }
 
-    // ==========================================
-    // CREATE / UPDATE
-    // ==========================================
+    /* =====================================
+       SAVE PRODUCT
+    ===================================== */
 
     async function handleSubmit(event) {
         event.preventDefault();
 
-        if (loading || step !== 3) {
-            return;
-        }
+        if (loading || step !== 3) return;
 
         for (let i = 0; i < 3; i++) {
             const message = validate(i);
@@ -689,7 +1159,11 @@ export default function AddProductPage() {
                 price: Number(form.price),
                 currency: form.currency,
                 condition: form.condition,
+
                 region: effectiveRegion,
+                community: location.community || (isEditing ? undefined : ""),
+                settlement: location.settlement || (isEditing ? undefined : ""),
+
                 description: createDescription(),
                 phone: form.phone.replace(/[\s()-]/g, ""),
                 images,
@@ -706,10 +1180,18 @@ export default function AddProductPage() {
                     steering: form.steering,
                     color: form.color,
                     vin: form.vin.trim().toUpperCase(),
+
+                    customsCleared: form.customsCleared,
+                    paintCondition: form.paintCondition,
+                    gasEquipment: form.gasEquipment,
+                    gasCylinderReplaced: form.gasCylinderReplaced,
+                    wheelSize: form.wheelSize,
+                    interiorMaterial: form.interiorMaterial,
+                    sunroof: form.sunroof,
+                    headlights: form.headlights,
+                    comfort: form.comfort,
                 });
             } else if (isEditing) {
-                // Եթե մեքենան փոխել են պահեստամասի,
-                // նախկին մեքենայի տվյալները մաքրում ենք։
                 Object.assign(payload, {
                     vehicleType: null,
                     brand: "",
@@ -720,6 +1202,16 @@ export default function AddProductPage() {
                     steering: null,
                     color: "",
                     vin: "",
+
+                    customsCleared: "",
+                    paintCondition: "",
+                    gasEquipment: "",
+                    gasCylinderReplaced: "",
+                    wheelSize: "",
+                    interiorMaterial: "",
+                    sunroof: "",
+                    headlights: [],
+                    comfort: [],
                 });
             }
 
@@ -742,8 +1234,7 @@ export default function AddProductPage() {
             }
 
             if (!isEditing && result?.requiresPayment) {
-                window.location.assign(`${BASE}monetization`);
-
+                navigate("/monetization");
                 return;
             }
 
@@ -755,93 +1246,68 @@ export default function AddProductPage() {
                 editId;
 
             setSuccessProductId(String(productId || ""));
-
-            setSuccessEditing(isEditing);
             setShowSuccess(true);
         } catch (err) {
             if (err.status === 401) {
-                window.location.assign(
-                    `${BASE}login?next=${encodeURIComponent(
-                        isEditing
-                            ? `/add-product?edit=${editId}`
-                            : "/add-product",
-                    )}`,
-                );
+                const next = isEditing
+                    ? `/add-product?edit=${editId}`
+                    : "/add-product";
+
+                navigate(`/login?next=${encodeURIComponent(next)}`, {
+                    replace: true,
+                });
 
                 return;
             }
 
-            setError(err.message || "Տվյալները պահպանել չհաջողվեց։");
+            setError(err.message || t.saveError);
         } finally {
             setLoading(false);
         }
     }
 
-    // ==========================================
-    // AUTH / LOADING
-    // ==========================================
+    /* =====================================
+       PAGE
+    ===================================== */
 
-    if (!token) {
-        return null;
-    }
+    if (!token) return null;
 
     if (loadingProduct) {
         return (
-            <>
-                <Header />
-
-                <main className="ap-page">
-                    <div className="ap-container">
-                        <p>Հայտարարության տվյալները բեռնվում են...</p>
-                    </div>
-                </main>
-            </>
+            <main className="ap-page">
+                <div className="ap-container">
+                    <p>{t.loading}</p>
+                </div>
+            </main>
         );
     }
 
-    // ==========================================
-    // PAGE
-    // ==========================================
-
     return (
         <>
-            <Header />
-
             <main className="ap-page">
                 <div className="ap-container">
-                    <a
-                        href={isEditing ? `${BASE}account` : BASE}
+                    <Link
+                        to={isEditing ? "/account" : "/"}
                         className="ap-back-link"
                     >
-                        ← {isEditing ? "Իմ հայտարարությունները" : "Գլխավոր էջ"}
-                    </a>
+                        ← {isEditing ? t.mine : t.home}
+                    </Link>
 
                     <div className="ap-heading">
                         <div>
-                            <span className="ap-eyebrow">ARMMOTORS</span>
 
-                            <h1>
-                                {isEditing
-                                    ? "Խմբագրել հայտարարությունը"
-                                    : "Տեղադրել հայտարարություն"}
-                            </h1>
+                            <h1>{isEditing ? t.edit : t.add}</h1>
 
-                            <p>
-                                {isEditing
-                                    ? "Կարող եք փոփոխել հայտարարության բոլոր տվյալներն ու լուսանկարները։"
-                                    : "Լրացրեք տվյալները, ավելացրեք լուսանկարներ և հրապարակեք։"}
-                            </p>
+                            <p>{t.help}</p>
                         </div>
-
-                        <span className="ap-heading-badge">
-                            Քայլ {step + 1} / 4
-                        </span>
                     </div>
 
+                    {/* PROGRESS */}
+
                     <div className="ap-progress">
-                        {STEPS.map((name, index) => (
+                        {t.steps.map((name, index) => (
                             <div
-                                key={name}
+                                key={index}
                                 className={[
                                     "ap-progress-step",
                                     index === step ? "is-active" : "",
@@ -862,86 +1328,82 @@ export default function AddProductPage() {
                         onSubmit={handleSubmit}
                         noValidate
                     >
-                        {/* STEP 1 */}
+                        {/* =========================
+                            STEP 1 — BASIC
+                        ========================= */}
 
                         {step === 0 && (
                             <section className="ap-section">
                                 <SectionHeading
                                     number="01"
-                                    title="Հիմնական տվյալներ"
-                                    description="Նշեք հայտարարության տեսակը, գինը և գտնվելու վայրը։"
+                                    title={t.basic}
+                                    description={t.help}
                                 />
 
                                 <div className="ap-grid">
                                     <Select
-                                        label="Բաժին"
+                                        label={t.category}
                                         value={form.type}
                                         onChange={changeType}
                                         options={[
-                                            ["car", "Մեքենա"],
-                                            ["part", "Պահեստամաս"],
+                                            ["car", t.car],
+                                            ["part", t.part],
                                         ]}
+                                        placeholder={t.choose}
                                     />
 
                                     <Select
-                                        label="Վիճակ"
+                                        label={t.condition}
                                         value={form.condition}
                                         onChange={(value) =>
                                             update("condition", value)
                                         }
-                                        options={["Նոր", "Օգտագործված"]}
+                                        options={[
+                                            ["Նոր", t.new],
+                                            ["Օգտագործված", t.used],
+                                        ]}
+                                        placeholder={t.choose}
                                     />
 
                                     {!isCar && (
                                         <div className="ap-full">
                                             <Field
-                                                label="Պահեստամասի անվանում"
+                                                label={t.partTitle}
                                                 value={form.title}
                                                 onChange={(value) =>
                                                     update("title", value)
                                                 }
                                                 required
-                                                placeholder="Օրինակ՝ Mercedes W212 լուսարձակ"
                                             />
                                         </div>
                                     )}
 
                                     <Field
-                                        label="Գին"
+                                        label={t.price}
                                         type="number"
+                                        min="0"
                                         value={form.price}
                                         onChange={(value) =>
                                             update("price", value)
                                         }
-                                        min="0"
                                         required
-                                        placeholder="Գինը"
                                     />
 
-                                    <Select
-                                        label="Արժույթ"
-                                        value={form.currency}
-                                        onChange={(value) =>
-                                            update("currency", value)
-                                        }
-                                        options={[
-                                            ["AMD", "AMD — Դրամ"],
-                                            ["USD", "USD — Դոլար"],
-                                            ["RUB", "RUB — Ռուբլի"],
-                                        ]}
-                                    />
+                                    {renderSelect(t.currency, "currency", [
+                                        ["AMD", "AMD"],
+                                        ["USD", "USD"],
+                                        ["RUB", "RUB"],
+                                    ])}
 
                                     <div className="ap-full">
                                         <h3 className="ap-location-heading">
-                                            Գտնվելու վայր
+                                            {t.location}
                                         </h3>
 
                                         {isEditing && savedRegion && (
                                             <p className="ap-existing-location">
-                                                Ընթացիկ վայր՝{" "}
-                                                <strong>{savedRegion}</strong>։
-                                                Կարող եք թողնել անփոփոխ կամ
-                                                ընտրել նորը։
+                                                {t.currentLocation}:{" "}
+                                                <strong>{savedRegion}</strong>
                                             </p>
                                         )}
                                     </div>
@@ -950,7 +1412,6 @@ export default function AddProductPage() {
                                         value={location}
                                         onChange={(value) => {
                                             setLocation(value);
-
                                             setError("");
                                         }}
                                     />
@@ -958,154 +1419,214 @@ export default function AddProductPage() {
                             </section>
                         )}
 
-                        {/* STEP 2 */}
+                        {/* =========================
+                            STEP 2 — VEHICLE
+                        ========================= */}
 
                         {step === 1 && (
                             <section className="ap-section">
                                 <SectionHeading
                                     number="02"
-                                    title={
-                                        isCar
-                                            ? "Մեքենայի տվյալներ"
-                                            : "Պահեստամասի տվյալներ"
-                                    }
-                                    description={
-                                        isCar
-                                            ? "Փոփոխեք մեքենայի տեխնիկական տվյալները։"
-                                            : "Շարունակեք նկարների և կապի տվյալների բաժին։"
-                                    }
+                                    title={isCar ? t.carDetails : t.partDetails}
+                                    description={t.help}
                                 />
 
                                 {isCar ? (
-                                    <div className="ap-grid">
-                                        <Select
-                                            label="Մեքենայի տեսակ"
-                                            value={form.vehicleType}
-                                            onChange={(value) =>
-                                                update("vehicleType", value)
-                                            }
-                                            options={[
-                                                ["passenger", "Մարդատար"],
-                                                ["truck", "Բեռնատար"],
-                                            ]}
-                                        />
+                                    <>
+                                        {/* MAIN VEHICLE DATA */}
 
-                                        <Select
-                                            label="Մակնիշ"
-                                            value={form.brand}
-                                            onChange={changeBrand}
-                                            options={CAR_BRANDS}
-                                            required
-                                        />
+                                        <div className="ap-grid">
+                                            {renderSelect(
+                                                t.vehicleType,
+                                                "vehicleType",
+                                                [
+                                                    ["passenger", t.passenger],
+                                                    ["truck", t.truck],
+                                                ],
+                                            )}
 
-                                        <Select
-                                            label="Մոդել"
-                                            value={form.model}
-                                            onChange={(value) =>
-                                                update("model", value)
-                                            }
-                                            options={modelOptions}
-                                            disabled={!form.brand}
-                                            required
-                                        />
+                                            <Select
+                                                label={t.brand}
+                                                value={form.brand}
+                                                onChange={changeBrand}
+                                                options={CAR_BRANDS}
+                                                placeholder={t.choose}
+                                                required
+                                            />
 
-                                        <Select
-                                            label="Տարեթիվ"
-                                            value={form.year}
-                                            onChange={(value) =>
-                                                update("year", value)
-                                            }
-                                            options={CAR_YEARS.map((year) => [
-                                                String(year),
-                                                String(year),
-                                            ])}
-                                            required
-                                        />
+                                            {renderSelect(
+                                                t.model,
+                                                "model",
+                                                modelOptions,
+                                                {
+                                                    disabled: !form.brand,
+                                                    required: true,
+                                                },
+                                            )}
 
-                                        <Field
-                                            label="Վազք (կմ)"
-                                            type="number"
-                                            value={form.mileage}
-                                            onChange={(value) =>
-                                                update("mileage", value)
-                                            }
-                                            min="0"
-                                            required
-                                        />
+                                            {renderSelect(
+                                                t.year,
+                                                "year",
+                                                CAR_YEARS.map((year) => [
+                                                    String(year),
+                                                    String(year),
+                                                ]),
+                                                { required: true },
+                                            )}
 
-                                        <Select
-                                            label="Վառելիք"
-                                            value={form.fuel}
-                                            onChange={(value) =>
-                                                update("fuel", value)
-                                            }
-                                            options={FUEL_OPTIONS}
-                                        />
+                                            <Field
+                                                label={t.mileage}
+                                                type="number"
+                                                min="0"
+                                                value={form.mileage}
+                                                onChange={(value) =>
+                                                    update("mileage", value)
+                                                }
+                                                required
+                                            />
 
-                                        <Select
-                                            label="Ղեկ"
-                                            value={form.steering}
-                                            onChange={(value) =>
-                                                update("steering", value)
-                                            }
-                                            options={STEERING_OPTIONS}
-                                        />
+                                            {renderSelect(
+                                                t.fuel,
+                                                "fuel",
+                                                fuelOptions,
+                                            )}
 
-                                        <Select
-                                            label="Գույն"
-                                            value={form.color}
-                                            onChange={(value) =>
-                                                update("color", value)
-                                            }
-                                            options={CAR_COLORS}
-                                            required
-                                        />
+                                            {renderSelect(
+                                                t.steering,
+                                                "steering",
+                                                steeringOptions,
+                                            )}
 
-                                        <Field
-                                            label="VIN"
-                                            value={form.vin}
-                                            onChange={(value) =>
-                                                update(
-                                                    "vin",
-                                                    value.toUpperCase(),
-                                                )
-                                            }
-                                            maxLength={17}
-                                            placeholder="Ըստ ցանկության"
-                                        />
-                                    </div>
+                                            {renderSelect(
+                                                t.color,
+                                                "color",
+                                                CAR_COLORS,
+                                                { required: true },
+                                            )}
+
+                                            <Field
+                                                label="VIN"
+                                                value={form.vin}
+                                                onChange={(value) =>
+                                                    update(
+                                                        "vin",
+                                                        value.toUpperCase(),
+                                                    )
+                                                }
+                                                maxLength={17}
+                                                placeholder={t.optional}
+                                            />
+                                        </div>
+
+                                        {/* TECHNICAL DETAILS */}
+
+                                        <div className="ap-extra-section">
+                                            <div className="ap-extra-heading">
+                                                <h3>{t.technical}</h3>
+                                            </div>
+
+                                            <div className="ap-grid">
+                                                {renderSelect(
+                                                    t.customsCleared,
+                                                    "customsCleared",
+                                                    yesNoOptions,
+                                                )}
+
+                                                {renderSelect(
+                                                    t.paintCondition,
+                                                    "paintCondition",
+                                                    paintOptions,
+                                                )}
+
+                                                {renderSelect(
+                                                    t.gasEquipment,
+                                                    "gasEquipment",
+                                                    gasOptions,
+                                                )}
+
+                                                {form.gasEquipment ===
+                                                    "installed" &&
+                                                    renderSelect(
+                                                        t.gasCylinderReplaced,
+                                                        "gasCylinderReplaced",
+                                                        yesNoOptions,
+                                                    )}
+
+                                                {renderSelect(
+                                                    t.wheelSize,
+                                                    "wheelSize",
+                                                    WHEEL_OPTIONS,
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* INTERIOR */}
+
+                                        <div className="ap-extra-section">
+                                            <div className="ap-extra-heading">
+                                                <h3>{t.interior}</h3>
+                                            </div>
+
+                                            <div className="ap-grid">
+                                                {renderSelect(
+                                                    t.interiorMaterial,
+                                                    "interiorMaterial",
+                                                    interiorOptions,
+                                                )}
+
+                                                {renderSelect(
+                                                    t.sunroof,
+                                                    "sunroof",
+                                                    sunroofOptions,
+                                                )}
+                                            </div>
+
+                                            <MultiSelect
+                                                label={t.comfort}
+                                                options={COMFORT_OPTIONS}
+                                                values={form.comfort}
+                                                onChange={(values) =>
+                                                    update("comfort", values)
+                                                }
+                                                language={lang}
+                                                selectedLabel={t.selected}
+                                            />
+                                        </div>
+                                    </>
                                 ) : (
                                     <div className="ap-info-box">
-                                        Շարունակեք հաջորդ քայլ։
+                                        {t.partDetails}
                                     </div>
                                 )}
                             </section>
                         )}
 
-                        {/* STEP 3 */}
+                        {/* =========================
+                            STEP 3 — PHOTOS
+                        ========================= */}
 
                         {step === 2 && (
                             <section className="ap-section">
                                 <SectionHeading
                                     number="03"
-                                    title="Նկարներ և կապ"
-                                    description="Փոփոխեք հեռախոսահամարը, նկարագրությունը և լուսանկարները։"
+                                    title={t.contact}
+                                    description={t.photosHelp}
                                 />
 
                                 <div className="ap-grid">
                                     <Field
-                                        label="Հեռախոսահամար"
+                                        label={t.phone}
                                         value={form.phone}
                                         onChange={(value) =>
                                             update("phone", value)
                                         }
-                                        required
                                         placeholder="+374XXXXXXXX"
+                                        required
                                     />
 
                                     <label className="ap-field ap-full">
                                         <span className="ap-field-label">
-                                            Նկարագրություն
+                                            {t.description}
                                         </span>
 
                                         <textarea
@@ -1117,7 +1638,9 @@ export default function AddProductPage() {
                                                 )
                                             }
                                             maxLength={7000}
-                                            placeholder="Նկարագրեք մեքենան կամ պահեստամասը..."
+                                            placeholder={
+                                                t.descriptionPlaceholder
+                                            }
                                         />
                                     </label>
                                 </div>
@@ -1125,12 +1648,8 @@ export default function AddProductPage() {
                                 <div className="ap-upload-section">
                                     <div className="ap-upload-heading">
                                         <div>
-                                            <h3>Լուսանկարներ</h3>
-
-                                            <p>
-                                                Առավելագույնը 12 նկար։ Առաջինը
-                                                կլինի գլխավոր։
-                                            </p>
+                                            <h3>{t.photos}</h3>
+                                            <p>{t.photosHelp}</p>
                                         </div>
 
                                         <span className="ap-image-count">
@@ -1151,19 +1670,19 @@ export default function AddProductPage() {
                                         <div className="ap-images-grid">
                                             {images.map((url, index) => (
                                                 <div
+                                                    className="ap-image-item"
                                                     key={url}
-                                                    className="ap-image-card"
                                                 >
                                                     <img
                                                         src={url}
-                                                        alt={`Նկար ${
+                                                        alt={`${t.photos} ${
                                                             index + 1
                                                         }`}
                                                     />
 
                                                     {index === 0 && (
                                                         <span className="ap-main-image-badge">
-                                                            Գլխավոր
+                                                            {t.main}
                                                         </span>
                                                     )}
 
@@ -1177,7 +1696,7 @@ export default function AddProductPage() {
                                                                     )
                                                                 }
                                                             >
-                                                                Գլխավոր
+                                                                {t.main}
                                                             </button>
                                                         )}
 
@@ -1188,7 +1707,7 @@ export default function AddProductPage() {
                                                                 removeImage(url)
                                                             }
                                                         >
-                                                            Հեռացնել
+                                                            {t.remove}
                                                         </button>
                                                     </div>
                                                 </div>
@@ -1199,7 +1718,9 @@ export default function AddProductPage() {
                             </section>
                         )}
 
-                        {/* STEP 4 */}
+                        {/* =========================
+                            STEP 4 — REVIEW
+                        ========================= */}
 
                         {step === 3 && (
                             <>
@@ -1208,16 +1729,13 @@ export default function AddProductPage() {
                                 <section className="ap-section">
                                     <SectionHeading
                                         number="04"
-                                        title="Ստուգեք տվյալները"
-                                        description="Համոզվեք, որ ամեն ինչ ճիշտ է՝ մինչև պահպանելը։"
+                                        title={t.review}
+                                        description={t.help}
                                     />
 
                                     {images[0] && (
                                         <div className="ap-review-cover">
-                                            <img
-                                                src={images[0]}
-                                                alt="Գլխավոր նկար"
-                                            />
+                                            <img src={images[0]} alt={t.main} />
                                         </div>
                                     )}
 
@@ -1232,89 +1750,141 @@ export default function AddProductPage() {
 
                                     <div className="ap-summary-grid">
                                         <Summary
-                                            label="Տեսակ"
+                                            label={t.category}
+                                            value={isCar ? t.car : t.part}
+                                        />
+
+                                        <Summary
+                                            label={t.condition}
                                             value={
-                                                isCar ? "Մեքենա" : "Պահեստամաս"
+                                                form.condition === "Նոր"
+                                                    ? t.new
+                                                    : t.used
                                             }
                                         />
 
                                         <Summary
-                                            label="Վիճակ"
-                                            value={form.condition}
-                                        />
-
-                                        <Summary
-                                            label="Գտնվելու վայր"
+                                            label={t.location}
                                             value={locationText || savedRegion}
                                         />
 
                                         <Summary
-                                            label="Հեռախոս"
+                                            label={t.phone}
                                             value={form.phone}
                                         />
 
                                         {isCar && (
                                             <>
                                                 <Summary
-                                                    label="Մակնիշ"
+                                                    label={t.brand}
                                                     value={form.brand}
                                                 />
 
                                                 <Summary
-                                                    label="Մոդել"
+                                                    label={t.model}
                                                     value={form.model}
                                                 />
 
                                                 <Summary
-                                                    label="Տարեթիվ"
+                                                    label={t.year}
                                                     value={form.year}
                                                 />
 
                                                 <Summary
-                                                    label="Վազք"
+                                                    label={t.mileage}
                                                     value={`${formatNumber(
                                                         form.mileage,
-                                                    )} կմ`}
+                                                    )} km`}
                                                 />
 
                                                 <Summary
-                                                    label="Վառելիք"
-                                                    value={form.fuel}
+                                                    label={t.fuel}
+                                                    value={
+                                                        fuelOptions.find(
+                                                            ([value]) =>
+                                                                value ===
+                                                                form.fuel,
+                                                        )?.[1]
+                                                    }
                                                 />
 
                                                 <Summary
-                                                    label="Գույն"
+                                                    label={t.color}
                                                     value={form.color}
+                                                />
+
+                                                <Summary
+                                                    label={t.wheelSize}
+                                                    value={form.wheelSize}
+                                                />
+
+                                                <Summary
+                                                    label={t.interiorMaterial}
+                                                    value={
+                                                        interiorOptions.find(
+                                                            ([value]) =>
+                                                                value ===
+                                                                form.interiorMaterial,
+                                                        )?.[1]
+                                                    }
+                                                />
+
+                                                <Summary
+                                                    label={t.sunroof}
+                                                    value={
+                                                        sunroofOptions.find(
+                                                            ([value]) =>
+                                                                value ===
+                                                                form.sunroof,
+                                                        )?.[1]
+                                                    }
+                                                />
+
+                                                <Summary
+                                                    label={t.comfort}
+                                                    value={String(
+                                                        form.comfort.length,
+                                                    )}
+                                                />
+
+                                                <Summary
+                                                    label={t.headlights}
+                                                    value={String(
+                                                        form.headlights.length,
+                                                    )}
                                                 />
                                             </>
                                         )}
 
                                         <Summary
-                                            label="Նկարներ"
-                                            value={`${images.length} հատ`}
+                                            label={t.photos}
+                                            value={String(images.length)}
                                         />
                                     </div>
 
                                     <div className="ap-review-description">
-                                        <h3>Նկարագրություն</h3>
-
+                                        <h3>{t.description}</h3>
                                         <p>{createDescription()}</p>
                                     </div>
 
                                     <div className="ap-info-box">
                                         {isEditing
-                                            ? "Տվյալները փոխելու համար նոր հրապարակման վճար չի պահանջվում։ Խմբագրումը ինքնաբերաբար չի բարձրացնում հայտարարությունը ցուցակում։"
-                                            : "Առաջին 5 հայտարարությունն անվճար է, իսկ յուրաքանչյուր հաջորդ հրապարակումը՝ 100 դրամ։"}
+                                            ? t.paymentEdit
+                                            : t.paymentCreate}
                                     </div>
                                 </section>
                             </>
                         )}
+
+                        {/* ERROR */}
 
                         {error && (
                             <div className="ap-error" role="alert">
                                 {error}
                             </div>
                         )}
+
+                        {/* FOOTER */}
 
                         <div className="ap-form-footer">
                             <div className="ap-footer-left">
@@ -1325,7 +1895,7 @@ export default function AddProductPage() {
                                         onClick={previousStep}
                                         disabled={loading}
                                     >
-                                        ← Նախորդ քայլ
+                                        ← {t.previous}
                                     </button>
                                 )}
                             </div>
@@ -1336,7 +1906,7 @@ export default function AddProductPage() {
                                     className="ap-next-button"
                                     onClick={nextStep}
                                 >
-                                    Շարունակել →
+                                    {t.next} →
                                 </button>
                             ) : (
                                 <button
@@ -1345,10 +1915,10 @@ export default function AddProductPage() {
                                     disabled={loading}
                                 >
                                     {loading
-                                        ? "Պահպանվում է..."
+                                        ? t.saving
                                         : isEditing
-                                          ? "Պահպանել փոփոխությունները"
-                                          : "Հրապարակել հայտարարությունը"}
+                                          ? t.save
+                                          : t.publish}
                                 </button>
                             )}
                         </div>
@@ -1359,7 +1929,8 @@ export default function AddProductPage() {
             {showSuccess && (
                 <PublicationSuccess
                     productId={successProductId}
-                    editing={successEditing}
+                    editing={isEditing}
+                    t={t}
                     onClose={() => setShowSuccess(false)}
                 />
             )}

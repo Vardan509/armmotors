@@ -1,14 +1,10 @@
 import { useState } from "react";
-
-import Header from "../components/header/Header";
-import GoogleSignIn from "../components/GoogleSignIn";
-import ListingPromotion from "../components/monetization/ListingPromotion";
-
 import useRemote from "../utils/useRemote";
 import useCurrency from "../utils/useCurrency";
 import { apiRequest } from "../utils/api";
-
+import ListingPromotion from "../components/monetization/ListingPromotion";
 import "./Account.css";
+import AccountBroadcasts from "../components/notifications/AccountBroadcasts";
 
 const BASE = import.meta.env.BASE_URL;
 
@@ -20,25 +16,15 @@ const LABELS = {
 
 export default function AccountPage() {
     const [revision, setRevision] = useState(0);
-    const [busy, setBusy] = useState("");
     const [error, setError] = useState("");
+    const [busy, setBusy] = useState("");
+    const [editing, setEditing] = useState(null);
 
     const me = useRemote("/auth/me");
-    const listings = useRemote("/products/mine", revision);
     const orders = useRemote("/orders", revision);
+    const listings = useRemote("/products/mine", revision);
 
     const { format } = useCurrency();
-
-    const items = Array.isArray(listings.data) ? listings.data : [];
-
-    const activeCount = items.filter((item) => item.status === "active").length;
-
-    const soldCount = items.filter((item) => item.status === "sold").length;
-
-    const totalViews = items.reduce(
-        (sum, item) => sum + Number(item.views || 0),
-        0,
-    );
 
     async function changeListing(id, data) {
         setBusy(id);
@@ -50,20 +36,22 @@ export default function AccountPage() {
                 body: JSON.stringify(data),
             });
 
-            setRevision((old) => old + 1);
+            setEditing(null);
+            setRevision((n) => n + 1);
         } catch (err) {
             setError(err.message);
         } finally {
             setBusy("");
         }
     }
+    <AccountBroadcasts />;
 
     async function deleteListing(id) {
-        const confirmed = window.confirm(
-            "Վստա՞հ եք, որ ցանկանում եք ջնջել հայտարարությունը։",
-        );
-
-        if (!confirmed) return;
+        if (
+            !window.confirm("Վստա՞հ եք, որ ուզում եք ջնջել հայտարարությունը։")
+        ) {
+            return;
+        }
 
         setBusy(id);
         setError("");
@@ -73,7 +61,7 @@ export default function AccountPage() {
                 method: "DELETE",
             });
 
-            setRevision((old) => old + 1);
+            setRevision((n) => n + 1);
         } catch (err) {
             setError(err.message);
         } finally {
@@ -90,7 +78,7 @@ export default function AccountPage() {
                 method: "PATCH",
             });
 
-            setRevision((old) => old + 1);
+            setRevision((n) => n + 1);
         } catch (err) {
             setError(err.message);
         } finally {
@@ -98,305 +86,337 @@ export default function AccountPage() {
         }
     }
 
+    const items = Array.isArray(listings.data) ? listings.data : [];
+
+    const totalViews = items.reduce(
+        (sum, product) => sum + (Number(product.views) || 0),
+        0,
+    );
+
+    const activeCount = items.filter(
+        (product) => product.status === "active",
+    ).length;
+
+    const soldCount = items.filter(
+        (product) => product.status === "sold",
+    ).length;
+
     return (
-        <>
-            <Header />
+        <main className="account-page">
+            <div className="account-heading">
+                <div>
+                    <span className="account-eyebrow">ARMMOTORS</span>
 
-            <main className="account-page">
-                <div className="account-heading">
-                    <div>
-                        <span className="account-eyebrow">
-                            ARMMOTORS ACCOUNT
-                        </span>
+                    <h1>Անձնական Էջ</h1>
 
-                        <h1>Անձնական էջ</h1>
-
-                        <p>
-                            Կառավարեք Ձեր հայտարարությունները, տեսանելիությունը
-                            և վճարումները։
-                        </p>
-                    </div>
-
-                    <div className="account-heading-actions">
-                        <a
-                            className="account-money-link"
-                            href={`${BASE}monetization`}
-                        >
-                            ★ Փաթեթներ
-                        </a>
-
-                        <a
-                            className="account-add-link"
-                            href={`${BASE}add-product`}
-                        >
-                            + Տեղադրել հայտարարություն
-                        </a>
-                    </div>
+                    <p>
+                        Կառավարեք ձեր հայտարարությունները և հետևեք դրանց
+                        վիճակագրությանը։
+                    </p>
                 </div>
 
-                {me.loading ? (
-                    <p className="account-loading">Հաշիվը բեռնվում է...</p>
-                ) : me.error || !me.data ? (
-                    <div className="account-empty">
-                        <h2>Մուտք գործեք Ձեր հաշիվ</h2>
+                <a className="account-money-link" href={`${BASE}monetization`}>
+                    Դարձնել հայտարարությունը ավելի տեսանելի
+                </a>
+            </div>
 
-                        <p>
-                            {me.error ||
-                                "Մուտք գործեք Ձեր հայտարարությունները կառավարելու համար։"}
-                        </p>
+            {me.loading ? (
+                <p>Բեռնվում է...</p>
+            ) : me.error || !me.data ? (
+                <div className="account-empty">
+                    <h2>Մուտք գործեք Ձեր հաշիվ</h2>
 
-                        <a href={`${BASE}login?next=/account`}>Մուտք</a>
-                    </div>
-                ) : (
-                    <>
-                        {/* PROFILE */}
+                    <p>
+                        {me.error ||
+                            "Հայտարարությունները կառավարելու համար մուտք գործեք։"}
+                    </p>
 
-                        <section className="account-profile">
-                            <div className="account-avatar">
-                                {me.data.name?.[0]?.toUpperCase() || "U"}
-                            </div>
+                    <a href={`${BASE}login?next=/account`}>Մուտք</a>
+                </div>
+            ) : (
+                <>
+                    {/* USER PROFILE */}
 
-                            <div className="account-profile-info">
-                                <h2>
-                                    {me.data.name} {me.data.surname}
-                                </h2>
+                    <section className="account-profile">
+                        <div className="account-avatar">
+                            {me.data.name?.[0]?.toUpperCase() || "U"}
+                        </div>
 
-                                <p>{me.data.email}</p>
+                        <div>
+                            <h2>
+                                {me.data.name} {me.data.surname}
+                            </h2>
+
+                            <p>{me.data.email}</p>
+
+                            <p>{me.data.phone || "Հեռախոսահամար նշված չէ"}</p>
+                        </div>
+
+                        <a href={`${BASE}favorites`}>Իմ Հավանածները</a>
+                    </section>
+
+                    {/* STATISTICS */}
+
+                    <section className="account-statistics">
+                        <div className="account-stat">
+                            <span>Ընդհանուր հայտարարություններ</span>
+
+                            <strong>{items.length}</strong>
+                        </div>
+
+                        <div className="account-stat">
+                            <span>Ակտիվ հայտարարություններ</span>
+
+                            <strong>{activeCount}</strong>
+                        </div>
+
+                        <div className="account-stat">
+                            <span>Վաճառված մեքենաներ</span>
+
+                            <strong>{soldCount}</strong>
+                        </div>
+
+                        <div className="account-stat">
+                            <span>Ընդհանուր դիտումներ</span>
+
+                            <strong>{totalViews}</strong>
+                        </div>
+                    </section>
+
+                    {/* MY LISTINGS */}
+
+                    <section className="account-section">
+                        <div className="account-section-head">
+                            <h2>Իմ հայտարարությունները</h2>
+
+                            <a href={`${BASE}add-product`}>+ Ավելացնել</a>
+                        </div>
+
+                        {error && (
+                            <p className="account-error" role="alert">
+                                {error}
+                            </p>
+                        )}
+
+                        {listings.loading ? (
+                            <p>Հայտարարությունները բեռնվում են...</p>
+                        ) : listings.error ? (
+                            <p className="account-error">{listings.error}</p>
+                        ) : items.length === 0 ? (
+                            <div className="account-empty">
+                                <h3>Դեռ հայտարարություններ չունեք</h3>
 
                                 <p>
-                                    {me.data.phone || "Հեռախոսահամար նշված չէ"}
+                                    Ավելացրեք ձեր առաջին մեքենան կամ
+                                    պահեստամասը։
                                 </p>
+
+                                <a href={`${BASE}add-product`}>
+                                    Ավելացնել հայտարարություն
+                                </a>
                             </div>
+                        ) : (
+                            <div className="account-listings">
+                                {items.map((product) => (
+                                    <article
+                                        className="account-listing"
+                                        key={product._id}
+                                    >
+                                        {product.images?.[0] ? (
+                                            <img
+                                                src={product.images[0]}
+                                                alt={product.title}
+                                            />
+                                        ) : (
+                                            <div className="account-listing-placeholder">
+                                                Նկար չկա
+                                            </div>
+                                        )}
 
-                            <a href={`${BASE}favorites`}>Իմ ընտրյալները</a>
-                        </section>
+                                        <div className="account-listing-info">
+                                            <h3>{product.title}</h3>
 
-                        {/* STATS */}
+                                            <p>
+                                                {format(
+                                                    product.price,
+                                                    product.currency || "AMD",
+                                                )}
+                                            </p>
 
-                        <section className="account-statistics">
-                            {[
-                                ["Ընդհանուր հայտարարություններ", items.length],
-                                ["Ակտիվ", activeCount],
-                                ["Վաճառված", soldCount],
-                                ["Ընդհանուր դիտումներ", totalViews],
-                            ].map(([label, value]) => (
-                                <article className="account-stat" key={label}>
-                                    <span>{label}</span>
-
-                                    <strong>
-                                        {Number(value).toLocaleString("en-US")}
-                                    </strong>
-                                </article>
-                            ))}
-                        </section>
-
-                        {/* MY LISTINGS */}
-
-                        <section className="account-section">
-                            <div className="account-section-head">
-                                <div>
-                                    <span className="account-eyebrow">
-                                        MY LISTINGS
-                                    </span>
-
-                                    <h2>Իմ հայտարարությունները</h2>
-                                </div>
-
-                                <a href={`${BASE}add-product`}>+ Ավելացնել</a>
-                            </div>
-
-                            {error && (
-                                <p className="account-error" role="alert">
-                                    {error}
-                                </p>
-                            )}
-
-                            {listings.loading ? (
-                                <p className="account-loading">
-                                    Հայտարարությունները բեռնվում են...
-                                </p>
-                            ) : listings.error ? (
-                                <p className="account-error">
-                                    {listings.error}
-                                </p>
-                            ) : items.length === 0 ? (
-                                <div className="account-empty">
-                                    <h3>Դեռ հայտարարություններ չունեք</h3>
-
-                                    <p>Տեղադրեք Ձեր առաջին հայտարարությունը։</p>
-
-                                    <a href={`${BASE}add-product`}>
-                                        Տեղադրել հայտարարություն
-                                    </a>
-                                </div>
-                            ) : (
-                                <div className="account-listings">
-                                    {items.map((product) => {
-                                        const id = product._id || product.id;
-
-                                        const topActive =
-                                            product.topUntil &&
-                                            new Date(
-                                                product.topUntil,
-                                            ).getTime() > Date.now();
-
-                                        return (
-                                            <article
-                                                className="account-listing"
-                                                key={id}
+                                            <span
+                                                className={
+                                                    `account-status ` +
+                                                    `account-status-${product.status}`
+                                                }
                                             >
-                                                <div className="account-listing-main">
-                                                    {product.images?.[0] ? (
-                                                        <img
-                                                            className="account-listing-image"
-                                                            src={
-                                                                product
-                                                                    .images[0]
+                                                {LABELS[product.status] ||
+                                                    product.status}
+                                            </span>
+
+                                            <small>
+                                                Դիտումներ՝ {product.views || 0}
+                                            </small>
+
+                                            {editing?._id === product._id && (
+                                                <form
+                                                    className="account-edit-form"
+                                                    onSubmit={(e) => {
+                                                        e.preventDefault();
+
+                                                        changeListing(
+                                                            product._id,
+                                                            {
+                                                                price: Number(
+                                                                    editing.price,
+                                                                ),
+                                                                status: editing.status,
+                                                            },
+                                                        );
+                                                    }}
+                                                >
+                                                    <label>
+                                                        Գին
+                                                        <input
+                                                            type="number"
+                                                            min="0"
+                                                            required
+                                                            value={
+                                                                editing.price
                                                             }
-                                                            alt={product.title}
-                                                            loading="lazy"
+                                                            onChange={(e) =>
+                                                                setEditing({
+                                                                    ...editing,
+                                                                    price: e
+                                                                        .target
+                                                                        .value,
+                                                                })
+                                                            }
                                                         />
-                                                    ) : (
-                                                        <div className="account-listing-placeholder">
-                                                            Նկար չկա
-                                                        </div>
-                                                    )}
+                                                    </label>
 
-                                                    <div className="account-listing-info">
-                                                        <h3>{product.title}</h3>
-
-                                                        <p>
-                                                            {format(
-                                                                product.price,
-                                                                product.currency ||
-                                                                    "AMD",
-                                                            )}
-                                                        </p>
-
-                                                        <span
-                                                            className={`account-status account-status-${product.status}`}
+                                                    <label>
+                                                        Կարգավիճակ
+                                                        <select
+                                                            value={
+                                                                editing.status
+                                                            }
+                                                            onChange={(e) =>
+                                                                setEditing({
+                                                                    ...editing,
+                                                                    status: e
+                                                                        .target
+                                                                        .value,
+                                                                })
+                                                            }
                                                         >
-                                                            {product.paymentPending
-                                                                ? "Վճարման սպասող"
-                                                                : LABELS[
-                                                                      product
-                                                                          .status
-                                                                  ] ||
-                                                                  product.status}
-                                                        </span>
+                                                            <option value="active">
+                                                                Ակտիվ
+                                                            </option>
 
-                                                        {topActive && (
-                                                            <span className="account-top-label">
-                                                                ★ TOP
-                                                            </span>
-                                                        )}
+                                                            <option value="draft">
+                                                                Սևագիր
+                                                            </option>
 
-                                                        <small>
-                                                            Դիտումներ՝{" "}
-                                                            {product.views || 0}
-                                                        </small>
-                                                    </div>
-                                                </div>
+                                                            <option value="sold">
+                                                                Վաճառված
+                                                            </option>
+                                                        </select>
+                                                    </label>
 
-                                                {/* ACTION BUTTONS */}
-
-                                                <div className="account-listing-actions">
-                                                    {product.status ===
-                                                        "active" && (
-                                                        <a
-                                                            href={`${BASE}cars/${id}`}
-                                                        >
-                                                            Դիտել
-                                                        </a>
-                                                    )}
-
-                                                    {!product.paymentPending && (
-                                                        <a
-                                                            href={`${BASE}add-product?edit=${encodeURIComponent(
-                                                                id,
-                                                            )}`}
-                                                            style={{
-                                                                borderColor:
-                                                                    "#d9b979",
-                                                                background:
-                                                                    "#fff8e9",
-                                                                color: "#8d6728",
-                                                            }}
-                                                        >
-                                                            Խմբագրել
-                                                            ամբողջությամբ
-                                                        </a>
-                                                    )}
-
-                                                    {product.status !==
-                                                        "sold" &&
-                                                        !product.paymentPending && (
-                                                            <button
-                                                                type="button"
-                                                                disabled={Boolean(
-                                                                    busy,
-                                                                )}
-                                                                onClick={() =>
-                                                                    changeListing(
-                                                                        id,
-                                                                        {
-                                                                            status: "sold",
-                                                                        },
-                                                                    )
-                                                                }
-                                                            >
-                                                                Նշել վաճառված
-                                                            </button>
-                                                        )}
+                                                    <button
+                                                        disabled={Boolean(busy)}
+                                                    >
+                                                        Պահպանել
+                                                    </button>
 
                                                     <button
                                                         type="button"
-                                                        className="account-danger"
-                                                        disabled={Boolean(busy)}
                                                         onClick={() =>
-                                                            deleteListing(id)
+                                                            setEditing(null)
                                                         }
                                                     >
-                                                        Ջնջել
+                                                        Չեղարկել
                                                     </button>
-                                                </div>
+                                                </form>
+                                            )}
+                                        </div>
 
-                                                {/* PAYMENT NOTICE */}
+                                        <div className="account-listing-actions">
+                                            {product.status === "active" && (
+                                                <a
+                                                    href={`${BASE}cars/${product._id}`}
+                                                >
+                                                    Դիտել
+                                                </a>
+                                            )}
 
-                                                {product.paymentPending && (
-                                                    <p className="money-pending-article">
-                                                        Հրապարակման վճար՝ 100 ֏։{" "}
-                                                        <a
-                                                            href={`${BASE}monetization`}
-                                                        >
-                                                            Դիտել վճարումը
-                                                        </a>
-                                                    </p>
-                                                )}
+                                            <button
+                                                disabled={Boolean(busy)}
+                                                onClick={() =>
+                                                    setEditing({
+                                                        _id: product._id,
+                                                        price: product.price,
+                                                        status: product.status,
+                                                    })
+                                                }
+                                            >
+                                                Խմբագրել
+                                            </button>
 
-                                                {/* TOP / REFRESH */}
+                                            {product.status !== "sold" && (
+                                                <button
+                                                    disabled={Boolean(busy)}
+                                                    onClick={() =>
+                                                        changeListing(
+                                                            product._id,
+                                                            {
+                                                                status: "sold",
+                                                            },
+                                                        )
+                                                    }
+                                                >
+                                                    Վաճառված
+                                                </button>
+                                            )}
 
-                                                <ListingPromotion
-                                                    product={product}
-                                                />
-                                            </article>
-                                        );
-                                    })}
-                                </div>
-                            )}
-                        </section>
+                                            <button
+                                                className="account-danger"
+                                                disabled={Boolean(busy)}
+                                                onClick={() =>
+                                                    deleteListing(product._id)
+                                                }
+                                            >
+                                                Ջնջել
+                                            </button>
+                                        </div>
 
-                        {/* ORDERS */}
+                                        {product.paymentPending && (
+                                            <p className="money-pending-article">
+                                                Վճարման սպասող հայտարարություն՝
+                                                100 ֏։{" "}
+                                                <a href={`${BASE}monetization`}>
+                                                    Դիտել հայտը
+                                                </a>
+                                            </p>
+                                        )}
 
-                        <section className="account-section">
-                            <div className="account-section-head">
-                                <h2>Իմ գնման հայտերը</h2>
+                                        <ListingPromotion product={product} />
+                                    </article>
+                                ))}
                             </div>
+                        )}
+                    </section>
 
-                            {orders.error && (
-                                <p className="account-error">{orders.error}</p>
-                            )}
+                    {/* MY ORDERS */}
 
+                    <section className="account-section">
+                        <h2>Իմ գնման հայտերը</h2>
+
+                        {orders.loading ? (
+                            <p>Գնման հայտերը բեռնվում են...</p>
+                        ) : orders.error ? (
+                            <p className="account-error">{orders.error}</p>
+                        ) : (
                             <div className="account-orders">
                                 {Array.isArray(orders.data) &&
                                     orders.data.map((order) => (
@@ -421,13 +441,12 @@ export default function AccountPage() {
 
                                             {order.status === "pending" && (
                                                 <button
-                                                    type="button"
                                                     disabled={Boolean(busy)}
                                                     onClick={() =>
                                                         cancelOrder(order._id)
                                                     }
                                                 >
-                                                    Չեղարկել
+                                                    Չեղարկել հայտը
                                                 </button>
                                             )}
                                         </article>
@@ -438,20 +457,10 @@ export default function AccountPage() {
                                         <p>Գնման հայտեր դեռ չկան։</p>
                                     )}
                             </div>
-                        </section>
-
-                        {/* GOOGLE ACCOUNT */}
-
-                        <section className="account-section">
-                            <h2>Google հաշիվ</h2>
-
-                            <p>Կարող եք կապակցել Ձեր Google հաշիվը։</p>
-
-                            <GoogleSignIn link />
-                        </section>
-                    </>
-                )}
-            </main>
-        </>
+                        )}
+                    </section>
+                </>
+            )}
+        </main>
     );
 }

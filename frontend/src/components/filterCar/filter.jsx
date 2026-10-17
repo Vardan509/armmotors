@@ -1,495 +1,454 @@
-import { useRef, useState } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
+import { useNavigate } from "react-router-dom";
+
+import { ALL_BRANDS, getModels } from "../../data/vehicleCatalog";
+import { useI18n } from "../../utils/i18n";
+
 import "./filter.css";
 
+const LABELS = {
+    hy: {
+        title: "Գտեք Ձեր մեքենան",
+        subtitle: "Ընտրեք Ձեր նախընտրած մեքենայի տվյալները",
+        brand: "Մակնիշ",
+        model: "Մոդել",
+        priceFrom: "Գին՝ սկսած",
+        priceTo: "Գին՝ մինչև",
+        yearFrom: "Տարեթիվ՝ սկսած",
+        yearTo: "Տարեթիվ՝ մինչև",
+        fuel: "Վառելիք",
+        any: "Ցանկացած",
+        search: "Որոնել մեքենաներ",
+        clear: "Մաքրել",
+        petrol: "Բենզին",
+        diesel: "Դիզել",
+        gas: "Գազ",
+        hybrid: "Հիբրիդ",
+        electric: "Էլեկտրական",
+        filters: "Որոնման ֆիլտրեր",
+        open: "Բացել ֆիլտրերը",
+        close: "Փակել ֆիլտրերը",
+        selectBrand: "Ընտրեք մակնիշը",
+        selectModel: "Ընտրեք մոդելը",
+        enterPrice: "Նշեք գինը",
+        enterYear: "Նշեք տարին",
+    },
+    ru: {
+        title: "Найдите свой автомобиль",
+        subtitle: "Выберите параметры автомобиля",
+        brand: "Марка",
+        model: "Модель",
+        priceFrom: "Цена от",
+        priceTo: "Цена до",
+        yearFrom: "Год от",
+        yearTo: "Год до",
+        fuel: "Топливо",
+        any: "Любой",
+        search: "Найти автомобили",
+        clear: "Сбросить",
+        petrol: "Бензин",
+        diesel: "Дизель",
+        gas: "Газ",
+        hybrid: "Гибрид",
+        electric: "Электро",
+        filters: "Фильтры поиска",
+        open: "Открыть фильтры",
+        close: "Закрыть фильтры",
+        selectBrand: "Выберите марку",
+        selectModel: "Выберите модель",
+        enterPrice: "Укажите цену",
+        enterYear: "Укажите год",
+    },
+    en: {
+        title: "Find your next car",
+        subtitle: "Choose your preferred vehicle specifications",
+        brand: "Brand",
+        model: "Model",
+        priceFrom: "Price from",
+        priceTo: "Price to",
+        yearFrom: "Year from",
+        yearTo: "Year to",
+        fuel: "Fuel",
+        any: "Any",
+        search: "Search cars",
+        clear: "Clear",
+        petrol: "Petrol",
+        diesel: "Diesel",
+        gas: "Gas",
+        hybrid: "Hybrid",
+        electric: "Electric",
+        filters: "Search filters",
+        open: "Open filters",
+        close: "Close filters",
+        selectBrand: "Select brand",
+        selectModel: "Select model",
+        enterPrice: "Enter price",
+        enterYear: "Enter year",
+    },
+};
 
-const INITIAL_FILTERS = {
+const INITIAL = {
+    brand: "",
+    model: "",
     priceFrom: "",
     priceTo: "",
     yearFrom: "",
     yearTo: "",
-    brand: "",
-    model: "",
-    region: "",
-    vin: "",
     fuel: "",
-    steering: "",
-    color: "",
 };
 
-const SELECT_FIELDS = [
-    {
-        name: "brand",
-        label: "Մակնիշ",
-        options: [
-            ["Mercedes-Benz", "Mercedes-Benz"],
-            ["BMW", "BMW"],
-            ["Toyota", "Toyota"],
-            ["Tesla", "Tesla"],
-            ["Hyundai", "Hyundai"],
-            ["Nissan", "Nissan"],
-            ["Volkswagen", "Volkswagen"],
-            ["Audi", "Audi"],
-            ["Ford", "Ford"],
-            ["Volvo", "Volvo"],
-            ["MAN", "MAN"],
-            ["Scania", "Scania"],
-        ],
-    },
-    {
-        name: "region",
-        label: "Տարածաշրջան",
-        options: [
-            ["Երևան", "Երևան"],
-            ["Արագածոտն", "Արագածոտն"],
-            ["Արարատ", "Արարատ"],
-            ["Արմավիր", "Արմավիր"],
-            ["Գեղարքունիք", "Գեղարքունիք"],
-            ["Կոտայք", "Կոտայք"],
-            ["Լոռի", "Լոռի"],
-            ["Շիրակ", "Շիրակ"],
-            ["Սյունիք", "Սյունիք"],
-            ["Տավուշ", "Տավուշ"],
-            ["Վայոց ձոր", "Վայոց ձոր"],
-        ],
-    },
-    {
-        name: "vin",
-        label: "VIN կոդ",
-        options: [
-            ["yes", "Նշված է"],
-            ["no", "Նշված չէ"],
-        ],
-    },
-    {
-        name: "fuel",
-        label: "Վառելիք",
-        options: [
-            ["gas", "Գազ"],
-            ["petrol", "Բենզին"],
-            ["diesel", "Դիզել"],
-            ["electric", "Էլեկտրական"],
-            ["hybrid", "Հիբրիդ"],
-        ],
-    },
-    {
-        name: "steering",
-        label: "Ղեկ",
-        options: [
-            ["left", "Ձախ"],
-            ["right", "Աջ"],
-        ],
-    },
-    {
-        name: "color",
-        label: "Գույն",
-        options: [
-            ["Սպիտակ", "Սպիտակ"],
-            ["Սև", "Սև"],
-            ["Արծաթագույն", "Արծաթագույն"],
-            ["Մոխրագույն", "Մոխրագույն"],
-            ["Կապույտ", "Կապույտ"],
-            ["Կարմիր", "Կարմիր"],
-            ["Կանաչ", "Կանաչ"],
-            ["Դեղին", "Դեղին"],
-            ["Շագանակագույն", "Շագանակագույն"],
-            ["Բեժ", "Բեժ"],
-            ["Այլ", "Այլ"],
-        ],
-    },
-];
+function optionValue(item) {
+    if (typeof item === "string") {
+        return [item, item];
+    }
+
+    if (Array.isArray(item)) {
+        return [item[0], item[1] || item[0]];
+    }
+
+    return [
+        item.value || item.name || "",
+        item.label || item.name || item.value || "",
+    ];
+}
+
+function FilterIcon() {
+    return (
+        <svg
+            width="22"
+            height="22"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+        >
+            <path d="M4 7h16" />
+            <path d="M7 12h10" />
+            <path d="M10 17h4" />
+        </svg>
+    );
+}
+
+function SearchIcon() {
+    return (
+        <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+        >
+            <circle cx="11" cy="11" r="7" />
+            <path d="m20 20-4-4" />
+        </svg>
+    );
+}
+
+function CloseIcon() {
+    return (
+        <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            aria-hidden="true"
+        >
+            <path d="M18 6 6 18M6 6l12 12" />
+        </svg>
+    );
+}
 
 export default function Filter() {
-    const popupRef = useRef(null);
+    const navigate = useNavigate();
+    const { language } = useI18n();
 
-    const [step, setStep] = useState("categories");
-    const [vehicleType, setVehicleType] = useState("");
-    const [filters, setFilters] = useState({ ...INITIAL_FILTERS });
-    const [error, setError] = useState("");
+    const w = LABELS[language] || LABELS.hy;
 
-    function openPopup() {
-        setStep("categories");
-        setError("");
+    const [open, setOpen] = useState(false);
+    const [filters, setFilters] = useState({ ...INITIAL });
 
-        if (popupRef.current && !popupRef.current.open) {
-            popupRef.current.showModal();
-        }
-    }
+    const activeCount = Object.values(filters).filter(Boolean).length;
 
-    function changeFilter(e) {
-        const { name, value } = e.target;
-
-        setFilters((prev) => ({
-            ...prev,
-            [name]: value,
+    function update(key, value) {
+        setFilters((previous) => ({
+            ...previous,
+            [key]: value,
+            ...(key === "brand" ? { model: "" } : {}),
         }));
-
-        setError("");
-    }
-
-    function selectVehicle(type) {
-        setVehicleType(type);
-        setStep("filters");
-    }
-
-    function goBack() {
-        setError("");
-
-        if (step === "filters") {
-            setStep("vehicleTypes");
-        } else {
-            setStep("categories");
-        }
     }
 
     function resetFilters() {
-        setFilters({ ...INITIAL_FILTERS });
-        setError("");
+        setFilters({ ...INITIAL });
     }
 
-    function handleSubmit(e) {
-        e.preventDefault();
-
-        if (
-            filters.priceFrom !== "" &&
-            filters.priceTo !== "" &&
-            Number(filters.priceFrom) > Number(filters.priceTo)
-        ) {
-            setError(
-                "Սկզբնական գինը չի կարող վերջնական գնից մեծ լինել։"
-            );
-            return;
-        }
-
-        if (
-            filters.yearFrom !== "" &&
-            filters.yearTo !== "" &&
-            Number(filters.yearFrom) > Number(filters.yearTo)
-        ) {
-            setError(
-                "Սկզբնական տարեթիվը չի կարող վերջնականից մեծ լինել։"
-            );
-            return;
-        }
+    function submit(event) {
+        event.preventDefault();
 
         const params = new URLSearchParams();
 
-        params.set("vehicleType", vehicleType);
-        params.set("priceCurrency", "AMD");
-
-        Object.entries(filters).forEach(([key, value]) => {
+        for (const [key, value] of Object.entries(filters)) {
             if (value !== "") {
                 params.set(key, value);
             }
-        });
+        }
 
-        window.location.assign(`/cars?${params.toString()}`);
+        setOpen(false);
+
+        const query = params.toString();
+
+        navigate(`/cars${query ? `?${query}` : ""}`);
     }
 
-    let title = "Ընտրեք բաժինը";
+    useEffect(() => {
+        if (!open) return;
 
-    if (step === "vehicleTypes") {
-        title = "Ընտրեք մեքենայի տեսակը";
-    } else if (step === "parts") {
-        title = "Ավտոպահեստամասեր";
-    } else if (step === "filters") {
-        title =
-            vehicleType === "passenger"
-                ? "Մարդատար մեքենաներ"
-                : "Բեռնատար մեքենաներ";
-    }
+        const previousOverflow = document.body.style.overflow;
+
+        document.body.style.overflow = "hidden";
+
+        function handleKeyDown(event) {
+            if (event.key === "Escape") {
+                setOpen(false);
+            }
+        }
+
+        document.addEventListener("keydown", handleKeyDown);
+
+        return () => {
+            document.body.style.overflow = previousOverflow;
+            document.removeEventListener("keydown", handleKeyDown);
+        };
+    }, [open]);
+
+    const numericFields = [
+        {
+            key: "priceFrom",
+            label: w.priceFrom,
+            placeholder: w.enterPrice,
+            min: 0,
+        },
+        {
+            key: "priceTo",
+            label: w.priceTo,
+            placeholder: w.enterPrice,
+            min: 0,
+        },
+        {
+            key: "yearFrom",
+            label: w.yearFrom,
+            placeholder: w.enterYear,
+            min: 1950,
+            max: new Date().getFullYear() + 1,
+        },
+        {
+            key: "yearTo",
+            label: w.yearTo,
+            placeholder: w.enterYear,
+            min: 1950,
+            max: new Date().getFullYear() + 1,
+        },
+    ];
+
+    const modal = open ? (
+        <div
+            className="am-filter-overlay"
+            onMouseDown={(event) => {
+                if (event.target === event.currentTarget) {
+                    setOpen(false);
+                }
+            }}
+        >
+            <div
+                className="am-filter-dialog"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="am-filter-title"
+            >
+                <div className="am-filter-header">
+                    <div className="am-filter-header-info">
+                        <div className="am-filter-header-icon">
+                            <FilterIcon />
+                        </div>
+
+                        <div>
+                            <span className="am-filter-eyebrow">ARMMOTORS</span>
+
+                            <h2 id="am-filter-title">{w.title}</h2>
+
+                            <p>{w.subtitle}</p>
+                        </div>
+                    </div>
+
+                    <button
+                        type="button"
+                        className="am-filter-close"
+                        onClick={() => setOpen(false)}
+                        aria-label={w.close}
+                    >
+                        <CloseIcon />
+                    </button>
+                </div>
+
+                <form onSubmit={submit}>
+                    <div className="am-filter-content">
+                        <div className="am-filter-section-label">
+                            <FilterIcon />
+                            <span>{w.filters}</span>
+                        </div>
+
+                        <div className="am-filter-grid">
+                            <label className="am-catalog-field">
+                                <span>{w.brand}</span>
+
+                                <select
+                                    value={filters.brand}
+                                    onChange={(event) =>
+                                        update("brand", event.target.value)
+                                    }
+                                >
+                                    <option value="">{w.selectBrand}</option>
+
+                                    {ALL_BRANDS.map((item) => {
+                                        const [value, label] =
+                                            optionValue(item);
+
+                                        return (
+                                            <option key={value} value={value}>
+                                                {label}
+                                            </option>
+                                        );
+                                    })}
+                                </select>
+                            </label>
+
+                            <label className="am-catalog-field">
+                                <span>{w.model}</span>
+
+                                <select
+                                    value={filters.model}
+                                    disabled={!filters.brand}
+                                    onChange={(event) =>
+                                        update("model", event.target.value)
+                                    }
+                                >
+                                    <option value="">{w.selectModel}</option>
+
+                                    {(filters.brand
+                                        ? getModels(filters.brand)
+                                        : []
+                                    ).map((item) => {
+                                        const [value, label] =
+                                            optionValue(item);
+
+                                        return (
+                                            <option key={value} value={value}>
+                                                {label}
+                                            </option>
+                                        );
+                                    })}
+                                </select>
+                            </label>
+
+                            {numericFields.map((field) => (
+                                <label
+                                    key={field.key}
+                                    className="am-catalog-field"
+                                >
+                                    <span>{field.label}</span>
+
+                                    <input
+                                        type="number"
+                                        inputMode="numeric"
+                                        min={field.min}
+                                        max={field.max}
+                                        placeholder={field.placeholder}
+                                        value={filters[field.key]}
+                                        onChange={(event) =>
+                                            update(
+                                                field.key,
+                                                event.target.value,
+                                            )
+                                        }
+                                    />
+                                </label>
+                            ))}
+
+                            <label className="am-catalog-field">
+                                <span>{w.fuel}</span>
+
+                                <select
+                                    value={filters.fuel}
+                                    onChange={(event) =>
+                                        update("fuel", event.target.value)
+                                    }
+                                >
+                                    <option value="">{w.any}</option>
+
+                                    {[
+                                        "petrol",
+                                        "diesel",
+                                        "gas",
+                                        "hybrid",
+                                        "electric",
+                                    ].map((value) => (
+                                        <option key={value} value={value}>
+                                            {w[value]}
+                                        </option>
+                                    ))}
+                                </select>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div className="am-filter-footer">
+                        <button
+                            type="button"
+                            className="am-filter-reset"
+                            onClick={resetFilters}
+                        >
+                            {w.clear}
+                        </button>
+
+                        <button type="submit" className="am-filter-submit">
+                            <SearchIcon />
+                            {w.search}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    ) : null;
 
     return (
         <>
             <button
                 type="button"
-                className="popup-open-btn"
-                onClick={openPopup}
-                aria-label="Բացել ֆիլտրերը"
+                className="am-filter-trigger"
+                onClick={() => setOpen(true)}
+                aria-label={w.open}
+                title={w.open}
+                aria-haspopup="dialog"
+                aria-expanded={open}
             >
-                <img
-                    src="https://cdn-icons-png.flaticon.com/512/2976/2976215.png"
-                    alt="Filter"
-                    width={15}
-                    height={15}
-                />
+                <FilterIcon />
+
+                {activeCount > 0 && (
+                    <span className="am-filter-count">{activeCount}</span>
+                )}
             </button>
 
-            <dialog
-                ref={popupRef}
-                className="popup-window"
-                aria-labelledby="popup-title"
-            >
-                <div className="popup-header">
-                    <div className="popup-heading">
-
-                        {step !== "categories" && (
-                            <button
-                                type="button"
-                                className="popup-back-btn"
-                                onClick={goBack}
-                                aria-label="Վերադառնալ"
-                            >
-                                ←
-                            </button>
-                        )}
-
-                        <h2 id="popup-title">
-                            {title}
-                        </h2>
-                    </div>
-
-                    <button
-                        type="button"
-                        className="popup-close-btn"
-                        onClick={() => popupRef.current?.close()}
-                        aria-label="Փակել պատուհանը"
-                    >
-                        ×
-                    </button>
-                </div>
-
-                <div className="popup-content">
-
-                    {step === "categories" && (
-                        <div className="popup-options">
-
-                            <button
-                                type="button"
-                                className="popup-option"
-                                onClick={() => setStep("vehicleTypes")}
-                            >
-                                <span>Մեքենաներ</span>
-                                <span aria-hidden="true">
-                                    ›
-                                </span>
-                            </button>
-
-                            <button
-                                type="button"
-                                className="popup-option"
-                                onClick={() => setStep("parts")}
-                            >
-                                <span>
-                                    Ավտոպահեստամասեր
-                                </span>
-
-                                <span aria-hidden="true">
-                                    ›
-                                </span>
-                            </button>
-
-                        </div>
-                    )}
-
-                    {step === "vehicleTypes" && (
-                        <div className="popup-options">
-
-                            <button
-                                type="button"
-                                className="popup-option"
-                                onClick={() =>
-                                    selectVehicle("passenger")
-                                }
-                            >
-                                <span>Մարդատար</span>
-
-                                <span aria-hidden="true">
-                                    ›
-                                </span>
-                            </button>
-
-                            <button
-                                type="button"
-                                className="popup-option"
-                                onClick={() =>
-                                    selectVehicle("truck")
-                                }
-                            >
-                                <span>Բեռնատար</span>
-
-                                <span aria-hidden="true">
-                                    ›
-                                </span>
-                            </button>
-
-                        </div>
-                    )}
-
-                    {step === "parts" && (
-                        <p className="popup-note">
-                            Այստեղ կավելացնենք
-                            ավտոպահեստամասերի ֆիլտրերը։
-                        </p>
-                    )}
-
-                    {step === "filters" && (
-                        <form onSubmit={handleSubmit}>
-
-                            <div className="filters-grid">
-
-                                <fieldset className="filter-group filter-full">
-                                    <legend>
-                                        Գին՝ ֏
-                                    </legend>
-
-                                    <div className="filter-range">
-
-                                        <input
-                                            type="number"
-                                            name="priceFrom"
-                                            min="0"
-                                            step="any"
-                                            placeholder="Սկսած"
-                                            aria-label="Նվազագույն գին"
-                                            value={filters.priceFrom}
-                                            onChange={changeFilter}
-                                        />
-
-                                        <span aria-hidden="true">
-                                            —
-                                        </span>
-
-                                        <input
-                                            type="number"
-                                            name="priceTo"
-                                            min="0"
-                                            step="any"
-                                            placeholder="Մինչև"
-                                            aria-label="Առավելագույն գին"
-                                            value={filters.priceTo}
-                                            onChange={changeFilter}
-                                        />
-
-                                    </div>
-                                </fieldset>
-
-                                <fieldset className="filter-group filter-full">
-
-                                    <legend>
-                                        Տարեթիվ
-                                    </legend>
-
-                                    <div className="filter-range">
-
-                                        <input
-                                            type="number"
-                                            name="yearFrom"
-                                            min="1886"
-                                            max={
-                                                new Date().getFullYear() + 1
-                                            }
-                                            placeholder="Սկսած"
-                                            aria-label="Նվազագույն տարեթիվ"
-                                            value={filters.yearFrom}
-                                            onChange={changeFilter}
-                                        />
-
-                                        <span aria-hidden="true">
-                                            —
-                                        </span>
-
-                                        <input
-                                            type="number"
-                                            name="yearTo"
-                                            min="1886"
-                                            max={
-                                                new Date().getFullYear() + 1
-                                            }
-                                            placeholder="Մինչև"
-                                            aria-label="Առավելագույն տարեթիվ"
-                                            value={filters.yearTo}
-                                            onChange={changeFilter}
-                                        />
-
-                                    </div>
-                                </fieldset>
-
-                                {SELECT_FIELDS.map((field) => (
-                                    <label
-                                        className="filter-field"
-                                        key={field.name}
-                                    >
-                                        <span>
-                                            {field.label}
-                                        </span>
-
-                                        <select
-                                            name={field.name}
-                                            value={
-                                                filters[field.name]
-                                            }
-                                            onChange={changeFilter}
-                                        >
-                                            <option value="">
-                                                Բոլորը
-                                            </option>
-
-                                            {field.options.map(
-                                                ([value, label]) => (
-                                                    <option
-                                                        key={value}
-                                                        value={value}
-                                                    >
-                                                        {label}
-                                                    </option>
-                                                )
-                                            )}
-
-                                        </select>
-                                    </label>
-                                ))}
-
-                                <label className="filter-field">
-
-                                    <span>
-                                        Մոդել
-                                    </span>
-
-                                    <input
-                                        type="text"
-                                        name="model"
-                                        placeholder="Օրինակ՝ Camry"
-                                        value={filters.model}
-                                        onChange={changeFilter}
-                                    />
-
-                                </label>
-
-                            </div>
-
-                            {error && (
-                                <p
-                                    className="filter-error"
-                                    role="alert"
-                                >
-                                    {error}
-                                </p>
-                            )}
-
-                            <div className="filter-actions">
-
-                                <button
-                                    type="button"
-                                    className="filter-reset"
-                                    onClick={resetFilters}
-                                >
-                                    Մաքրել
-                                </button>
-
-                                <button
-                                    type="submit"
-                                    className="filter-submit"
-                                >
-                                    Կիրառել ֆիլտրերը
-                                </button>
-
-                            </div>
-
-                        </form>
-                    )}
-
-                </div>
-            </dialog>
+            {modal && createPortal(modal, document.body)}
         </>
     );
 }

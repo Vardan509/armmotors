@@ -101,3 +101,91 @@ textarea:focus-visible {
         transition: none !important;
     }
 }
+
+/* =========================================
+   ARMMOTORS — GLOBAL HEART BUTTON
+========================================= */
+
+button:has(> svg.lucide-heart),
+button:has(> svg[class*="heart"]),
+button:has(> .lucide-heart),
+button[aria-label*="favorite" i],
+button[aria-label*="wishlist" i],
+button[aria-label*="սիրելի" i] {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-radius: 50%;
+
+    background: rgba(255, 255, 255, 0.94);
+    color: #242424;
+
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    backdrop-filter: blur(8px);
+
+    cursor: pointer;
+    transition:
+        transform 0.2s ease,
+        background 0.2s ease,
+        color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+button:has(> svg.lucide-heart):hover,
+button:has(> svg[class*="heart"]):hover,
+button[aria-label*="favorite" i]:hover,
+button[aria-label*="սիրելի" i]:hover {
+    transform: scale(1.08);
+    background: #fff4f4;
+    color: #d63d4c;
+    box-shadow: 0 6px 20px rgba(214, 61, 76, 0.14);
+}
+
+button:has(> svg.lucide-heart) svg,
+button:has(> svg[class*="heart"]) svg {
+    width: 22px;
+    height: 22px;
+    stroke-width: 1.8;
+}
+
+/* Selected / active favorite */
+
+button[aria-pressed="true"]:has(svg.lucide-heart),
+button[aria-pressed="true"]:has(svg[class*="heart"]),
+button[aria-label*="remove from favorites" i] {
+    background: #fff0f1;
+    color: #dc4050;
+}
+
+button[aria-pressed="true"]:has(svg.lucide-heart) svg,
+button[aria-pressed="true"]:has(svg[class*="heart"]) svg {
+    fill: currentColor;
+}
+
+/* Mobile */
+
+@media (max-width: 600px) {
+    button:has(> svg.lucide-heart),
+    button:has(> svg[class*="heart"]),
+    button[aria-label*="favorite" i],
+    button[aria-label*="սիրելի" i] {
+        width: 38px;
+        height: 38px;
+        min-width: 38px;
+        min-height: 38px;
+    }
+
+    button:has(> svg.lucide-heart) svg,
+    button:has(> svg[class*="heart"]) svg {
+        width: 20px;
+        height: 20px;
+    }
+}

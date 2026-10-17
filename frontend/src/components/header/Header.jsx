@@ -1,46 +1,25 @@
 import { useEffect, useRef, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import { setCurrencyByLanguage } from "../../utils/useCurrency";
 import { apiRequest } from "../../utils/api";
 import { useI18n } from "../../utils/i18n";
 import { asset } from "../../utils/asset";
+import { uiText } from "../../utils/localizeListing";
 
 import NotificationBell from "../notifications/NotificationBell";
 
 import "./Header.css";
 
-const BASE = import.meta.env.BASE_URL;
-
-function pageUrl(path = "/") {
-    return `${BASE}${String(path).replace(/^\/+/, "")}`;
-}
-
-function currentPage() {
-    const base = BASE.replace(/\/+$/, "");
-    let path = window.location.pathname;
-
-    if (base && (path === base || path.startsWith(base + "/"))) {
-        path = path.slice(base.length);  
-    }
-
-    return path.replace(/\/+$/, "") || "/";
-}
-
-// Օգտատիրոջ տվյալները վերցնում ենք միայն
-// այն դեպքում, երբ կա նաև token։
 function getStoredSession() {
     const token = localStorage.getItem("token");
 
     if (!token) {
-        return {
-            token: null,
-            user: null,
-        };
+        return { token: null, user: null };
     }
 
     try {
         const raw = localStorage.getItem("user");
-
         const parsed = raw ? JSON.parse(raw) : null;
 
         return {
@@ -51,10 +30,7 @@ function getStoredSession() {
                     : null,
         };
     } catch {
-        return {
-            token,
-            user: null,
-        };
+        return { token, user: null };
     }
 }
 
@@ -72,13 +48,6 @@ function Icon({ name, size = 21 }) {
     };
 
     switch (name) {
-        case "search":
-            return (
-                <svg {...props}>
-                    <circle cx="10.8" cy="10.8" r="7.2" />
-                    <path d="m16.3 16.3 4.7 4.7" />
-                </svg>
-            );
 
         case "heart":
             return (
@@ -162,7 +131,14 @@ function Icon({ name, size = 21 }) {
     }
 }
 
-function LanguageMenu({ selected, languages, open, onToggle, onSelect }) {
+function LanguageMenu({
+    selected,
+    languages,
+    open,
+    onToggle,
+    onSelect,
+    label,
+}) {
     return (
         <div className="am-language">
             <button
@@ -170,10 +146,9 @@ function LanguageMenu({ selected, languages, open, onToggle, onSelect }) {
                 className="am-language-button"
                 onClick={onToggle}
                 aria-expanded={open}
-                aria-label="Փոխել լեզուն"
+                aria-label={label}
             >
                 <span>{selected?.code?.toUpperCase() || "HY"}</span>
-
                 <Icon name="chevron" size={13} />
             </button>
 
@@ -199,33 +174,38 @@ function LanguageMenu({ selected, languages, open, onToggle, onSelect }) {
 }
 
 export default function Header() {
+    const navigate = useNavigate();
+    const location = useLocation();
+
     const { language, languages, setLanguage, t } = useI18n();
 
-    const [session, setSession] = useState(getStoredSession);
+    const tr = (key) => uiText(language, key);
 
+    const [session, setSession] = useState(getStoredSession);
     const [languageOpen, setLanguageOpen] = useState(false);
     const [moreOpen, setMoreOpen] = useState(false);
     const [mobileOpen, setMobileOpen] = useState(false);
     const [loggingOut, setLoggingOut] = useState(false);
 
+    const [mobileViewport, setMobileViewport] = useState(() =>
+        typeof window !== "undefined"
+            ? window.matchMedia("(max-width: 768px)").matches
+            : false,
+    );
+
     const headerRef = useRef(null);
 
     const token = session.token;
     const user = session.user;
-
-    // Կոճակի տեսանելիությունը որոշվում է
-    // պահպանված մուտքի տվյալներով։
     const isLoggedIn = Boolean(token);
 
     const isAdmin =
         isLoggedIn && (user?.isAdmin === true || user?.role === "admin");
 
-    const path = currentPage();
+    const path = location.pathname;
 
     const isHome = path === "/";
-
     const isCars = path === "/cars" || path.startsWith("/cars/");
-
     const isSearch = path === "/search";
     const isFavorites = path === "/favorites";
     const isAccount = path === "/account";
@@ -234,20 +214,27 @@ export default function Header() {
         languages.find((item) => item.code === language) || languages[0];
 
     const addListingUrl = isLoggedIn
-        ? pageUrl("/add-product")
-        : pageUrl("/login?next=%2Fadd-product");
-
-    // =====================================
-    // LANGUAGE AND CURRENCY
-    // =====================================
+        ? "/add-product"
+        : "/login?next=%2Fadd-product";
 
     useEffect(() => {
         setCurrencyByLanguage(language);
     }, [language]);
 
-    // =====================================
-    // SESSION
-    // =====================================
+    useEffect(() => {
+        const media = window.matchMedia("(max-width: 768px)");
+
+        function updateViewport(event) {
+            setMobileViewport(event.matches);
+        }
+
+        setMobileViewport(media.matches);
+        media.addEventListener("change", updateViewport);
+
+        return () => {
+            media.removeEventListener("change", updateViewport);
+        };
+    }, []);
 
     useEffect(() => {
         function updateSession() {
@@ -255,19 +242,14 @@ export default function Header() {
         }
 
         window.addEventListener("session-changed", updateSession);
-
         window.addEventListener("storage", updateSession);
 
         return () => {
             window.removeEventListener("session-changed", updateSession);
-
             window.removeEventListener("storage", updateSession);
         };
     }, []);
 
-    // Տվյալները ստուգում ենք backend-ից,
-    // որպեսզի միայն localStorage-ի user դաշտին
-    // չվստահենք։
     useEffect(() => {
         if (!token) return;
 
@@ -290,8 +272,6 @@ export default function Header() {
             } catch (error) {
                 if (cancelled) return;
 
-                // Միայն անվավեր session-ի դեպքում
-                // թաքցնում ենք օգտատիրոջ նշանը։
                 if (error?.status === 401) {
                     localStorage.removeItem("token");
                     localStorage.removeItem("user");
@@ -300,6 +280,8 @@ export default function Header() {
                         token: null,
                         user: null,
                     });
+
+                    window.dispatchEvent(new Event("session-changed"));
                 } else {
                     console.warn("Unable to verify current user:", error);
                 }
@@ -313,9 +295,11 @@ export default function Header() {
         };
     }, [token]);
 
-    // =====================================
-    // CLOSE DROPDOWNS
-    // =====================================
+    useEffect(() => {
+        setLanguageOpen(false);
+        setMoreOpen(false);
+        setMobileOpen(false);
+    }, [location.pathname, location.search, location.hash]);
 
     useEffect(() => {
         function handleOutside(event) {
@@ -338,19 +322,13 @@ export default function Header() {
         }
 
         document.addEventListener("pointerdown", handleOutside);
-
         document.addEventListener("keydown", handleEscape);
 
         return () => {
             document.removeEventListener("pointerdown", handleOutside);
-
             document.removeEventListener("keydown", handleEscape);
         };
     }, []);
-
-    // =====================================
-    // CHANGE LANGUAGE
-    // =====================================
 
     function changeLanguage(code) {
         if (!languages.some((item) => item.code === code)) {
@@ -362,21 +340,12 @@ export default function Header() {
         setLanguageOpen(false);
     }
 
-    // =====================================
-    // FAVORITES
-    // =====================================
-
     function handleFavoritesClick(event) {
         if (!isLoggedIn) {
             event.preventDefault();
-
-            window.location.assign(pageUrl("/login?next=%2Ffavorites"));
+            navigate("/login?next=%2Ffavorites");
         }
     }
-
-    // =====================================
-    // SUPPORT
-    // =====================================
 
     function openSupport() {
         window.dispatchEvent(new CustomEvent("open-support"));
@@ -384,10 +353,6 @@ export default function Header() {
         setMoreOpen(false);
         setMobileOpen(false);
     }
-
-    // =====================================
-    // LOGOUT
-    // =====================================
 
     async function logout() {
         if (loggingOut) return;
@@ -411,47 +376,74 @@ export default function Header() {
 
             window.dispatchEvent(new Event("session-changed"));
 
-            window.location.assign(pageUrl("/"));
+            setMoreOpen(false);
+            setMobileOpen(false);
+            setLoggingOut(false);
+
+            navigate("/", { replace: true });
         }
     }
+
+    function toggleMobileMenu() {
+        setMobileOpen((previous) => !previous);
+        setMoreOpen(false);
+        setLanguageOpen(false);
+    }
+
+    function toggleMoreMenu() {
+        setMoreOpen((previous) => !previous);
+        setLanguageOpen(false);
+        setMobileOpen(false);
+    }
+
+    function toggleLanguageMenu() {
+        setLanguageOpen((previous) => !previous);
+        setMoreOpen(false);
+    }
+
+    function renderNotifications() {
+        return (
+            <div className="am-menu-notifications">
+                <span>{tr("notifications")}</span>
+                <NotificationBell />
+            </div>
+        );
+    }
+
+    const languageMenu = (
+        <LanguageMenu
+            selected={selectedLanguage}
+            languages={languages}
+            open={languageOpen}
+            onToggle={toggleLanguageMenu}
+            onSelect={changeLanguage}
+            label={tr("changeLanguage")}
+        />
+    );
 
     return (
         <>
             <header className="site-header" ref={headerRef}>
                 <div className="am-header-container">
-                    {/* HEADER TOP */}
-
                     <div className="am-header-top">
-                        {/* LOGO */}
-
-                        <a
-                            href={pageUrl("/")}
-                            className="am-logo"
-                            aria-label="ArmMotors գլխավոր էջ"
-                        >
+                        <Link to="/" className="am-logo" aria-label="ArmMotors">
                             <img src={asset("/logo.png")} alt="ArmMotors" />
-                        </a>
-
-                        {/* RIGHT ACTIONS */}
+                        </Link>
 
                         <div className="am-header-actions">
-                            {/* SEARCH */}
-
-                            <a
-                                href={pageUrl("/search")}
+                            <Link
+                                to="/search"
                                 className={`am-icon-button ${
                                     isSearch ? "active" : ""
                                 }`}
-                                title="Որոնում"
-                                aria-label="Որոնում"
+                                title={tr("search")}
+                                aria-label={tr("search")}
                             >
                                 <Icon name="search" />
-                            </a>
+                            </Link>
 
-                            {/* FAVORITES */}
-
-                            <a
-                                href={pageUrl("/favorites")}
+                            <Link
+                                to="/favorites"
                                 onClick={handleFavoritesClick}
                                 className={`am-icon-button ${
                                     isFavorites ? "active" : ""
@@ -460,178 +452,148 @@ export default function Header() {
                                 aria-label={t("favorites")}
                             >
                                 <Icon name="heart" />
-                            </a>
-
-                            {/* LOGIN / ACCOUNT */}
+                            </Link>
 
                             {isLoggedIn ? (
-                                <a
-                                    href={pageUrl("/account")}
+                                <Link
+                                    to="/account"
                                     className={`am-icon-button am-account-button ${
                                         isAccount ? "active" : ""
                                     }`}
-                                    title="Իմ հաշիվը"
-                                    aria-label="Իմ հաշիվը"
+                                    title={tr("account")}
+                                    aria-label={tr("account")}
                                 >
                                     <Icon name="user" />
-                                </a>
+                                </Link>
                             ) : (
-                                <a
-                                    href={pageUrl("/login")}
-                                    className="am-login-button"
-                                >
+                                <Link to="/login" className="am-login-button">
                                     {t("login")}
-                                </a>
+                                </Link>
                             )}
 
-                            {/* ADD PRODUCT */}
-
-                            <a href={addListingUrl} className="am-add-button">
+                            <Link to={addListingUrl} className="am-add-button">
                                 <Icon name="plus" size={19} />
-
                                 <span>{t("addListing")}</span>
-                            </a>
-
-                            {/* MOBILE MENU BUTTON */}
+                            </Link>
 
                             <button
                                 type="button"
                                 className="am-mobile-menu-button"
-                                aria-label="Բացել ընտրացանկը"
+                                aria-label={tr("openMenu")}
                                 aria-expanded={mobileOpen}
-                                onClick={() => setMobileOpen((old) => !old)}
+                                onClick={toggleMobileMenu}
                             >
                                 <Icon name="menu" />
                             </button>
                         </div>
                     </div>
 
-                    {/* HEADER BOTTOM */}
-
                     <div className="am-header-bottom">
-                        {/* NAVIGATION */}
-
                         <nav
                             className="am-main-nav"
-                            aria-label="Հիմնական ընտրացանկ"
+                            aria-label={tr("mainMenu")}
                         >
-                            <a
-                                href={pageUrl("/")}
+                            <Link
+                                to="/"
                                 className={isHome ? "active" : ""}
                                 aria-current={isHome ? "page" : undefined}
                             >
                                 {t("home")}
-                            </a>
+                            </Link>
 
-                            <a
-                                href={pageUrl("/cars")}
+                            <Link
+                                to="/cars"
                                 className={isCars ? "active" : ""}
                                 aria-current={isCars ? "page" : undefined}
                             >
                                 {t("listings")}
-                            </a>
+                            </Link>
 
-                            <a href={pageUrl("/#brands")}>Մակնիշներ</a>
+                            <Link to="/#brands">{tr("brands")}</Link>
                         </nav>
 
-                        {/* LANGUAGE AND MORE */}
-
                         <div className="am-header-secondary">
-                            <LanguageMenu
-                                selected={selectedLanguage}
-                                languages={languages}
-                                open={languageOpen}
-                                onToggle={() => {
-                                    setLanguageOpen((old) => !old);
-
-                                    setMoreOpen(false);
-                                }}
-                                onSelect={changeLanguage}
-                            />
+                            {languageMenu}
 
                             <div className="am-more">
                                 <button
                                     type="button"
                                     className="am-more-trigger"
                                     aria-expanded={moreOpen}
-                                    onClick={() => {
-                                        setMoreOpen((old) => !old);
-
-                                        setLanguageOpen(false);
-                                    }}
+                                    onClick={toggleMoreMenu}
                                 >
-                                    Ավելին
+                                    {tr("more")}
                                     <Icon name="chevron" size={14} />
                                 </button>
 
                                 {moreOpen && (
                                     <div className="am-more-dropdown">
-                                        {/* COMPARE */}
-
-                                        <a href={pageUrl("/compare")}>
+                                        <Link
+                                            to="/compare"
+                                            onClick={() => setMoreOpen(false)}
+                                        >
                                             <Icon name="compare" size={18} />
-                                            Համեմատել
-                                        </a>
-
-                                        {/* MESSAGES */}
+                                            {tr("compare")}
+                                        </Link>
 
                                         {isLoggedIn && (
-                                            <a href={pageUrl("/messages")}>
+                                            <Link
+                                                to="/messages"
+                                                onClick={() =>
+                                                    setMoreOpen(false)
+                                                }
+                                            >
                                                 <Icon
                                                     name="message"
                                                     size={18}
                                                 />
-                                                Հաղորդագրություններ
-                                            </a>
+                                                {tr("messages")}
+                                            </Link>
                                         )}
-
-                                        {/* SUPPORT */}
 
                                         <button
                                             type="button"
                                             onClick={openSupport}
                                         >
                                             <Icon name="message" size={18} />
-                                            Կապ մեզ հետ
+                                            {tr("contactUs")}
                                         </button>
 
-                                        {/* NOTIFICATIONS */}
-
-                                        {isLoggedIn && (
-                                            <div className="am-menu-notifications">
-                                                <span>Ծանուցումներ</span>
-
-                                                <NotificationBell />
-                                            </div>
-                                        )}
+                                        {isLoggedIn &&
+                                            !mobileViewport &&
+                                            renderNotifications()}
 
                                         <div className="am-menu-divider" />
 
-                                        {/* LOGGED IN */}
-
                                         {isLoggedIn ? (
                                             <>
-                                                <a href={pageUrl("/account")}>
+                                                <Link
+                                                    to="/account"
+                                                    onClick={() =>
+                                                        setMoreOpen(false)
+                                                    }
+                                                >
                                                     <Icon
                                                         name="user"
                                                         size={18}
                                                     />
-                                                    Իմ հաշիվը
-                                                </a>
-
-                                                {/* ADMIN */}
+                                                    {tr("account")}
+                                                </Link>
 
                                                 {isAdmin && (
-                                                    <a href={pageUrl("/admin")}>
+                                                    <Link
+                                                        to="/admin"
+                                                        onClick={() =>
+                                                            setMoreOpen(false)
+                                                        }
+                                                    >
                                                         <Icon
                                                             name="settings"
                                                             size={18}
                                                         />
-                                                        Ադմինիստրատոր
-                                                    </a>
+                                                        {tr("administrator")}
+                                                    </Link>
                                                 )}
-
-                                                {/* LOGOUT */}
 
                                                 <button
                                                     type="button"
@@ -642,18 +604,21 @@ export default function Header() {
                                                         name="logout"
                                                         size={18}
                                                     />
-
                                                     {loggingOut
-                                                        ? "Դուրս է գալիս..."
+                                                        ? tr("logoutProgress")
                                                         : t("logout")}
                                                 </button>
                                             </>
                                         ) : (
-                                            <a href={pageUrl("/login")}>
+                                            <Link
+                                                to="/login"
+                                                onClick={() =>
+                                                    setMoreOpen(false)
+                                                }
+                                            >
                                                 <Icon name="user" size={18} />
-
                                                 {t("login")}
-                                            </a>
+                                            </Link>
                                         )}
                                     </div>
                                 )}
@@ -661,31 +626,27 @@ export default function Header() {
                         </div>
                     </div>
 
-                    {/* MOBILE DROPDOWN */}
-
                     {mobileOpen && (
                         <nav
                             className="am-mobile-dropdown"
-                            aria-label="Հեռախոսի ընտրացանկ"
+                            aria-label={tr("mobileMenu")}
                         >
-                            <a href={pageUrl("/")}>{t("home")}</a>
+                            <Link to="/">{t("home")}</Link>
 
-                            <a href={pageUrl("/cars")}>{t("listings")}</a>
+                            <Link to="/cars">{t("listings")}</Link>
 
-                            <a href={pageUrl("/#brands")}>Մակնիշներ</a>
+                            <Link to="/#brands">{tr("brands")}</Link>
 
-                            <a href={pageUrl("/search")}>Որոնում</a>
+                            <Link to="/search">{tr("search")}</Link>
 
-                            <a href={pageUrl("/compare")}>Համեմատել</a>
+                            <Link to="/compare">{tr("compare")}</Link>
 
                             {isLoggedIn && (
-                                <a href={pageUrl("/messages")}>
-                                    Հաղորդագրություններ
-                                </a>
+                                <Link to="/messages">{tr("messages")}</Link>
                             )}
 
                             <button type="button" onClick={openSupport}>
-                                Կապ մեզ հետ
+                                {tr("contactUs")}
                             </button>
 
                             <div className="am-mobile-language">
@@ -693,93 +654,81 @@ export default function Header() {
                                     selected={selectedLanguage}
                                     languages={languages}
                                     open={languageOpen}
-                                    onToggle={() =>
-                                        setLanguageOpen((old) => !old)
-                                    }
+                                    onToggle={toggleLanguageMenu}
                                     onSelect={changeLanguage}
+                                    label={tr("changeLanguage")}
                                 />
                             </div>
 
-                            {isLoggedIn && (
+                            {isLoggedIn && mobileViewport && (
                                 <div className="am-mobile-notifications">
-                                    <span>Ծանուցումներ</span>
-
-                                    <NotificationBell />
+                                    {renderNotifications()}
                                 </div>
                             )}
 
                             {isAdmin && (
-                                <a href={pageUrl("/admin")}>Ադմինիստրատոր</a>
+                                <Link to="/admin">{tr("administrator")}</Link>
                             )}
 
                             {isLoggedIn ? (
                                 <>
-                                    <a href={pageUrl("/account")}>Իմ հաշիվը</a>
+                                    <Link to="/account">{tr("account")}</Link>
 
                                     <button
                                         type="button"
                                         onClick={logout}
                                         disabled={loggingOut}
                                     >
-                                        {t("logout")}
+                                        {loggingOut
+                                            ? tr("logoutProgress")
+                                            : t("logout")}
                                     </button>
                                 </>
                             ) : (
-                                <a href={pageUrl("/login")}>{t("login")}</a>
+                                <Link to="/login">{t("login")}</Link>
                             )}
                         </nav>
                     )}
                 </div>
             </header>
 
-            {/* MOBILE BOTTOM NAVIGATION */}
-
-            <nav className="am-mobile-bottom-nav" aria-label="Արագ անցումներ">
-                <a href={pageUrl("/")} className={isHome ? "active" : ""}>
+            <nav className="am-mobile-bottom-nav" aria-label={tr("quickLinks")}>
+                <Link to="/" className={isHome ? "active" : ""}>
                     <Icon name="home" size={20} />
-
                     <span>{t("homeNav")}</span>
-                </a>
+                </Link>
 
-                <a
-                    href={pageUrl("/favorites")}
+                <Link
+                    to="/favorites"
                     onClick={handleFavoritesClick}
                     className={isFavorites ? "active" : ""}
                 >
                     <Icon name="heart" size={20} />
-
                     <span>{t("favoritesNav")}</span>
-                </a>
+                </Link>
 
-                <a href={addListingUrl} className="am-bottom-add">
+                <Link to={addListingUrl} className="am-bottom-add">
                     <span className="am-bottom-add-icon">
                         <Icon name="plus" size={22} />
                     </span>
-
                     <span>{t("addNav")}</span>
-                </a>
+                </Link>
 
                 <button type="button" onClick={openSupport}>
                     <Icon name="message" size={20} />
-
                     <span>{t("chatNav")}</span>
                 </button>
 
                 {isLoggedIn ? (
-                    <a
-                        href={pageUrl("/account")}
-                        className={isAccount ? "active" : ""}
-                    >
+                    <Link to="/account" className={isAccount ? "active" : ""}>
                         <Icon name="user" size={20} />
-
                         <span>{t("accountNav")}</span>
-                    </a>
+                    </Link>
                 ) : (
-                    <a href={pageUrl("/login")}>
+                    <Link to="/login">
                         <Icon name="user" size={20} />
-
                         <span>{t("login")}</span>
-                    </a>
+                    </Link>
                 )}
             </nav>
         </>

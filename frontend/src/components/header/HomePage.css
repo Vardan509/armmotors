@@ -3,6 +3,7 @@
    Modern White / Champagne Gold / Dark Charcoal
 ===================================================== */
 
+@import "../../styles/ArmMotorsMobile.css";
 .home-wrapper {
     --gold: #c9a45c;
     --gold-light: #e9d09a;
@@ -35,10 +36,7 @@
 
     color: var(--text);
 
-    font-family:
-        Arial,
-        "Noto Sans Armenian",
-        sans-serif;
+    font-family: Arial, "Noto Sans Armenian", sans-serif;
 
     -webkit-font-smoothing: antialiased;
 }
@@ -94,11 +92,7 @@
             rgba(220, 184, 112, 0.105),
             transparent 45%
         ),
-        linear-gradient(
-            145deg,
-            #ffffff 0%,
-            #fefdfb 100%
-        );
+        linear-gradient(145deg, #ffffff 0%, #fefdfb 100%);
 
     box-shadow:
         0 1px 1px rgba(0, 0, 0, 0.015),
@@ -150,8 +144,7 @@
 
     outline: none;
 
-    box-shadow:
-        inset 0 1px 2px rgba(0, 0, 0, 0.012);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.012);
 
     transition:
         border-color 0.25s ease,
@@ -169,8 +162,7 @@
 
     background: #ffffff;
 
-    box-shadow:
-        0 0 0 3px rgba(201, 164, 92, 0.09);
+    box-shadow: 0 0 0 3px rgba(201, 164, 92, 0.09);
 }
 
 /* SEARCH ICON */
@@ -301,8 +293,7 @@
 
     background: rgba(255, 255, 255, 0.99);
 
-    box-shadow:
-        0 20px 55px rgba(29, 26, 21, 0.13);
+    box-shadow: 0 20px 55px rgba(29, 26, 21, 0.13);
 
     animation: amDropdownIn 0.22s ease both;
 }
@@ -452,11 +443,7 @@
             rgba(216, 183, 113, 0.17),
             transparent 68%
         ),
-        linear-gradient(
-            160deg,
-            #ffffff 0%,
-            #fefdfb 100%
-        );
+        linear-gradient(160deg, #ffffff 0%, #fefdfb 100%);
 
     color: #292929;
 
@@ -486,12 +473,7 @@
 
     border-radius: 3px 3px 0 0;
 
-    background: linear-gradient(
-        90deg,
-        transparent,
-        #c6a056,
-        transparent
-    );
+    background: linear-gradient(90deg, transparent, #c6a056, transparent);
 
     opacity: 0;
 
@@ -575,9 +557,7 @@
     object-fit: contain;
     object-position: center bottom;
 
-    filter: drop-shadow(
-        0 11px 12px rgba(15, 15, 15, 0.11)
-    );
+    filter: drop-shadow(0 11px 12px rgba(15, 15, 15, 0.11));
 
     transition:
         transform 0.4s cubic-bezier(0.2, 0.7, 0.2, 1),
@@ -587,9 +567,7 @@
 .category-card:hover .category-image {
     transform: translateY(-3px) scale(1.075);
 
-    filter: drop-shadow(
-        0 16px 13px rgba(15, 15, 15, 0.15)
-    );
+    filter: drop-shadow(0 16px 13px rgba(15, 15, 15, 0.15));
 }
 
 /* =====================================================
@@ -619,11 +597,7 @@
     border: 1px solid #e9d9b9;
     border-radius: 10px;
 
-    background: linear-gradient(
-        135deg,
-        #fffdf8,
-        #faf4e7
-    );
+    background: linear-gradient(135deg, #fffdf8, #faf4e7);
 
     color: #946f2d;
 
@@ -704,11 +678,7 @@
     border: 1px dashed #d9c49b;
     border-radius: 20px;
 
-    background: linear-gradient(
-        145deg,
-        #ffffff,
-        #fffcf6
-    );
+    background: linear-gradient(145deg, #ffffff, #fffcf6);
 
     text-align: center;
 
@@ -731,11 +701,7 @@
     border: 1px solid #caa258;
     border-radius: 11px;
 
-    background: linear-gradient(
-        135deg,
-        #edd49b,
-        #d5af66
-    );
+    background: linear-gradient(135deg, #edd49b, #d5af66);
 
     color: #382b14;
 
@@ -795,12 +761,7 @@
 
     border: 1px solid #ebe7df;
 
-    background:
-        linear-gradient(
-            155deg,
-            #ffffff,
-            #fdfcf9
-        );
+    background: linear-gradient(155deg, #ffffff, #fdfcf9);
 
     box-shadow: var(--shadow-sm);
 }
@@ -845,8 +806,7 @@
 
     cursor: pointer;
 
-    box-shadow:
-        0 2px 8px rgba(24, 24, 24, 0.018);
+    box-shadow: 0 2px 8px rgba(24, 24, 24, 0.018);
 
     transition:
         transform 0.27s,
@@ -862,8 +822,7 @@
 
     background: #fffaf0;
 
-    box-shadow:
-        0 10px 24px rgba(66, 48, 20, 0.075);
+    box-shadow: 0 10px 24px rgba(66, 48, 20, 0.075);
 }
 
 /* BRAND LOGO */
@@ -963,8 +922,7 @@
     object-fit: cover;
     object-position: center;
 
-    transition:
-        transform 0.55s cubic-bezier(0.2, 0.7, 0.2, 1);
+    transition: transform 0.55s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
 .ad-banner:hover .ad-image {
@@ -987,11 +945,7 @@
 
     border-top: 1px solid #ebe7df;
 
-    background: linear-gradient(
-        180deg,
-        #ffffff,
-        #fdfbf7
-    );
+    background: linear-gradient(180deg, #ffffff, #fdfbf7);
 }
 
 .footer-container {
@@ -1084,8 +1038,7 @@
     }
 
     .products-grid {
-        grid-template-columns:
-            repeat(3, minmax(0, 1fr));
+        grid-template-columns: repeat(3, minmax(0, 1fr));
 
         gap: 16px;
     }
@@ -1105,8 +1058,7 @@
 
 @media (max-width: 950px) {
     .categories-grid {
-        grid-template-columns:
-            repeat(3, minmax(0, 1fr));
+        grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 
     .brands-ad-wrapper {
@@ -1178,8 +1130,7 @@
         scroll-snap-type: x proximity;
 
         scrollbar-width: thin;
-        scrollbar-color:
-            #c9a45c #f0ede7;
+        scrollbar-color: #c9a45c #f0ede7;
     }
 
     .category-card {
@@ -1200,8 +1151,7 @@
     /* PRODUCTS */
 
     .products-grid {
-        grid-template-columns:
-            repeat(2, minmax(0, 1fr));
+        grid-template-columns: repeat(2, minmax(0, 1fr));
 
         gap: 12px;
     }
@@ -1276,15 +1226,13 @@
     }
 
     .products-grid {
-        grid-template-columns:
-            repeat(2, minmax(0, 1fr));
+        grid-template-columns: repeat(2, minmax(0, 1fr));
 
         gap: 10px;
     }
 
     .brands-grid {
-        grid-template-columns:
-            repeat(2, minmax(0, 1fr));
+        grid-template-columns: repeat(2, minmax(0, 1fr));
 
         gap: 10px;
     }

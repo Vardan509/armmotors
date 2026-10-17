@@ -1,11 +1,8 @@
-
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 
-import Header from "../components/header/Header";
 import ProductCard from "../components/ProductCard/ProductCard";
-
 import { apiRequest } from "../utils/api";
-import { pageUrl } from "../utils/navigation";
 
 import "./SellerPage.css";
 
@@ -27,7 +24,7 @@ export default function SellerPage({ id }) {
             try {
                 const result = await apiRequest(
                     `/sellers/${encodeURIComponent(id)}`,
-                    { signal: controller.signal }
+                    { signal: controller.signal },
                 );
 
                 if (!controller.signal.aborted) {
@@ -36,8 +33,7 @@ export default function SellerPage({ id }) {
             } catch (err) {
                 if (!controller.signal.aborted) {
                     setError(
-                        err.message ||
-                            "Վաճառողի տվյալները բեռնել չհաջողվեց։"
+                        err.message || "Վաճառողի տվյալները բեռնել չհաջողվեց։",
                     );
                 }
             } finally {
@@ -47,7 +43,12 @@ export default function SellerPage({ id }) {
             }
         }
 
-        void loadSeller();
+        if (id) {
+            void loadSeller();
+        } else {
+            setLoading(false);
+            setError("Վաճառողի ID-ն նշված չէ։");
+        }
 
         return () => controller.abort();
     }, [id]);
@@ -57,8 +58,9 @@ export default function SellerPage({ id }) {
 
         const oldTitle = document.title;
 
-        document.title =
-            `${data.seller.name} ${data.seller.surname} — ArmMotors`;
+        document.title = `${
+            data.seller.name || "Վաճառող"
+        } ${data.seller.surname || ""} — ArmMotors`;
 
         return () => {
             document.title = oldTitle;
@@ -66,12 +68,12 @@ export default function SellerPage({ id }) {
     }, [data]);
 
     const products = useMemo(() => {
-        if (!data?.products) return [];
+        if (!Array.isArray(data?.products)) {
+            return [];
+        }
 
         const filtered = data.products.filter(
-            (product) =>
-                filter === "all" ||
-                product.type === filter
+            (product) => filter === "all" || product.type === filter,
         );
 
         return [...filtered].sort((a, b) => {
@@ -84,13 +86,11 @@ export default function SellerPage({ id }) {
             }
 
             if (sort === "views") {
-                return Number(b.views || 0) -
-                    Number(a.views || 0);
+                return Number(b.views || 0) - Number(a.views || 0);
             }
 
             return (
-                new Date(b.createdAt).getTime() -
-                new Date(a.createdAt).getTime()
+                (Date.parse(b.createdAt) || 0) - (Date.parse(a.createdAt) || 0)
             );
         });
     }, [data, filter, sort]);
@@ -99,7 +99,7 @@ export default function SellerPage({ id }) {
     const statistics = data?.statistics;
 
     const fullName = seller
-        ? `${seller.name} ${seller.surname || ""}`.trim()
+        ? `${seller.name || ""} ${seller.surname || ""}`.trim()
         : "";
 
     const joinedYear = seller?.joinedAt
@@ -107,218 +107,170 @@ export default function SellerPage({ id }) {
         : null;
 
     return (
-        <>
-            <Header />
+        <main className="seller-page">
+            <nav className="seller-breadcrumb" aria-label="Էջի ուղի">
+                <Link to="/">Գլխավոր</Link>
+                <span>/</span>
+                <Link to="/cars">Հայտարարություններ</Link>
+                <span>/</span>
+                <span>Վաճառող</span>
+            </nav>
 
-            <main className="seller-page">
-                <nav
-                    className="seller-breadcrumb"
-                    aria-label="Էջի ուղի"
-                >
-                    <a href={pageUrl("/")}>Գլխավոր</a>
-                    <span>/</span>
-                    <a href={pageUrl("/cars")}>
-                        Հայտարարություններ
-                    </a>
-                    <span>/</span>
-                    <span>Վաճառող</span>
-                </nav>
+            {loading && (
+                <div className="seller-loading" role="status">
+                    Վաճառողի տվյալները բեռնվում են...
+                </div>
+            )}
 
-                {loading && (
-                    <div
-                        className="seller-loading"
-                        role="status"
-                    >
-                        Վաճառողի տվյալները բեռնվում են...
-                    </div>
-                )}
+            {!loading && error && (
+                <section className="seller-error">
+                    <h1>Վաճառողը հասանելի չէ</h1>
+                    <p role="alert">{error}</p>
+                    <Link to="/cars">Վերադառնալ հայտարարություններին</Link>
+                </section>
+            )}
 
-                {!loading && error && (
-                    <section className="seller-error">
-                        <h1>Վաճառողը հասանելի չէ</h1>
-                        <p role="alert">{error}</p>
+            {!loading && !error && seller && (
+                <>
+                    <section className="seller-hero">
+                        <div className="seller-profile">
+                            <div
+                                className="seller-avatar-large"
+                                aria-hidden="true"
+                            >
+                                {seller.name?.[0]?.toUpperCase() || "U"}
+                            </div>
 
-                        <a href={pageUrl("/cars")}>
-                            Վերադառնալ հայտարարություններին
-                        </a>
+                            <div className="seller-profile-info">
+                                <span className="seller-eyebrow">
+                                    ARMMOTORS / ՎԱՃԱՌՈՂ
+                                </span>
+
+                                <h1>{fullName}</h1>
+
+                                <p>
+                                    {joinedYear
+                                        ? `ArmMotors-ում՝ ${joinedYear} թվականից`
+                                        : "ArmMotors-ի վաճառող"}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="seller-stats">
+                            <div>
+                                <strong>{statistics?.total || 0}</strong>
+                                <span>Ակտիվ հայտարարություններ</span>
+                            </div>
+
+                            <div>
+                                <strong>{statistics?.cars || 0}</strong>
+                                <span>Մեքենաներ</span>
+                            </div>
+
+                            <div>
+                                <strong>{statistics?.parts || 0}</strong>
+                                <span>Պահեստամասեր</span>
+                            </div>
+                        </div>
                     </section>
-                )}
 
-                {!loading && !error && seller && (
-                    <>
-                        <section className="seller-hero">
-                            <div className="seller-profile">
-                                <div
-                                    className="seller-avatar-large"
-                                    aria-hidden="true"
+                    <section className="seller-listings">
+                        <div className="seller-listings-header">
+                            <div>
+                                <span className="seller-eyebrow">
+                                    ՀԱՅՏԱՐԱՐՈՒԹՅՈՒՆՆԵՐ
+                                </span>
+
+                                <h2>{fullName}-ի հայտարարությունները</h2>
+
+                                <p>
+                                    Գտնվել է {products.length} հայտարարություն
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="seller-toolbar">
+                            <div
+                                className="seller-filter-buttons"
+                                role="group"
+                                aria-label="Հայտարարության տեսակ"
+                            >
+                                <button
+                                    type="button"
+                                    className={filter === "all" ? "active" : ""}
+                                    onClick={() => setFilter("all")}
                                 >
-                                    {seller.name?.[0]?.toUpperCase() ||
-                                        "U"}
-                                </div>
+                                    Բոլորը
+                                </button>
 
-                                <div className="seller-profile-info">
-                                    <span className="seller-eyebrow">
-                                        ARMMOTORS / ՎԱՃԱՌՈՂ
-                                    </span>
-
-                                    <h1>{fullName}</h1>
-
-                                    <p>
-                                        {joinedYear
-                                            ? `ArmMotors-ում՝ ${joinedYear} թվականից`
-                                            : "ArmMotors-ի վաճառող"}
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div className="seller-stats">
-                                <div>
-                                    <strong>
-                                        {statistics?.total || 0}
-                                    </strong>
-                                    <span>
-                                        Ակտիվ հայտարարություններ
-                                    </span>
-                                </div>
-
-                                <div>
-                                    <strong>
-                                        {statistics?.cars || 0}
-                                    </strong>
-                                    <span>Մեքենաներ</span>
-                                </div>
-
-                                <div>
-                                    <strong>
-                                        {statistics?.parts || 0}
-                                    </strong>
-                                    <span>Պահեստամասեր</span>
-                                </div>
-                            </div>
-                        </section>
-
-                        <section className="seller-listings">
-                            <div className="seller-listings-header">
-                                <div>
-                                    <span className="seller-eyebrow">
-                                        ՀԱՅՏԱՐԱՐՈՒԹՅՈՒՆՆԵՐ
-                                    </span>
-
-                                    <h2>
-                                        {fullName}-ի հայտարարությունները
-                                    </h2>
-
-                                    <p>
-                                        Գտնվել է {products.length} հայտարարություն
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div className="seller-toolbar">
-                                <div
-                                    className="seller-filter-buttons"
-                                    role="group"
-                                    aria-label="Հայտարարության տեսակ"
+                                <button
+                                    type="button"
+                                    className={filter === "car" ? "active" : ""}
+                                    onClick={() => setFilter("car")}
                                 >
-                                    <button
-                                        type="button"
-                                        className={
-                                            filter === "all"
-                                                ? "active"
-                                                : ""
-                                        }
-                                        onClick={() =>
-                                            setFilter("all")
-                                        }
-                                    >
-                                        Բոլորը
-                                    </button>
+                                    Մեքենաներ
+                                </button>
 
-                                    <button
-                                        type="button"
-                                        className={
-                                            filter === "car"
-                                                ? "active"
-                                                : ""
-                                        }
-                                        onClick={() =>
-                                            setFilter("car")
-                                        }
-                                    >
-                                        Մեքենաներ
-                                    </button>
-
-                                    <button
-                                        type="button"
-                                        className={
-                                            filter === "part"
-                                                ? "active"
-                                                : ""
-                                        }
-                                        onClick={() =>
-                                            setFilter("part")
-                                        }
-                                    >
-                                        Պահեստամասեր
-                                    </button>
-                                </div>
-
-                                <select
-                                    aria-label="Տեսակավորել"
-                                    value={sort}
-                                    onChange={(event) =>
-                                        setSort(event.target.value)
+                                <button
+                                    type="button"
+                                    className={
+                                        filter === "part" ? "active" : ""
                                     }
+                                    onClick={() => setFilter("part")}
                                 >
-                                    <option value="newest">
-                                        Նորերը սկզբում
-                                    </option>
-                                    <option value="priceAsc">
-                                        Գին՝ աճման կարգով
-                                    </option>
-                                    <option value="priceDesc">
-                                        Գին՝ նվազման կարգով
-                                    </option>
-                                    <option value="views">
-                                        Ամենադիտվածները
-                                    </option>
-                                </select>
+                                    Պահեստամասեր
+                                </button>
                             </div>
 
-                            {products.length > 0 ? (
-                                <div className="seller-products-grid">
-                                    {products.map((product) => (
-                                        <ProductCard
-                                            key={product._id}
-                                            item={product}
-                                        />
-                                    ))}
-                                </div>
-                            ) : (
-                                <div className="seller-empty">
-                                    <h3>
-                                        Հայտարարություններ չկան
-                                    </h3>
+                            <select
+                                aria-label="Տեսակավորել"
+                                value={sort}
+                                onChange={(event) =>
+                                    setSort(event.target.value)
+                                }
+                            >
+                                <option value="newest">Նորերը սկզբում</option>
+                                <option value="priceAsc">
+                                    Գին՝ աճման կարգով
+                                </option>
+                                <option value="priceDesc">
+                                    Գին՝ նվազման կարգով
+                                </option>
+                                <option value="views">Ամենադիտվածները</option>
+                            </select>
+                        </div>
 
-                                    <p>
-                                        Այս բաժնում ակտիվ
-                                        հայտարարություններ դեռ չկան։
-                                    </p>
+                        {products.length > 0 ? (
+                            <div className="seller-products-grid">
+                                {products.map((product) => (
+                                    <ProductCard
+                                        key={product._id || product.id}
+                                        item={product}
+                                    />
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="seller-empty">
+                                <h3>Հայտարարություններ չկան</h3>
 
+                                <p>
+                                    Այս բաժնում ակտիվ հայտարարություններ դեռ
+                                    չկան։
+                                </p>
+
+                                {filter !== "all" && (
                                     <button
                                         type="button"
-                                        onClick={() =>
-                                            setFilter("all")
-                                        }
+                                        onClick={() => setFilter("all")}
                                     >
                                         Ցույց տալ բոլորը
                                     </button>
-                                </div>
-                            )}
-                        </section>
-                    </>
-                )}
-            </main>
-        </>
+                                )}
+                            </div>
+                        )}
+                    </section>
+                </>
+            )}
+        </main>
     );
 }

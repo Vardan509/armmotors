@@ -1,537 +1,958 @@
-// ?????
+import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 
-
-import { useState } from "react";
-import Header from "../components/header/Header";
 import ProductCard from "../components/ProductCard/ProductCard";
-import "./CarsPage.css";
+import SearchableSelect from "../components/filterCar/SearchableSelect";
+
 import useProducts from "../utils/useProducts";
 import useCurrency from "../utils/useCurrency";
+import { useI18n } from "../utils/i18n";
 
-const INITIAL_FILTERS = {
+import { ALL_BRANDS, getModels } from "../data/vehicleCatalog";
+import {
+    loadArmeniaLocations,
+    getRegions,
+    getCommunities,
+    getSettlements,
+} from "../data/armeniaLocations";
+
+import "./CarsPage.css";
+import "../components/filterCar/filter.css";
+
+const EMPTY = {
+    brand: "",
+    model: "",
+    region: "",
+    community: "",
+    settlement: "",
     priceFrom: "",
     priceTo: "",
     yearFrom: "",
     yearTo: "",
-    brand: "",
-    model: "",
-    region: "",
-    vin: "",
+    mileageFrom: "",
+    mileageTo: "",
     fuel: "",
     steering: "",
     color: "",
+    vin: "",
+    customsCleared: "",
+    condition: "",
+    paintCondition: "",
+    gasEquipment: "",
+    gasCylinderReplaced: "",
+    wheelSize: "",
+    interiorMaterial: "",
+    sunroof: "",
+    headlights: [],
+    comfort: [],
 };
 
-const REGIONS = [
-    "Երևան",
-    "Արագածոտն",
-    "Արարատ",
-    "Արմավիր",
-    "Գեղարքունիք",
-    "Կոտայք",
-    "Լոռի",
-    "Շիրակ",
-    "Սյունիք",
-    "Տավուշ",
-    "Վայոց ձոր",
-];
+const MULTIPLE = ["headlights", "comfort"];
 
-function matchesFilters(car, filters, convert, priceCurrency) {
-    const price = convert(car.price, priceCurrency, car.currency || "AMD");
-    if (
-        filters.priceFrom !== "" &&
-        price < Number(filters.priceFrom)
-    ) return false;
+const WORDS = {
+    hy: {
+        title: "Գտեք Ձեր մեքենան",
+        subtitle: "Հայաստանի ավտոմեքենաների հայտարարություններ",
+        all: "Բոլորը",
+        passenger: "Մարդատար",
+        truck: "Բեռնատար",
+        brand: "Մակնիշ",
+        model: "Մոդել",
+        region: "Մարզ",
+        community: "Համայնք",
+        settlement: "Բնակավայր",
+        priceFrom: "Գին՝ սկսած",
+        priceTo: "Գին՝ մինչև",
+        yearFrom: "Տարեթիվ՝ սկսած",
+        yearTo: "Տարեթիվ՝ մինչև",
+        mileageFrom: "Վազք՝ սկսած",
+        mileageTo: "Վազք՝ մինչև",
+        fuel: "Վառելիք",
+        steering: "Ղեկ",
+        color: "Գույն",
+        condition: "Վիճակ",
+        customsCleared: "Մաքսազերծված",
+        paintCondition: "Ներկի վիճակ",
+        gasEquipment: "Գազի սարքավորում",
+        gasCylinderReplaced: "Գազի բալոնը փոխված է",
+        wheelSize: "Անվահեծի չափ",
+        interiorMaterial: "Սրահի նյութ",
+        sunroof: "Լյուկ",
+        headlights: "Լուսարձակներ",
+        comfort: "Հարմարություններ",
+        yes: "Այո",
+        no: "Ոչ",
+        new: "Նոր",
+        used: "Օգտագործված",
+        petrol: "Բենզին",
+        diesel: "Դիզել",
+        gas: "Գազ",
+        hybrid: "Հիբրիդ",
+        electric: "Էլեկտրական",
+        left: "Ձախ",
+        right: "Աջ",
+        apply: "Ցույց տալ արդյունքները",
+        clear: "Մաքրել",
+        found: "Գտնվել է",
+        results: "հայտարարություն",
+        loading: "Բեռնվում է…",
+        empty: "Այս ֆիլտրերով մեքենա չի գտնվել։",
+        any: "Ցանկացած",
+        select: "Ընտրել",
+        filters: "Ֆիլտրեր",
+        retry: "Կրկին փորձել",
+        allOptions: "Բոլոր տարբերակները",
+        close: "Փակել",
+        advanced: "Ընդլայնված ֆիլտրեր",
+        mainFilters: "Հիմնական տվյալներ",
+        priceYear: "Գին, տարեթիվ և վազք",
+        specifications: "Տեխնիկական տվյալներ",
+        extras: "Լրացուցիչ տվյալներ",
+        sort: "Դասավորել",
+        newest: "Նորերը սկզբում",
+        oldest: "Հները սկզբում",
+        cheap: "Էժանները սկզբում",
+        expensive: "Թանկերը սկզբում",
+        active: "Ակտիվ ֆիլտրեր",
+    },
+    ru: {
+        title: "Найдите свой автомобиль",
+        subtitle: "Объявления об автомобилях в Армении",
+        all: "Все",
+        passenger: "Легковые",
+        truck: "Грузовые",
+        brand: "Марка",
+        model: "Модель",
+        region: "Область",
+        community: "Община",
+        settlement: "Населённый пункт",
+        priceFrom: "Цена от",
+        priceTo: "Цена до",
+        yearFrom: "Год от",
+        yearTo: "Год до",
+        mileageFrom: "Пробег от",
+        mileageTo: "Пробег до",
+        fuel: "Топливо",
+        steering: "Руль",
+        color: "Цвет",
+        condition: "Состояние",
+        customsCleared: "Растаможен",
+        paintCondition: "Состояние краски",
+        gasEquipment: "Газовое оборудование",
+        gasCylinderReplaced: "Газовый баллон заменён",
+        wheelSize: "Размер дисков",
+        interiorMaterial: "Материал салона",
+        sunroof: "Люк",
+        headlights: "Фары",
+        comfort: "Комфорт",
+        yes: "Да",
+        no: "Нет",
+        new: "Новый",
+        used: "Б/у",
+        petrol: "Бензин",
+        diesel: "Дизель",
+        gas: "Газ",
+        hybrid: "Гибрид",
+        electric: "Электро",
+        left: "Левый",
+        right: "Правый",
+        apply: "Показать результаты",
+        clear: "Сбросить",
+        found: "Найдено",
+        results: "объявлений",
+        loading: "Загрузка…",
+        empty: "Автомобили не найдены.",
+        any: "Любой",
+        select: "Выбрать",
+        filters: "Фильтры",
+        retry: "Повторить",
+        allOptions: "Все варианты",
+        close: "Закрыть",
+        advanced: "Расширенные фильтры",
+        mainFilters: "Основные данные",
+        priceYear: "Цена, год и пробег",
+        specifications: "Характеристики",
+        extras: "Дополнительно",
+        sort: "Сортировка",
+        newest: "Сначала новые",
+        oldest: "Сначала старые",
+        cheap: "Сначала дешёвые",
+        expensive: "Сначала дорогие",
+        active: "Активные фильтры",
+    },
+    en: {
+        title: "Find your next car",
+        subtitle: "Car listings across Armenia",
+        all: "All",
+        passenger: "Passenger",
+        truck: "Trucks",
+        brand: "Brand",
+        model: "Model",
+        region: "Region",
+        community: "Community",
+        settlement: "Settlement",
+        priceFrom: "Price from",
+        priceTo: "Price to",
+        yearFrom: "Year from",
+        yearTo: "Year to",
+        mileageFrom: "Mileage from",
+        mileageTo: "Mileage to",
+        fuel: "Fuel",
+        steering: "Steering",
+        color: "Color",
+        condition: "Condition",
+        customsCleared: "Customs cleared",
+        paintCondition: "Paint condition",
+        gasEquipment: "Gas equipment",
+        gasCylinderReplaced: "Gas cylinder replaced",
+        wheelSize: "Wheel size",
+        interiorMaterial: "Interior material",
+        sunroof: "Sunroof",
+        headlights: "Headlights",
+        comfort: "Comfort",
+        yes: "Yes",
+        no: "No",
+        new: "New",
+        used: "Used",
+        petrol: "Petrol",
+        diesel: "Diesel",
+        gas: "Gas",
+        hybrid: "Hybrid",
+        electric: "Electric",
+        left: "Left",
+        right: "Right",
+        apply: "Show results",
+        clear: "Clear",
+        found: "Found",
+        results: "listings",
+        loading: "Loading…",
+        empty: "No cars match these filters.",
+        any: "Any",
+        select: "Select",
+        filters: "Filters",
+        retry: "Try again",
+        allOptions: "All options",
+        close: "Close",
+        advanced: "Advanced filters",
+        mainFilters: "Basic information",
+        priceYear: "Price, year and mileage",
+        specifications: "Specifications",
+        extras: "Additional features",
+        sort: "Sort by",
+        newest: "Newest first",
+        oldest: "Oldest first",
+        cheap: "Price: low to high",
+        expensive: "Price: high to low",
+        active: "Active filters",
+    },
+};
 
-    if (
-        filters.priceTo !== "" &&
-        price > Number(filters.priceTo)
-    ) return false;
+const COMFORT_LABELS = {
+    airConditioning: ["Օդորակիչ", "Кондиционер", "Air conditioning"],
+    climateControl: ["Կլիմատ կոնտրոլ", "Климат-контроль", "Climate control"],
+    heatedSeats: ["Տաքացվող նստատեղեր", "Подогрев сидений", "Heated seats"],
+    ventilatedSeats: [
+        "Օդափոխվող նստատեղեր",
+        "Вентиляция сидений",
+        "Ventilated seats",
+    ],
+    heatedSteering: ["Տաքացվող ղեկ", "Подогрев руля", "Heated steering"],
+    heatedWindshield: [
+        "Տաքացվող դիմապակի",
+        "Обогрев стекла",
+        "Heated windshield",
+    ],
+    cruiseControl: ["Կրուիզ կոնտրոլ", "Круиз-контроль", "Cruise control"],
+    adaptiveCruise: ["Ադապտիվ կրուիզ", "Адаптивный круиз", "Adaptive cruise"],
+    parkingSensors: ["Պարկտրոնիկ", "Парктроники", "Parking sensors"],
+    rearCamera: ["Հետևի տեսախցիկ", "Камера заднего вида", "Rear camera"],
+    camera360: ["360° տեսախցիկ", "Камера 360°", "360° camera"],
+    keylessEntry: ["Առանց բանալի մուտք", "Бесключевой доступ", "Keyless entry"],
+    startStop: ["Start / Stop", "Start / Stop", "Start / Stop"],
+    electricSeats: ["Էլեկտրական նստատեղեր", "Электросиденья", "Power seats"],
+    memorySeats: ["Նստատեղերի հիշողություն", "Память сидений", "Memory seats"],
+    navigation: ["Նավիգացիա", "Навигация", "Navigation"],
+    bluetooth: ["Bluetooth", "Bluetooth", "Bluetooth"],
+    appleCarplay: ["Apple CarPlay", "Apple CarPlay", "Apple CarPlay"],
+    androidAuto: ["Android Auto", "Android Auto", "Android Auto"],
+};
 
-    if (
-        filters.yearFrom !== "" &&
-        car.year < Number(filters.yearFrom)
-    ) return false;
+const COMFORT = Object.keys(COMFORT_LABELS);
 
-    if (
-        filters.yearTo !== "" &&
-        car.year > Number(filters.yearTo)
-    ) return false;
+function emptyFilters() {
+    return {
+        ...EMPTY,
+        headlights: [],
+        comfort: [],
+    };
+}
 
-    if (filters.brand && (car.brand || "").trim().toLowerCase() !== filters.brand.trim().toLowerCase()) return false;
+function fromQuery(params) {
+    const result = emptyFilters();
 
-    if (
-        filters.model.trim() &&
-        !(car.model || "").toLowerCase().includes(
-            filters.model.trim().toLowerCase()
-        )
-    ) return false;
+    for (const key of Object.keys(EMPTY)) {
+        result[key] = MULTIPLE.includes(key)
+            ? (params.get(key) || "").split(",").filter(Boolean)
+            : params.get(key) || "";
+    }
 
-    if (filters.region && car.region !== filters.region) return false;
-    if (filters.fuel && car.fuel !== filters.fuel) return false;
-    if (filters.steering && car.steering !== filters.steering) return false;
-    if (filters.color && car.color !== filters.color) return false;
+    return result;
+}
 
-    const hasVin = Boolean(car.vin?.trim());
+function same(a, b) {
+    return (
+        String(a ?? "")
+            .trim()
+            .toLowerCase() ===
+        String(b ?? "")
+            .trim()
+            .toLowerCase()
+    );
+}
 
-    if (filters.vin === "yes" && !hasVin) return false;
-    if (filters.vin === "no" && hasVin) return false;
+function inRange(value, from, to) {
+    if (from === "" && to === "") return true;
+
+    if (value === null || value === undefined || value === "") {
+        return false;
+    }
+
+    const number = Number(value);
+
+    if (!Number.isFinite(number)) return false;
+
+    return (
+        (from === "" || number >= Number(from)) &&
+        (to === "" || number <= Number(to))
+    );
+}
+
+function matches(car, filters, convert, currency) {
+    const price = convert(
+        Number(car.price || 0),
+        currency,
+        car.currency || "AMD",
+    );
+
+    if (!inRange(price, filters.priceFrom, filters.priceTo)) return false;
+    if (!inRange(car.year, filters.yearFrom, filters.yearTo)) return false;
+    if (!inRange(car.mileage, filters.mileageFrom, filters.mileageTo))
+        return false;
+
+    const exact = [
+        "brand",
+        "model",
+        "region",
+        "community",
+        "settlement",
+        "fuel",
+        "steering",
+        "color",
+        "customsCleared",
+        "paintCondition",
+        "gasEquipment",
+        "gasCylinderReplaced",
+        "wheelSize",
+        "interiorMaterial",
+        "sunroof",
+        "condition",
+    ];
+
+    for (const key of exact) {
+        if (filters[key] && !same(car[key], filters[key])) {
+            return false;
+        }
+    }
+
+    if (filters.vin) {
+        const hasVin = Boolean(String(car.vin || "").trim());
+
+        if (filters.vin === "yes" && !hasVin) return false;
+        if (filters.vin === "no" && hasVin) return false;
+    }
+
+    for (const key of MULTIPLE) {
+        const available = Array.isArray(car[key]) ? car[key] : [];
+
+        if (!filters[key].every((value) => available.includes(value))) {
+            return false;
+        }
+    }
 
     return true;
 }
 
-export default function CarsPage() {
-    const {
-        products,
-        loading,
-        error: loadError
-    } = useProducts();
-
-    const CARS = products.filter(product => product.type === "car");
-
-    const { currency, convert } = useCurrency();
-
-    const params = new URLSearchParams(window.location.search);
-
-    const initialFilters = Object.fromEntries(
-        Object.keys(INITIAL_FILTERS).map(key => [
-            key,
-            params.get(key) || ""
-        ])
+function Field({ label, children }) {
+    return (
+        <label className="am-catalog-field">
+            <span>{label}</span>
+            {children}
+        </label>
     );
+}
 
-    const [vehicleType, setVehicleType] = useState(
-        params.get("vehicleType") === "truck"
-            ? "truck"
-            : params.get("vehicleType") === "passenger" ? "passenger" : "all"
-    );
-
-    const [filters, setFilters] = useState(initialFilters);
-
-    const [appliedFilters, setAppliedFilters] = useState({
-        ...initialFilters
-    });
-
-    const [sort, setSort] = useState("newest");
-    const [priceCurrency, setPriceCurrency] = useState(params.get("priceCurrency") || currency);
-    const [inputCurrency, setInputCurrency] = useState(params.get("priceCurrency") || currency);
-    const [error, setError] = useState("");
-    const typeCars = vehicleType === "all" ? CARS : CARS.filter(car => (car.vehicleType || "passenger") === vehicleType);
-
-    const brands = [...new Set(typeCars.map((car) => car.brand))];
-    const colors = [...new Set(typeCars.map((car) => car.color))];
-
-    const visibleCars = typeCars
-        .filter((car) => matchesFilters(car, appliedFilters, convert, priceCurrency))
-        .sort((a, b) => {
-            const difference = convert(a.price, "AMD", a.currency || "AMD") - convert(b.price, "AMD", b.currency || "AMD");
-            if (sort === "priceAsc") return difference;
-            if (sort === "priceDesc") return -difference;
-            if (sort === "yearDesc") return b.year - a.year;
-
-            return (Date.parse(b.createdAt) || 0) - (Date.parse(a.createdAt) || 0);
-        });
-
-    function changeFilter(e) {
-        const { name, value } = e.target;
-        if (name === "priceFrom" || name === "priceTo") {
-            setFilters(prev => ({ ...prev,
-                priceFrom: prev.priceFrom === "" ? "" : String(Math.round(convert(prev.priceFrom, currency, inputCurrency))),
-                priceTo: prev.priceTo === "" ? "" : String(Math.round(convert(prev.priceTo, currency, inputCurrency))),
-                [name]: value
-            }));
-            setInputCurrency(currency);
-            setError("");
-            return;
-        }
-
-        setFilters(prev => ({
-            ...prev,
-
-            [name]: value,
-
-            ...(name === "brand"
-                ? { model: "" }
-                : {})
-        }));
-
-        setError("");
-    }
-
-    function resetFilters() {
-        setFilters({ ...INITIAL_FILTERS });
-        setAppliedFilters({ ...INITIAL_FILTERS });
-        setError("");
-        const url = new URL(window.location.href);
-        Object.keys(INITIAL_FILTERS).forEach(key => url.searchParams.delete(key));
-        window.history.replaceState(null, "", url);
-    }
-
-    function selectType(type) {
-        setVehicleType(type);
-        resetFilters();
-        const url = new URL(window.location.href);
-        url.searchParams.set("vehicleType", type);
-        window.history.replaceState(null, "", url);
-    }
-
-    function applyFilters(e) {
-        e.preventDefault();
-
-        if (
-            filters.priceFrom !== "" &&
-            filters.priceTo !== "" &&
-            Number(filters.priceFrom) > Number(filters.priceTo)
-        ) {
-            setError("Սկզբնական գինը վերջնականից մեծ է։");
-            return;
-        }
-
-        if (
-            filters.yearFrom !== "" &&
-            filters.yearTo !== "" &&
-            Number(filters.yearFrom) > Number(filters.yearTo)
-        ) {
-            setError("Սկզբնական տարեթիվը վերջնականից մեծ է։");
-            return;
-        }
-
-        const nextFilters = { ...filters,
-            priceFrom: filters.priceFrom === "" ? "" : String(convert(filters.priceFrom, currency, inputCurrency)),
-            priceTo: filters.priceTo === "" ? "" : String(convert(filters.priceTo, currency, inputCurrency))
-        };
-        setAppliedFilters(nextFilters);
-        setPriceCurrency(currency);
-        setError("");
-        const url = new URL(window.location.href);
-        Object.entries(nextFilters).forEach(([key, value]) => value ? url.searchParams.set(key, value) : url.searchParams.delete(key));
-        url.searchParams.set("vehicleType", vehicleType);
-        url.searchParams.set("priceCurrency", currency);
-        window.history.replaceState(null, "", url);
-    }
+function Pills({ label, value, options, onChange, multiple = false }) {
+    const selected = multiple ? value || [] : value;
 
     return (
-        <>
-            <Header />
+        <div className="am-pill-field">
+            <span className="am-pill-label">{label}</span>
 
-            <main className="cars-page">
-                <a href="/" className="cars-back">
-                    ← Գլխավոր էջ
-                </a>
+            <div className="am-pill-list">
+                {options.map(([key, text]) => {
+                    const active = multiple
+                        ? selected.includes(key)
+                        : selected === key;
 
-                {!vehicleType ? (
-                    <section className="car-type-section">
-                        <h1>Ընտրեք մեքենայի տեսակը</h1>
+                    return (
+                        <button
+                            key={key}
+                            type="button"
+                            className={`am-pill ${active ? "active" : ""}`}
+                            aria-pressed={active}
+                            onClick={() => {
+                                if (multiple) {
+                                    onChange(
+                                        active
+                                            ? selected.filter(
+                                                  (item) => item !== key,
+                                              )
+                                            : [...selected, key],
+                                    );
+                                } else {
+                                    onChange(active ? "" : key);
+                                }
+                            }}
+                        >
+                            {text}
+                        </button>
+                    );
+                })}
+            </div>
+        </div>
+    );
+}
 
-                        <div className="car-type-options">
-                            <button type="button" onClick={() => selectType("all")}>Բոլոր մեքենաները →</button>
-                            <button
-                                type="button"
-                                onClick={() => selectType("passenger")}
-                            >
-                                Մարդատար →
-                            </button>
+export default function CarsPage() {
+    const { language } = useI18n();
+    const w = WORDS[language] || WORDS.hy;
 
-                            <button
-                                type="button"
-                                onClick={() => selectType("truck")}
-                            >
-                                Բեռնատար →
-                            </button>
+    const [params, setParams] = useSearchParams();
+    const [filters, setFilters] = useState(() => fromQuery(params));
+    const [vehicleType, setVehicleType] = useState(
+        params.get("vehicleType") || "all",
+    );
+
+    const [locationsReady, setLocationsReady] = useState(false);
+    const [mobileOpen, setMobileOpen] = useState(false);
+    const [advancedOpen, setAdvancedOpen] = useState(false);
+    const [sort, setSort] = useState("newest");
+
+    const { products = [], loading, error, retry } = useProducts();
+    const { convert, currency } = useCurrency();
+
+    useEffect(() => {
+        setFilters(fromQuery(params));
+        setVehicleType(params.get("vehicleType") || "all");
+    }, [params]);
+
+    useEffect(() => {
+        let active = true;
+
+        Promise.resolve()
+            .then(() => loadArmeniaLocations())
+            .catch(() => null)
+            .finally(() => {
+                if (active) setLocationsReady(true);
+            });
+
+        return () => {
+            active = false;
+        };
+    }, []);
+
+    useEffect(() => {
+        if (!mobileOpen) return;
+
+        const previousOverflow = document.body.style.overflow;
+        document.body.style.overflow = "hidden";
+
+        function onEscape(event) {
+            if (event.key === "Escape") {
+                setMobileOpen(false);
+            }
+        }
+
+        document.addEventListener("keydown", onEscape);
+
+        return () => {
+            document.body.style.overflow = previousOverflow;
+            document.removeEventListener("keydown", onEscape);
+        };
+    }, [mobileOpen]);
+
+    const regions = locationsReady ? getRegions() : [];
+
+    const communities =
+        locationsReady && filters.region ? getCommunities(filters.region) : [];
+
+    const settlements =
+        locationsReady && filters.region && filters.community
+            ? getSettlements(filters.region, filters.community)
+            : [];
+
+    const filtered = useMemo(() => {
+        return products.filter((product) => {
+            if (product.type !== "car") return false;
+            if (product.status === "draft") return false;
+
+            if (vehicleType !== "all" && product.vehicleType !== vehicleType) {
+                return false;
+            }
+
+            return matches(product, filters, convert, currency);
+        });
+    }, [products, filters, vehicleType, convert, currency]);
+
+    const sorted = useMemo(() => {
+        const list = [...filtered];
+
+        const price = (item) => {
+            const converted = Number(
+                convert(
+                    Number(item.price || 0),
+                    currency,
+                    item.currency || "AMD",
+                ),
+            );
+
+            return Number.isFinite(converted) ? converted : 0;
+        };
+
+        const date = (item) => new Date(item.createdAt || 0).getTime() || 0;
+
+        switch (sort) {
+            case "oldest":
+                return list.sort((a, b) => date(a) - date(b));
+
+            case "cheap":
+                return list.sort((a, b) => price(a) - price(b));
+
+            case "expensive":
+                return list.sort((a, b) => price(b) - price(a));
+
+            default:
+                return list.sort((a, b) => date(b) - date(a));
+        }
+    }, [filtered, sort, convert, currency]);
+
+    const activeCount =
+        Object.values(filters).filter((value) =>
+            Array.isArray(value) ? value.length > 0 : value !== "",
+        ).length + (vehicleType !== "all" ? 1 : 0);
+
+    function change(key, value) {
+        setFilters((previous) => {
+            const next = { ...previous, [key]: value };
+
+            if (key === "brand") next.model = "";
+
+            if (key === "region") {
+                next.community = "";
+                next.settlement = "";
+            }
+
+            if (key === "community") {
+                next.settlement = "";
+            }
+
+            return next;
+        });
+    }
+
+    function apply(event) {
+        event.preventDefault();
+
+        const next = new URLSearchParams();
+
+        if (vehicleType !== "all") {
+            next.set("vehicleType", vehicleType);
+        }
+
+        for (const [key, value] of Object.entries(filters)) {
+            if (Array.isArray(value)) {
+                if (value.length) next.set(key, value.join(","));
+            } else if (value !== "") {
+                next.set(key, value);
+            }
+        }
+
+        setParams(next);
+        setMobileOpen(false);
+    }
+
+    function clear() {
+        setFilters(emptyFilters());
+        setVehicleType("all");
+        setParams(new URLSearchParams());
+    }
+
+    function numberField(key) {
+        return (
+            <Field key={key} label={w[key]}>
+                <input
+                    type="number"
+                    min="0"
+                    placeholder={w.any}
+                    value={filters[key]}
+                    onChange={(event) => change(key, event.target.value)}
+                />
+            </Field>
+        );
+    }
+
+    function selectField(key, options) {
+        return (
+            <Field key={key} label={w[key]}>
+                <select
+                    value={filters[key]}
+                    onChange={(event) => change(key, event.target.value)}
+                >
+                    <option value="">{w.allOptions}</option>
+
+                    {options.map(([value, label]) => (
+                        <option key={value} value={value}>
+                            {label}
+                        </option>
+                    ))}
+                </select>
+            </Field>
+        );
+    }
+
+    function locationOptions(items) {
+        return items.map((item) => [
+            typeof item === "string" ? item : item.value || item.name,
+            typeof item === "string" ? item : item.label || item.name,
+        ]);
+    }
+
+    const booleanOptions = [
+        ["yes", w.yes],
+        ["no", w.no],
+    ];
+
+    const localeIndex = language === "ru" ? 1 : language === "en" ? 2 : 0;
+
+    return (
+        <main className="cars-page">
+
+
+            <div className="cars-mobile-toolbar">
+                <button
+                    type="button"
+                    className="cars-mobile-filter-button"
+                    onClick={() => setMobileOpen(true)}
+                    aria-expanded={mobileOpen}
+                    aria-controls="cars-filter-panel"
+                >
+                    <span className="cars-filter-symbol">☷</span>
+                    {w.filters}
+
+                    {activeCount > 0 && (
+                        <span className="cars-filter-count">{activeCount}</span>
+                    )}
+                </button>
+
+                <select
+                    aria-label={w.sort}
+                    className="cars-mobile-sort"
+                    value={sort}
+                    onChange={(event) => setSort(event.target.value)}
+                >
+                    <option value="newest">{w.newest}</option>
+                    <option value="oldest">{w.oldest}</option>
+                    <option value="cheap">{w.cheap}</option>
+                    <option value="expensive">{w.expensive}</option>
+                </select>
+            </div>
+
+            {mobileOpen && (
+                <button
+                    type="button"
+                    className="cars-filter-backdrop"
+                    aria-label={w.close}
+                    onClick={() => setMobileOpen(false)}
+                />
+            )}
+
+            <div className="cars-page-layout">
+                <aside
+                    id="cars-filter-panel"
+                    className={`cars-filters ${mobileOpen ? "is-open" : ""}`}
+                    aria-label={w.filters}
+                >
+                    <div className="cars-filter-top">
+                        <div>
+                            <h2>{w.filters}</h2>
                         </div>
-                    </section>
-                ) : (
-                    <>
-                        <div className="cars-page-heading">
-                            <h1>
-                                {vehicleType === "passenger"
-                                    ? "Մարդատար մեքենաներ"
-                                    : vehicleType === "truck" ? "Բեռնատար մեքենաներ" : appliedFilters.brand ? `${appliedFilters.brand} մեքենաներ` : "Բոլոր մեքենաները"}
-                            </h1>
 
-                            <button
-                                type="button"
-                                className="cars-secondary-btn"
-                                onClick={() => setVehicleType("")}
-                            >
-                                Փոխել տեսակը
-                            </button>
-                        </div>
+                        <button
+                            type="button"
+                            className="cars-filter-close"
+                            onClick={() => setMobileOpen(false)}
+                            aria-label={w.close}
+                        >
+                            ×
+                        </button>
+                    </div>
 
-                        <div className="cars-layout">
-                            <aside className="cars-filter-panel">
-                                <h2>Ֆիլտրեր</h2>
+                    <form onSubmit={apply}>
+                        <div className="cars-filter-scroll">
+                            <div className="cars-filter-section">
+                                <h3>{w.mainFilters}</h3>
 
-                                <form onSubmit={applyFilters}>
-                                    <fieldset className="cars-range-field">
-                                        <legend>Գին՝ {currency}</legend>
+                                <Pills
+                                    label={w.all}
+                                    value={vehicleType}
+                                    options={[
+                                        ["all", w.all],
+                                        ["passenger", w.passenger],
+                                        ["truck", w.truck],
+                                    ]}
+                                    onChange={setVehicleType}
+                                />
 
-                                        <div className="cars-range">
-                                            <input
-                                                type="number"
-                                                name="priceFrom"
-                                                min="0"
-                                                placeholder="Սկսած"
-                                                aria-label="Նվազագույն գին"
-                                                value={filters.priceFrom === "" ? "" : Math.round(convert(filters.priceFrom, currency, inputCurrency))}
-                                                onChange={changeFilter}
-                                            />
+                                <Field label={w.brand}>
+                                    <SearchableSelect
+                                        value={filters.brand}
+                                        options={ALL_BRANDS}
+                                        onChange={(value) =>
+                                            change("brand", value)
+                                        }
+                                        placeholder={w.select}
+                                    />
+                                </Field>
 
-                                            <input
-                                                type="number"
-                                                name="priceTo"
-                                                min="0"
-                                                placeholder="Մինչև"
-                                                aria-label="Առավելագույն գին"
-                                                value={filters.priceTo === "" ? "" : Math.round(convert(filters.priceTo, currency, inputCurrency))}
-                                                onChange={changeFilter}
-                                            />
-                                        </div>
-                                    </fieldset>
+                                <Field label={w.model}>
+                                    <SearchableSelect
+                                        value={filters.model}
+                                        options={
+                                            filters.brand
+                                                ? getModels(filters.brand)
+                                                : []
+                                        }
+                                        onChange={(value) =>
+                                            change("model", value)
+                                        }
+                                        placeholder={w.select}
+                                    />
+                                </Field>
 
-                                    <fieldset className="cars-range-field">
-                                        <legend>Տարեթիվ</legend>
+                                {selectField(
+                                    "region",
+                                    locationOptions(regions),
+                                )}
 
-                                        <div className="cars-range">
-                                            <input
-                                                type="number"
-                                                name="yearFrom"
-                                                min="1886"
-                                                max={new Date().getFullYear() + 1}
-                                                placeholder="Սկսած"
-                                                aria-label="Նվազագույն տարեթիվ"
-                                                value={filters.yearFrom}
-                                                onChange={changeFilter}
-                                            />
+                                {selectField(
+                                    "community",
+                                    locationOptions(communities),
+                                )}
 
-                                            <input
-                                                type="number"
-                                                name="yearTo"
-                                                min="1886"
-                                                max={new Date().getFullYear() + 1}
-                                                placeholder="Մինչև"
-                                                aria-label="Առավելագույն տարեթիվ"
-                                                value={filters.yearTo}
-                                                onChange={changeFilter}
-                                            />
-                                        </div>
-                                    </fieldset>
+                                {selectField(
+                                    "settlement",
+                                    locationOptions(settlements),
+                                )}
+                            </div>
 
-                                    <label className="cars-field">
-                                        <span>Մակնիշ</span>
-                                        <select
-                                            name="brand"
-                                            value={filters.brand}
-                                            onChange={changeFilter}
-                                        >
-                                            <option value="">Բոլորը</option>
+                            <div className="cars-filter-section">
+                                <h3>{w.priceYear}</h3>
 
-                                            {brands.map(brand => (
-                                                <option key={brand} value={brand}>
-                                                    {brand} (
-                                                    {typeCars.filter(car => car.brand === brand).length}
-                                                    )
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </label>
-
-                                    <label className="cars-field">
-                                        <span>Մոդել</span>
-
-                                        <select
-                                            name="model"
-                                            value={filters.model}
-                                            onChange={changeFilter}
-                                        >
-                                            <option value="">Բոլորը</option>
-
-                                            {[
-                                                ...new Set(
-                                                    typeCars
-                                                        .filter(car =>
-                                                            !filters.brand ||
-                                                            car.brand === filters.brand
-                                                        )
-                                                        .map(car => car.model)
-                                                )
-                                            ]
-                                                .sort()
-                                                .map(model => (
-                                                    <option key={model} value={model}>
-                                                        {model} (
-                                                        {typeCars.filter(car =>
-                                                            car.model === model &&
-                                                            (!filters.brand || car.brand === filters.brand)
-                                                        ).length}
-                                                        )
-                                                    </option>
-                                                ))}
-                                        </select>
-                                    </label>
-
-                                    <label className="cars-field">
-                                        <span>Տարածաշրջան</span>
-                                        <select
-                                            name="region"
-                                            value={filters.region}
-                                            onChange={changeFilter}
-                                        >
-                                            <option value="">Բոլորը</option>
-
-                                            {REGIONS.map((region) => (
-                                                <option key={region} value={region}>
-                                                    {region}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </label>
-
-                                    <label className="cars-field">
-                                        <span>VIN կոդ</span>
-                                        <select
-                                            name="vin"
-                                            value={filters.vin}
-                                            onChange={changeFilter}
-                                        >
-                                            <option value="">Բոլորը</option>
-                                            <option value="yes">Նշված է</option>
-                                            <option value="no">Նշված չէ</option>
-                                        </select>
-                                    </label>
-
-                                    <label className="cars-field">
-                                        <span>Վառելիք</span>
-                                        <select
-                                            name="fuel"
-                                            value={filters.fuel}
-                                            onChange={changeFilter}
-                                        >
-                                            <option value="">Բոլորը</option>
-                                            <option value="gas">Գազ</option>
-                                            <option value="petrol">Բենզին</option>
-                                            <option value="diesel">Դիզել</option>
-                                            <option value="electric">Էլեկտրական</option>
-                                            <option value="hybrid">Հիբրիդ</option>
-                                        </select>
-                                    </label>
-
-                                    <label className="cars-field">
-                                        <span>Ղեկ</span>
-                                        <select
-                                            name="steering"
-                                            value={filters.steering}
-                                            onChange={changeFilter}
-                                        >
-                                            <option value="">Բոլորը</option>
-                                            <option value="left">Ձախ</option>
-                                            <option value="right">Աջ</option>
-                                        </select>
-                                    </label>
-
-                                    <label className="cars-field">
-                                        <span>Գույն</span>
-                                        <select
-                                            name="color"
-                                            value={filters.color}
-                                            onChange={changeFilter}
-                                        >
-                                            <option value="">Բոլորը</option>
-
-                                            {colors.map((color) => (
-                                                <option key={color} value={color}>
-                                                    {color}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </label>
-
-                                    {error && (
-                                        <p className="cars-error" role="alert">
-                                            {error}
-                                        </p>
-                                    )}
-
-                                    <div className="cars-filter-actions">
-                                        <button
-                                            type="button"
-                                            className="cars-secondary-btn"
-                                            onClick={resetFilters}
-                                        >
-                                            Մաքրել
-                                        </button>
-
-                                        <button
-                                            type="submit"
-                                            className="cars-primary-btn"
-                                        >
-                                            Որոնել
-                                        </button>
-                                    </div>
-                                </form>
-                            </aside>
-
-                            <section className="cars-results">
-                                <div className="cars-results-heading">
-                                    <span aria-live="polite">
-                                        {visibleCars.length} հայտարարություն
-                                    </span>
-
-                                    <select
-                                        value={sort}
-                                        onChange={(e) => setSort(e.target.value)}
-                                        aria-label="Դասավորել հայտարարությունները"
-                                    >
-                                        <option value="newest">
-                                            Վերջին ավելացվածները
-                                        </option>
-                                        <option value="yearDesc">
-                                            Տարեթիվ՝ նորից հին
-                                        </option>
-                                        <option value="priceAsc">
-                                            Գին՝ ցածրից բարձր
-                                        </option>
-                                        <option value="priceDesc">
-                                            Գին՝ բարձրից ցածր
-                                        </option>
-                                    </select>
+                                <div className="am-filter-grid">
+                                    {numberField("priceFrom")}
+                                    {numberField("priceTo")}
+                                    {numberField("yearFrom")}
+                                    {numberField("yearTo")}
+                                    {numberField("mileageFrom")}
+                                    {numberField("mileageTo")}
                                 </div>
+                            </div>
 
-                                {loadError && (
-                                    <p className="catalog-notice" role="status">
-                                        {loadError}
-                                    </p>
-                                )}
+                            <div className="cars-filter-section">
+                                <h3>{w.specifications}</h3>
 
-                                {loading ? (
-                                    <p role="status">Բեռնվում է…</p>
-                                ) : visibleCars.length > 0 ? (
-                                    <div className="cars-results-grid">
-                                        {visibleCars.map(car => (
-                                            <ProductCard
-                                                key={car.id}
-                                                item={car}
-                                            />
+                                {selectField("fuel", [
+                                    ["petrol", w.petrol],
+                                    ["diesel", w.diesel],
+                                    ["gas", w.gas],
+                                    ["hybrid", w.hybrid],
+                                    ["electric", w.electric],
+                                ])}
+
+                                {selectField("steering", [
+                                    ["left", w.left],
+                                    ["right", w.right],
+                                ])}
+
+                                {selectField("condition", [
+                                    ["new", w.new],
+                                    ["used", w.used],
+                                ])}
+                            </div>
+
+                            <div className="cars-filter-section">
+                                <button
+                                    type="button"
+                                    className="cars-advanced-toggle"
+                                    onClick={() =>
+                                        setAdvancedOpen((value) => !value)
+                                    }
+                                    aria-expanded={advancedOpen}
+                                >
+                                    <span>{w.advanced}</span>
+                                    <span>{advancedOpen ? "−" : "+"}</span>
+                                </button>
+
+                                {advancedOpen && (
+                                    <div className="cars-advanced-content">
+                                        {selectField("vin", booleanOptions)}
+                                        {selectField(
+                                            "customsCleared",
+                                            booleanOptions,
+                                        )}
+                                        {selectField(
+                                            "gasEquipment",
+                                            booleanOptions,
+                                        )}
+                                        {selectField(
+                                            "gasCylinderReplaced",
+                                            booleanOptions,
+                                        )}
+                                        {selectField("sunroof", booleanOptions)}
+
+                                        {[
+                                            "color",
+                                            "paintCondition",
+                                            "wheelSize",
+                                            "interiorMaterial",
+                                        ].map((key) => (
+                                            <Field key={key} label={w[key]}>
+                                                <input
+                                                    type="text"
+                                                    value={filters[key]}
+                                                    placeholder={w.any}
+                                                    onChange={(event) =>
+                                                        change(
+                                                            key,
+                                                            event.target.value,
+                                                        )
+                                                    }
+                                                />
+                                            </Field>
                                         ))}
-                                    </div>
-                                ) : (
-                                    <div className="cars-empty">
-                                        <p>Այս պայմաններով մեքենա չի գտնվել։</p>
 
-                                        <button
-                                            type="button"
-                                            className="cars-secondary-btn"
-                                            onClick={resetFilters}
-                                        >
-                                            Մաքրել ֆիլտրերը
-                                        </button>
+                                        <Pills
+                                            label={w.headlights}
+                                            value={filters.headlights}
+                                            multiple
+                                            options={[
+                                                ["halogen", "Halogen"],
+                                                ["xenon", "Xenon"],
+                                                ["led", "LED"],
+                                            ]}
+                                            onChange={(value) =>
+                                                change("headlights", value)
+                                            }
+                                        />
+
+                                        <Pills
+                                            label={w.comfort}
+                                            value={filters.comfort}
+                                            multiple
+                                            options={COMFORT.map((key) => [
+                                                key,
+                                                COMFORT_LABELS[key][
+                                                    localeIndex
+                                                ],
+                                            ])}
+                                            onChange={(value) =>
+                                                change("comfort", value)
+                                            }
+                                        />
                                     </div>
                                 )}
-                            </section>
+                            </div>
                         </div>
-                    </>
-                )}
-            </main>
-        </>
+
+                        <div className="am-filter-actions">
+                            <button
+                                type="button"
+                                className="am-filter-reset"
+                                onClick={clear}
+                            >
+                                {w.clear}
+                            </button>
+
+                            <button type="submit" className="am-filter-submit">
+                                {w.apply}
+                            </button>
+                        </div>
+                    </form>
+                </aside>
+
+                <section className="cars-results">
+                    <div className="cars-results-heading">
+                        <div>
+                            <h2>
+                                {w.found}: {filtered.length} {w.results}
+                            </h2>
+                        </div>
+
+                        <select
+                            aria-label={w.sort}
+                            className="cars-desktop-sort"
+                            value={sort}
+                            onChange={(event) => setSort(event.target.value)}
+                        >
+                            <option value="newest">{w.newest}</option>
+                            <option value="oldest">{w.oldest}</option>
+                            <option value="cheap">{w.cheap}</option>
+                            <option value="expensive">{w.expensive}</option>
+                        </select>
+                    </div>
+
+                    {loading ? (
+                        <div className="cars-status" role="status">
+                            {w.loading}
+                        </div>
+                    ) : error ? (
+                        <div className="cars-status" role="alert">
+                            <p>{error}</p>
+
+                            <button type="button" onClick={retry}>
+                                {w.retry}
+                            </button>
+                        </div>
+                    ) : sorted.length === 0 ? (
+                        <div className="cars-status cars-empty">
+                            <h3>{w.empty}</h3>
+
+                            <button type="button" onClick={clear}>
+                                {w.clear}
+                            </button>
+                        </div>
+                    ) : (
+                        <div className="products-grid armmotors-cars-grid">
+                            {sorted.map((item) => (
+                                <ProductCard
+                                    key={item._id || item.id}
+                                    item={item}
+                                />
+                            ))}
+                        </div>
+                    )}
+                </section>
+            </div>
+        </main>
     );
 }

@@ -1,14 +1,14 @@
 import { useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
-import Header from "./Header";
 import ProductCard from "../ProductCard/ProductCard";
 import Filter from "../filterCar/filter.jsx";
-
 import useProducts from "../../utils/useProducts";
 import { useI18n } from "../../utils/i18n";
 import { asset } from "../../utils/asset";
 
 import "./HomePage.css";
+import "../../styles/ArmMotorsMobile.css";
 
 const CATEGORIES = [
     {
@@ -64,82 +64,38 @@ const CATEGORIES = [
 ];
 
 const BRANDS = [
-    {
-        id: 1,
-        name: "Mercedes-Benz",
-        logo: "/mercedes.png",
-    },
-    {
-        id: 2,
-        name: "Toyota",
-        logo: "/toyota.png",
-    },
-    {
-        id: 3,
-        name: "BMW",
-        logo: "/bmw.png",
-    },
-    {
-        id: 4,
-        name: "Tesla",
-        logo: "/tesla.png",
-    },
-    {
-        id: 6,
-        name: "Nissan",
-        logo: "/nissan.png",
-    },
-    {
-        id: 7,
-        name: "Kia",
-        logo: "/kia.png",
-    },
+    { id: 1, name: "Mercedes-Benz", logo: "/mercedes.png" },
+    { id: 2, name: "Toyota", logo: "/toyota.png" },
+    { id: 3, name: "BMW", logo: "/bmw.png" },
+    { id: 4, name: "Tesla", logo: "/tesla.png" },
+    { id: 6, name: "Nissan", logo: "/nissan.png" },
+    { id: 7, name: "Kia", logo: "/kia.png" },
 ];
+
+function getSearchValues(product) {
+    return [product.title, product.brand, product.model, product.year]
+        .filter((value) => value !== undefined && value !== null)
+        .map((value) => String(value).toLowerCase());
+}
 
 export default function HomePage() {
     const { language, t } = useI18n();
+    const navigate = useNavigate();
+    const [searchParams, setSearchParams] = useSearchParams();
 
     const { products = [], loading, error } = useProducts();
 
     const [search, setSearch] = useState("");
     const [searchFocused, setSearchFocused] = useState(false);
 
-    const [category, setCategory] = useState(() => {
-        const params = new URLSearchParams(window.location.search);
+    const requestedCategory = searchParams.get("category") || "";
 
-        const value = params.get("category") || "";
-
-        return CATEGORIES.some((item) => item.value === value) ? value : "";
-    });
+    const category = CATEGORIES.some((item) => item.value === requestedCategory)
+        ? requestedCategory
+        : "";
 
     const PRODUCTS = Array.isArray(products) ? products : [];
-
     const normalizedSearch = search.trim().toLowerCase();
-
-    // =========================================
-    // OPEN BUSINESS PROPOSAL FORM
-    // =========================================
-
-    function openBusinessProposal() {
-        window.dispatchEvent(
-            new CustomEvent("open-support", {
-                detail: {
-                    type: "business",
-                    source: "homepage-banner",
-                },
-            }),
-        );
-    }
-
-    // =========================================
-    // SEARCH
-    // =========================================
-
-    function getSearchValues(product) {
-        return [product.title, product.brand, product.model, product.year]
-            .filter((value) => value !== undefined && value !== null)
-            .map((value) => String(value).toLowerCase());
-    }
 
     const searchSuggestions = normalizedSearch
         ? PRODUCTS.filter((product) =>
@@ -149,10 +105,6 @@ export default function HomePage() {
           ).slice(0, 6)
         : [];
 
-    // =========================================
-    // FILTER PRODUCTS
-    // =========================================
-
     const filteredProducts = PRODUCTS.filter((product) => {
         const matchesSearch =
             !normalizedSearch ||
@@ -160,9 +112,7 @@ export default function HomePage() {
                 value.includes(normalizedSearch),
             );
 
-        if (!matchesSearch) {
-            return false;
-        }
+        if (!matchesSearch) return false;
 
         if (category === "electric") {
             return product.type === "car" && product.fuel === "electric";
@@ -191,27 +141,27 @@ export default function HomePage() {
     });
 
     const firstProducts = filteredProducts.slice(0, 6);
-
     const restProducts = filteredProducts.slice(6);
 
     const selectedCategory = CATEGORIES.find((item) => item.value === category);
 
     // =========================================
-    // CATEGORY ACTIONS
+    // CATEGORY FILTER
     // =========================================
 
     function updateCategory(value) {
-        setCategory(value);
-
-        const url = new URL(window.location.href);
+        const nextParams = new URLSearchParams(searchParams);
 
         if (value) {
-            url.searchParams.set("category", value);
+            nextParams.set("category", value);
         } else {
-            url.searchParams.delete("category");
+            nextParams.delete("category");
         }
 
-        window.history.replaceState(null, "", url);
+        setSearchParams(nextParams, {
+            replace: true,
+            preventScrollReset: true,
+        });
     }
 
     function selectCategory(value) {
@@ -232,7 +182,22 @@ export default function HomePage() {
     }
 
     // =========================================
-    // BRANDS AND AD BANNER
+    // BUSINESS PROPOSAL
+    // =========================================
+
+    function openBusinessProposal() {
+        window.dispatchEvent(
+            new CustomEvent("open-support", {
+                detail: {
+                    type: "business",
+                    source: "homepage-banner",
+                },
+            }),
+        );
+    }
+
+    // =========================================
+    // BRANDS AND AD
     // =========================================
 
     function renderBrandsAndAd() {
@@ -261,15 +226,13 @@ export default function HomePage() {
                                     type="button"
                                     key={brand.id}
                                     className="brand-card"
-                                    onClick={() => {
-                                        window.location.assign(
-                                            `${
-                                                import.meta.env.BASE_URL
-                                            }cars?brand=${encodeURIComponent(
+                                    onClick={() =>
+                                        navigate(
+                                            `/cars?brand=${encodeURIComponent(
                                                 brand.name,
                                             )}`,
-                                        );
-                                    }}
+                                        )
+                                    }
                                 >
                                     <img
                                         src={asset(brand.logo)}
@@ -290,8 +253,6 @@ export default function HomePage() {
                         })}
                     </div>
                 </div>
-
-                {/* BUSINESS AD BANNER */}
 
                 <button
                     type="button"
@@ -331,10 +292,8 @@ export default function HomePage() {
 
     return (
         <div className="home-wrapper">
-            <Header />
-
             <main className="main-content">
-                {/* SEARCH SECTION */}
+                {/* SEARCH */}
 
                 <section className="intro-section">
                     <div
@@ -375,7 +334,6 @@ export default function HomePage() {
                                     aria-hidden="true"
                                 >
                                     <circle cx="10.5" cy="10.5" r="6.5" />
-
                                     <path d="m16 16 5 5" />
                                 </svg>
 
@@ -431,7 +389,6 @@ export default function HomePage() {
                                                             .join(" ");
 
                                                     setSearch(value);
-
                                                     setSearchFocused(false);
                                                 }}
                                             >
@@ -521,14 +478,6 @@ export default function HomePage() {
                                     selectedCategory.title.hy
                                   : t("latestListings")}
                         </h2>
-
-                        <span className="products-count">
-                            {loading
-                                ? t("loading")
-                                : `${filteredProducts.length} ${t(
-                                      "listingCount",
-                                  )}`}
-                        </span>
                     </div>
 
                     {(search.trim() || category) && (

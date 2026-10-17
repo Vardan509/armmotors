@@ -21,17 +21,29 @@ const ALLOWED_FIELDS = [
     "steering",
     "color",
     "region",
+    "community",
+    "settlement",
     "vin",
     "condition",
     "description",
     "phone",
     "images",
+
+    // Նոր ֆիլտրեր
+    "customsCleared",
+    "paintCondition",
+    "gasEquipment",
+    "gasCylinderReplaced",
+    "wheelSize",
+    "interiorMaterial",
+    "sunroof",
+    "headlights",
+    "comfort",
 ];
 
 function createError(message, status) {
     const error = new Error(message);
     error.status = status;
-
     return error;
 }
 
@@ -57,8 +69,7 @@ export function pickFields(body) {
     return data;
 }
 
-// Բոլոր հրապարակված հայտարարությունները
-// TOP-երը ցուցադրվում են առաջինը։
+// Բոլոր ակտիվ հայտարարությունները
 export async function getAllProduct() {
     await autoRefreshDue();
 
@@ -69,7 +80,7 @@ export async function getAllProduct() {
     );
 }
 
-// Օգտատիրոջ սեփական հայտարարությունները
+// Իմ հայտարարությունները
 export async function getMyProducts(userId) {
     return Product.find({
         owner: userId,
@@ -80,24 +91,20 @@ export async function getMyProducts(userId) {
         });
 }
 
-// Մեկ հայտարարության մանրամասները
+// Հայտարարության մանրամասները
 export async function getProductById(id) {
     validateId(id);
 
     const product = await Product.findOneAndUpdate(
         {
             _id: id,
-            status: {
-                $ne: "draft",
-            },
+            status: { $ne: "draft" },
         },
         {
-            $inc: {
-                views: 1,
-            },
+            $inc: { views: 1 },
         },
         {
-            new: true,
+            returnDocument: "after",
         },
     ).select("-__v");
 
@@ -108,7 +115,7 @@ export async function getProductById(id) {
     return product;
 }
 
-// Նոր հայտարարության տեղադրում
+// Նոր հայտարարություն
 export async function addProduct(body, userId) {
     const data = pickFields(body);
 

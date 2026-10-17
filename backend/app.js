@@ -1,4 +1,5 @@
 import express from "express";
+import notificationRoutes from "./routes/notificationRoutes.js";
 import cors from "cors";
 import mongoose from "mongoose";
 import rateLimit from "express-rate-limit";
@@ -13,9 +14,10 @@ import reportRoutes from "./routes/reportRoutes.js";
 import listingQueryRoutes from "./routes/listingQueryRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
 import conversationRoutes from "./routes/conversationRoutes.js";
+import monetizationRoutes from "./routes/monetizationRoutes.js";
+import translationRoutes from "./routes/translationRoutes.js";
 
 import errorHandler from "./middleware/errorHandler.js";
-import monetizationRoutes from "./routes/monetizationRoutes.js";
 
 function getAllowedOrigins() {
     const configured = process.env.CLIENT_ORIGIN || "";
@@ -42,37 +44,57 @@ function getAllowedOrigins() {
 
 export function createApp() {
     const app = express();
-
     const allowedOrigins = getAllowedOrigins();
 
     app.disable("x-powered-by");
 
+    if (process.env.TRUST_PROXY === "1") {
+        app.set("trust proxy", 1);
+    }
+
+    app.use("/api/notifications", notificationRoutes);
+    app.use((req, res, next) => {
+        res.setHeader("X-Content-Type-Options", "nosniff");
+        res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+        res.setHeader("X-Frame-Options", "DENY");
+        res.setHeader(
+            "Permissions-Policy",
+            "camera=(), microphone=(), geolocation=()",
+        );
+        next();
+    });
+
     app.use(
         cors({
             origin(origin, callback) {
-                callback(null, !origin || allowedOrigins.has(origin));
+                if (!origin) {
+                    return callback(null, true);
+                }
+
+                return callback(null, allowedOrigins.has(origin));
             },
-
+            credentials: true,
             methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-
             allowedHeaders: ["Content-Type", "Authorization"],
         }),
     );
 
-    app.use(express.json({ limit: "100kb" }));
+    app.use(
+        express.json({
+            limit: "100kb",
+        }),
+    );
 
-    // Backend-ի և MongoDB-ի առողջության ստուգում
     app.get("/api/health", (req, res) => {
         const connected = mongoose.connection.readyState === 1;
 
-        res.status(connected ? 200 : 503).json({
+        return res.status(connected ? 200 : 503).json({
             status: connected ? "ok" : "degraded",
             service: "ArmMotors API",
             database: connected ? "connected" : "disconnected",
         });
     });
 
-    // Եթե MongoDB-ն չի աշխատում
     app.use("/api", (req, res, next) => {
         if (mongoose.connection.readyState !== 1) {
             return res.status(503).json({
@@ -82,7 +104,7 @@ export function createApp() {
             });
         }
 
-        next();
+        return next();
     });
 
     const limiter = (options) =>
@@ -92,44 +114,36 @@ export function createApp() {
             ...options,
         });
 
-    // AUTH
-    app.use(
-        "/api/auth",
-        limiter({
-            windowMs: 15 * 60 * 1000,
-            limit: 60,
+    app.use("/api/auth", authRoutes);
 
-            skip: (req) => req.method === "GET",
-
-            message: {
-                message: "Շատ փորձեր։ Փորձեք ավելի ուշ։",
-            },
-        }),
-        authRoutes,
-    );
-
-    // Վճարումներ, TOP, հայտարարության թարմացում
     app.use("/api/monetization", monetizationRoutes);
 
-    // PRODUCTS
     app.use("/api/products", productRoutes);
 
-    // LISTINGS
     app.use("/api/listings", listingQueryRoutes);
 
-    // UPLOADS
+    app.use(
+        "/api/translations",
+        limiter({
+            windowMs: 15 * 60 * 1000,
+            limit: 30,
+            message: {
+                code: "TRANSLATION_RATE_LIMIT",
+                message:
+                    "Թարգմանության հարցումների սահմանաչափը լրացել է։ Փորձեք ավելի ուշ։",
+            },
+        }),
+        translationRoutes,
+    );
+
     app.use("/api/uploads", uploadRoutes);
 
-    // MESSAGES
     app.use("/api/messages", messageRoutes);
 
-    // CONVERSATIONS
     app.use("/api/conversations", conversationRoutes);
 
-    // FAVORITES
     app.use("/api/favorites", favoriteRoutes);
 
-    // ORDERS
     app.use(
         "/api/orders",
         limiter({
@@ -139,10 +153,8 @@ export function createApp() {
         orderRoutes,
     );
 
-    // ADMIN
     app.use("/api/admin", adminRoutes);
 
-    // REPORTS
     app.use(
         "/api/reports",
         limiter({
@@ -152,14 +164,12 @@ export function createApp() {
         reportRoutes,
     );
 
-    // 404
     app.use((req, res) => {
-        res.status(404).json({
+        return res.status(404).json({
             message: "API հասցեն չի գտնվել։",
         });
     });
 
-    // ERROR HANDLER
     app.use(errorHandler);
 
     return app;

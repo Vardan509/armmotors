@@ -4,6 +4,28 @@ function carRequired() {
     return this.type === "car";
 }
 
+const COMFORT_OPTIONS = [
+    "airConditioning",
+    "climateControl",
+    "heatedSeats",
+    "ventilatedSeats",
+    "heatedSteering",
+    "heatedWindshield",
+    "cruiseControl",
+    "adaptiveCruise",
+    "parkingSensors",
+    "rearCamera",
+    "camera360",
+    "keylessEntry",
+    "startStop",
+    "electricSeats",
+    "memorySeats",
+    "navigation",
+    "bluetooth",
+    "appleCarplay",
+    "androidAuto",
+];
+
 const productSchema = new mongoose.Schema(
     {
         owner: {
@@ -40,27 +62,24 @@ const productSchema = new mongoose.Schema(
             uppercase: true,
         },
 
-        // TOP հայտարարության գործողության ավարտը
+        // Գործող վճարային համակարգ
         topUntil: {
             type: Date,
             default: null,
             index: true,
         },
 
-        // Վերջին թարմացման ժամանակը
         lastRefreshedAt: {
             type: Date,
             default: Date.now,
             index: true,
         },
 
-        // Ավտոմատ թարմացման փաթեթի ավարտը
         autoRefreshUntil: {
             type: Date,
             default: null,
         },
 
-        // Վճարման սպասող հայտարարություն
         paymentPending: {
             type: Boolean,
             default: false,
@@ -79,6 +98,7 @@ const productSchema = new mongoose.Schema(
             index: true,
         },
 
+        // Մեքենայի հիմնական տվյալներ
         vehicleType: {
             type: String,
             enum: ["passenger", "truck"],
@@ -103,12 +123,10 @@ const productSchema = new mongoose.Schema(
             type: Number,
             required: carRequired,
             min: 1886,
-
             validate: {
                 validator: (value) =>
                     Number.isInteger(value) &&
                     value <= new Date().getFullYear() + 1,
-
                 message: "Տարեթիվը սխալ է։",
             },
         },
@@ -137,13 +155,6 @@ const productSchema = new mongoose.Schema(
             maxlength: 40,
         },
 
-        region: {
-            type: String,
-            required: true,
-            trim: true,
-            maxlength: 60,
-        },
-
         vin: {
             type: String,
             trim: true,
@@ -156,6 +167,101 @@ const productSchema = new mongoose.Schema(
             default: "Օգտագործված",
         },
 
+        // Գտնվելու վայր
+        region: {
+            type: String,
+            required: true,
+            trim: true,
+            maxlength: 60,
+        },
+
+        community: {
+            type: String,
+            trim: true,
+            default: "",
+            maxlength: 100,
+        },
+
+        settlement: {
+            type: String,
+            trim: true,
+            default: "",
+            maxlength: 100,
+        },
+
+        // Լրացուցիչ տեխնիկական տվյալներ
+        customsCleared: {
+            type: String,
+            enum: ["", "yes", "no"],
+            default: "",
+        },
+
+        paintCondition: {
+            type: String,
+            enum: ["", "original", "repainted"],
+            default: "",
+        },
+
+        gasEquipment: {
+            type: String,
+            enum: ["", "installed", "notInstalled"],
+            default: "",
+        },
+
+        gasCylinderReplaced: {
+            type: String,
+            enum: ["", "yes", "no"],
+            default: "",
+        },
+
+        wheelSize: {
+            type: String,
+            enum: [
+                "",
+                "R13",
+                "R14",
+                "R15",
+                "R16",
+                "R17",
+                "R18",
+                "R19",
+                "R20",
+                "R21",
+                "R22",
+                "R23",
+                "R24",
+            ],
+            default: "",
+        },
+
+        // Ինտերիեր
+        interiorMaterial: {
+            type: String,
+            enum: ["", "fabric", "leather", "artificial", "alcantara", "other"],
+            default: "",
+        },
+
+        sunroof: {
+            type: String,
+            enum: ["", "standard", "panoramic", "none"],
+            default: "",
+        },
+
+        // Էքստերիեր
+        headlights: {
+            type: [String],
+            enum: ["halogen", "xenon", "led"],
+            default: [],
+        },
+
+        // Կոմֆորտ
+        comfort: {
+            type: [String],
+            enum: COMFORT_OPTIONS,
+            default: [],
+        },
+
+        // Հայտարարության նկարագրություն
         description: {
             type: String,
             trim: true,
@@ -165,11 +271,9 @@ const productSchema = new mongoose.Schema(
         phone: {
             type: String,
             required: true,
-
             validate: {
                 validator: (value) =>
                     /^\+?[0-9]{8,15}$/.test(value.replace(/[\s()-]/g, "")),
-
                 message: "Հեռախոսահամարը սխալ է։",
             },
         },
@@ -177,12 +281,10 @@ const productSchema = new mongoose.Schema(
         images: {
             type: [String],
             default: [],
-
             validate: {
                 validator: (images) =>
                     images.length <= 12 &&
                     images.every((image) => /^https?:\/\//i.test(image)),
-
                 message: "Ավելացրեք առավելագույնը 12 նկարի HTTP/HTTPS հղում։",
             },
         },
@@ -192,7 +294,7 @@ const productSchema = new mongoose.Schema(
     },
 );
 
-// MongoDB INDEXES
+// INDEXES
 
 productSchema.index({
     status: 1,
@@ -219,6 +321,18 @@ productSchema.index({
 productSchema.index({
     owner: 1,
     createdAt: -1,
+});
+
+productSchema.index({
+    type: 1,
+    brand: 1,
+    model: 1,
+});
+
+productSchema.index({
+    type: 1,
+    region: 1,
+    community: 1,
 });
 
 export default mongoose.model("Product", productSchema);
