@@ -1,0 +1,24 @@
+ArmMotors - updated complete project (focused fixes)
+
+Included improvements:
+- CompareTray selection panel for 1-3 cars; available on all MainLayout pages.
+- ProductCard compare link appears after 2+ selections.
+- Seller profile route mounted at /api/sellers/:id.
+- Local CORS origins for Vite ports 5173 and 5174.
+- Original Header, SupportWidget, ScrollToTop and other features retained.
+
+SECURITY: .git, node_modules and real .env files are intentionally not included.
+Create backend/.env and frontend/.env from your own local configuration or .env.example. Never share secrets.
+
+Run in separate terminals:
+  cd backend
+  npm install
+  npm run dev
+
+  cd frontend
+  npm install
+  npm run dev
+
+Check http://localhost:3001/api/health and Vite URL printed in terminal.
+Backend needs a valid MongoDB connection and your own environment variables.
+These changes are source-level fixes; full live MongoDB / OAuth / payment flows are not verified.
