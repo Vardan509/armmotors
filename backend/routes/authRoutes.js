@@ -32,19 +32,24 @@ function rateLimitMessage(minutes) {
     };
 }
 
-// Մուտքի պաշտպանություն
-// Հաջողված հարցումները չեն հաշվվում։
+// ==========================================
+// LOGIN RATE LIMIT
+// 100 անհաջող փորձ՝ 15 րոպեում
+// Հաջողված մուտքերը չեն հաշվվում
+// ==========================================
 
 const loginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    limit: 30,
+    limit: 100,
     standardHeaders: "draft-8",
     legacyHeaders: false,
     skipSuccessfulRequests: true,
     message: rateLimitMessage(15),
 });
 
-// Գրանցման առանձին սահմանաչափ
+// ==========================================
+// REGISTRATION RATE LIMIT
+// ==========================================
 
 const registrationLimiter = rateLimit({
     windowMs: 60 * 60 * 1000,
@@ -56,7 +61,9 @@ const registrationLimiter = rateLimit({
     },
 });
 
-// Գաղտնաբառի վերականգնման պաշտպանություն
+// ==========================================
+// PASSWORD RECOVERY RATE LIMIT
+// ==========================================
 
 const recoveryLimiter = rateLimit({
     windowMs: 60 * 60 * 1000,
@@ -84,11 +91,11 @@ function normalizeOrigin(value) {
 function getAllowedOrigins(req) {
     const allowed = new Set();
 
-    // Տեղային React development
+    // Local development
     allowed.add("http://localhost:5173");
     allowed.add("http://127.0.0.1:5173");
 
-    // Render-ի կամ այլ production հասցեներ
+    // Render / production origins
     const configured = process.env.CLIENT_ORIGIN || "";
 
     for (const value of configured.split(",")) {
@@ -99,13 +106,7 @@ function getAllowedOrigins(req) {
         }
     }
 
-    // Նույն կայքից եկող հարցումները նույնպես
-    // պետք է ընդունվեն։
-    //
-    // Production-ում օգտագործում ենք Host-ը։
-    // Express-ի trust proxy կարգավորումը
-    // պետք է ճիշտ սահմանված լինի app.js-ում։
-
+    // Same-origin requests
     const host = req.get("host");
 
     if (host) {
@@ -151,10 +152,14 @@ function requireTrustedOrigin(req, res, next) {
 }
 
 // ==========================================
-// AUTH
+// LOGIN
 // ==========================================
 
 router.post("/login", loginLimiter, controllerLogin);
+
+// ==========================================
+// REGISTRATION
+// ==========================================
 
 router.post("/reg", registrationLimiter, controllerRegistration);
 
@@ -222,7 +227,7 @@ router.post("/google/link", requireAuth, async (req, res, next) => {
 });
 
 // ==========================================
-// REFRESH
+// REFRESH SESSION
 // ==========================================
 
 router.post("/refresh", requireTrustedOrigin, async (req, res, next) => {
