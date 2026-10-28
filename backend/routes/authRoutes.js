@@ -23,26 +23,49 @@ import User from "../models/user.js";
 const router = express.Router();
 
 // ==========================================
-// RATE LIMITS
+// RATE LIMIT HELPERS
 // ==========================================
 
-const authLimiter = rateLimit({
+function rateLimitMessage(minutes) {
+    return {
+        message: `Չափազանց շատ անհաջող փորձեր։ Կրկին փորձեք մոտ ${minutes} րոպեից։`,
+    };
+}
+
+// Մուտքի պաշտպանություն
+// Հաջողված հարցումները չեն հաշվվում։
+
+const loginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
+    limit: 30,
+    standardHeaders: "draft-8",
+    legacyHeaders: false,
+    skipSuccessfulRequests: true,
+    message: rateLimitMessage(15),
+});
+
+// Գրանցման առանձին սահմանաչափ
+
+const registrationLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000,
+    limit: 15,
+    standardHeaders: "draft-8",
+    legacyHeaders: false,
+    message: {
+        message: "Գրանցման չափազանց շատ հարցումներ։ Փորձեք ավելի ուշ։",
+    },
+});
+
+// Գաղտնաբառի վերականգնման պաշտպանություն
+
+const recoveryLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000,
     limit: 10,
     standardHeaders: "draft-8",
     legacyHeaders: false,
     message: {
-        message: "Չափազանց շատ փորձեր։ Փորձեք ավելի ուշ։",
-    },
-});
-
-const recoveryLimiter = rateLimit({
-    windowMs: 60 * 60 * 1000,
-    limit: 5,
-    standardHeaders: "draft-8",
-    legacyHeaders: false,
-    message: {
-        message: "Չափազանց շատ փորձեր։ Փորձեք ավելի ուշ։",
+        message:
+            "Գաղտնաբառի վերականգնման սահմանաչափը լրացել է։ Փորձեք ավելի ուշ։",
     },
 });
 
@@ -50,8 +73,57 @@ const recoveryLimiter = rateLimit({
 // TRUSTED ORIGIN
 // ==========================================
 
+function normalizeOrigin(value) {
+    try {
+        return new URL(value).origin;
+    } catch {
+        return null;
+    }
+}
+
+function getAllowedOrigins(req) {
+    const allowed = new Set();
+
+    // Տեղային React development
+    allowed.add("http://localhost:5173");
+    allowed.add("http://127.0.0.1:5173");
+
+    // Render-ի կամ այլ production հասցեներ
+    const configured = process.env.CLIENT_ORIGIN || "";
+
+    for (const value of configured.split(",")) {
+        const origin = normalizeOrigin(value.trim());
+
+        if (origin) {
+            allowed.add(origin);
+        }
+    }
+
+    // Նույն կայքից եկող հարցումները նույնպես
+    // պետք է ընդունվեն։
+    //
+    // Production-ում օգտագործում ենք Host-ը։
+    // Express-ի trust proxy կարգավորումը
+    // պետք է ճիշտ սահմանված լինի app.js-ում։
+
+    const host = req.get("host");
+
+    if (host) {
+        const protocol =
+            process.env.NODE_ENV === "production" ? "https" : req.protocol;
+
+        const currentOrigin = normalizeOrigin(`${protocol}://${host}`);
+
+        if (currentOrigin) {
+            allowed.add(currentOrigin);
+        }
+    }
+
+    return allowed;
+}
+
 function requireTrustedOrigin(req, res, next) {
-    const origin = req.headers.origin;
+    const origin = req.get("origin");
 
     if (!origin) {
         return res.status(403).json({
@@ -59,35 +131,17 @@ function requireTrustedOrigin(req, res, next) {
         });
     }
 
-    let normalizedOrigin;
+    const normalizedOrigin = normalizeOrigin(origin);
 
-    try {
-        normalizedOrigin = new URL(origin).origin;
-    } catch {
+    if (!normalizedOrigin) {
         return res.status(403).json({
             message: "Հարցման աղբյուրը սխալ է։",
         });
     }
 
-    const configured = process.env.CLIENT_ORIGIN || "";
+    const allowedOrigins = getAllowedOrigins(req);
 
-    const allowed = new Set([
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-        ...configured.split(",").map((item) => item.trim()),
-    ]);
-
-    const normalizedAllowed = new Set();
-
-    for (const value of allowed) {
-        try {
-            normalizedAllowed.add(new URL(value).origin);
-        } catch {
-            // Ignore invalid origins.
-        }
-    }
-
-    if (!normalizedAllowed.has(normalizedOrigin)) {
+    if (!allowedOrigins.has(normalizedOrigin)) {
         return res.status(403).json({
             message: "Այս կայքից հարցումն արգելված է։",
         });
@@ -100,9 +154,9 @@ function requireTrustedOrigin(req, res, next) {
 // AUTH
 // ==========================================
 
-router.post("/login", authLimiter, controllerLogin);
+router.post("/login", loginLimiter, controllerLogin);
 
-router.post("/reg", authLimiter, controllerRegistration);
+router.post("/reg", registrationLimiter, controllerRegistration);
 
 // ==========================================
 // PASSWORD RECOVERY
@@ -115,7 +169,7 @@ router.get("/reset-password/validate", controllerCheckResetToken);
 router.post("/reset-password", recoveryLimiter, controllerResetPassword);
 
 // ==========================================
-// GOOGLE
+// GOOGLE CONFIG
 // ==========================================
 
 router.get("/config", (req, res) => {
@@ -124,7 +178,11 @@ router.get("/config", (req, res) => {
     });
 });
 
-router.post("/google", authLimiter, async (req, res, next) => {
+// ==========================================
+// GOOGLE LOGIN
+// ==========================================
+
+router.post("/google", loginLimiter, async (req, res, next) => {
     try {
         const result = await googleLogin(req.body?.credential);
 
@@ -148,6 +206,10 @@ router.post("/google", authLimiter, async (req, res, next) => {
         return next(error);
     }
 });
+
+// ==========================================
+// GOOGLE LINK
+// ==========================================
 
 router.post("/google/link", requireAuth, async (req, res, next) => {
     try {
