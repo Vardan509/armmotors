@@ -1,0 +1,173 @@
+/* =========================================
+   ARMMOTORS — SEARCHABLE SELECT
+   MODERN WHITE & NAVY
+========================================= */
+
+.am-select {
+    position: relative;
+    width: 100%;
+    min-width: 0;
+    font-family: inherit;
+}
+
+.am-select-label {
+    display: block;
+    margin-bottom: 8px;
+    color: #334155;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.am-select-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    min-height: 46px;
+    padding: 0 13px;
+    border: 1px solid #e3e9f1;
+    border-radius: 10px;
+    background: #ffffff;
+    color: #14263f;
+    font-family: inherit;
+    font-size: 13px;
+    text-align: left;
+    cursor: pointer;
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.am-select-trigger > span:first-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.am-select-trigger:hover,
+.am-select.is-open .am-select-trigger {
+    border-color: #c9a052;
+}
+
+.am-select.is-open .am-select-trigger {
+    box-shadow: 0 0 0 3px rgba(201, 160, 82, 0.1);
+}
+
+.am-select-arrow {
+    flex-shrink: 0;
+    color: #64748b;
+    font-size: 19px;
+}
+
+.am-select.disabled {
+    opacity: 0.5;
+}
+
+.am-select-popup {
+    position: relative;
+    width: 100%;
+    margin-top: 7px;
+    padding: 8px;
+    border: 1px solid #e3e9f1;
+    border-radius: 11px;
+    background: #ffffff;
+    box-shadow: 0 6px 18px rgba(20, 38, 63, 0.07);
+    animation: amDropdown 0.18s ease;
+}
+
+.am-select-search {
+    padding: 3px 3px 9px;
+}
+
+.am-select-search input {
+    width: 100%;
+    height: 40px;
+    padding: 0 12px;
+    border: 1px solid #e3e9f1;
+    border-radius: 8px;
+    outline: none;
+    background: #f8fafd;
+    color: #14263f;
+    font-family: inherit;
+    font-size: 13px;
+}
+
+.am-select-search input:focus {
+    border-color: #c9a052;
+    background: #ffffff;
+}
+
+.am-select-options {
+    max-height: 200px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+}
+
+.am-select-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    min-height: 38px;
+    padding: 9px 10px;
+    border: 0;
+    border-radius: 7px;
+    background: transparent;
+    color: #334155;
+    font-family: inherit;
+    font-size: 12px;
+    text-align: left;
+    cursor: pointer;
+}
+
+.am-select-option:hover {
+    background: #f5f7fb;
+}
+
+.am-select-option.selected {
+    background: #faf4e8;
+    color: #98712e;
+    font-weight: 700;
+}
+
+.am-select-empty {
+    padding: 18px 8px;
+    color: #94a3b8;
+    font-size: 12px;
+    text-align: center;
+}
+
+@keyframes amDropdown {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 600px) {
+    .am-select-popup {
+        padding: 6px;
+    }
+
+    .am-select-options {
+        max-height: 175px;
+    }
+
+    .am-select-trigger {
+        min-height: 44px;
+        font-size: 12px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .am-select-popup {
+        animation: none;
+    }
+}

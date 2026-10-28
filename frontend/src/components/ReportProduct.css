@@ -1,0 +1,119 @@
+/* ARMMOTORS — REPORT PRODUCT */
+
+.report-product {
+    width: 100%;
+    margin-top: 20px;
+    font-family: Arial, sans-serif;
+}
+
+.report-open-button {
+    padding: 10px 0;
+    border: none;
+    background: transparent;
+    color: #94a3b8;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.report-open-button:hover {
+    color: #b43c3c;
+}
+
+.report-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 22px;
+    border: 1px solid #e3e9f1;
+    border-radius: 12px;
+    background: #ffffff;
+}
+
+.report-form-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.report-form-heading h3 {
+    margin: 0;
+    color: #14263f;
+    font-size: 17px;
+}
+
+.report-form-heading button {
+    border: 0;
+    background: transparent;
+    color: #64748b;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.report-form label {
+    color: #475569;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.report-form select,
+.report-form textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #e3e9f1;
+    border-radius: 9px;
+    background: #ffffff;
+    color: #14263f;
+    font-family: inherit;
+    font-size: 13px;
+    outline: none;
+}
+
+.report-form select:focus,
+.report-form textarea:focus {
+    border-color: #c9a052;
+}
+
+.report-form textarea {
+    resize: vertical;
+}
+
+.report-submit {
+    align-self: flex-start;
+    padding: 11px 20px;
+    border: 0;
+    border-radius: 9px;
+    background: #14263f;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.report-submit:hover:not(:disabled) {
+    background: #203b59;
+}
+
+.report-submit:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.report-success {
+    color: #238447;
+    font-size: 12px;
+}
+
+.report-error {
+    color: #b43c3c;
+    font-size: 12px;
+}
+
+@media (max-width: 600px) {
+    .report-form {
+        padding: 16px;
+    }
+
+    .report-submit {
+        width: 100%;
+    }
+}

@@ -1,0 +1,238 @@
+const rows = [
+    [
+        "BMW",
+        "X5 3.0d",
+        2018,
+        12500000,
+        145000,
+        "diesel",
+        "Երևան",
+        "Սև",
+        "1555215695-3004980ad54e",
+    ],
+    [
+        "Toyota",
+        "Camry",
+        2015,
+        9800000,
+        210000,
+        "petrol",
+        "Արմավիր",
+        "Սպիտակ",
+        "1621007947382-bb3c3994e3fb",
+    ],
+    [
+        "Mercedes-Benz",
+        "E200",
+        2019,
+        11200000,
+        98000,
+        "petrol",
+        "Կոտայք",
+        "Սև",
+        "1618843479313-40f8afb4b4d8",
+    ],
+    [
+        "Tesla",
+        "Model 3",
+        2021,
+        13900000,
+        64000,
+        "electric",
+        "Երևան",
+        "Մոխրագույն",
+        "1560958089-b8a1929cea89",
+    ],
+    [
+        "MAN",
+        "TGX",
+        2017,
+        18000000,
+        420000,
+        "diesel",
+        "Շիրակ",
+        "Սպիտակ",
+        "1519003722824-194d4455a60c",
+    ],
+
+    [
+        "BMW",
+        "320i",
+        2020,
+        10800000,
+        76000,
+        "petrol",
+        "Երևան",
+        "Սև",
+        "1555215695-3004980ad54e",
+    ],
+    [
+        "BMW",
+        "X3",
+        2022,
+        15600000,
+        48000,
+        "diesel",
+        "Կոտայք",
+        "Սպիտակ",
+        "1555215695-3004980ad54e",
+    ],
+    [
+        "Toyota",
+        "RAV4",
+        2021,
+        12400000,
+        67000,
+        "hybrid",
+        "Երևան",
+        "Մոխրագույն",
+        "1621007947382-bb3c3994e3fb",
+    ],
+    [
+        "Toyota",
+        "Corolla",
+        2020,
+        7900000,
+        89000,
+        "petrol",
+        "Արմավիր",
+        "Սպիտակ",
+        "1621007947382-bb3c3994e3fb",
+    ],
+    [
+        "Mercedes-Benz",
+        "C200",
+        2018,
+        9500000,
+        112000,
+        "petrol",
+        "Լոռի",
+        "Սև",
+        "1618843479313-40f8afb4b4d8",
+    ],
+    [
+        "Tesla",
+        "Model Y",
+        2023,
+        17400000,
+        32000,
+        "electric",
+        "Երևան",
+        "Սպիտակ",
+        "1560958089-b8a1929cea89",
+    ],
+    [
+        "Hyundai",
+        "Tucson",
+        2020,
+        10000000,
+        120000,
+        "petrol",
+        "Կոտայք",
+        "Կապույտ",
+        "1542362567-b07e54358753",
+    ],
+    [
+        "Nissan",
+        "Rogue",
+        2017,
+        8500000,
+        175000,
+        "petrol",
+        "Արարատ",
+        "Սև",
+        "1568605117036-5fe5e7bab0b7",
+    ],
+    [
+        "Hyundai",
+        "Elantra",
+        2022,
+        8700000,
+        42000,
+        "petrol",
+        "Երևան",
+        "Սպիտակ",
+        "1542362567-b07e54358753",
+    ],
+];
+
+export const CARS = rows.map(
+    (
+        [brand, model, year, price, mileage, fuel, region, color, photo],
+        index,
+    ) => ({
+        id: `demo-${index + 1}`,
+        type: "car",
+        isDemo: true,
+
+        vehicleType: brand === "MAN" ? "truck" : "passenger",
+
+        title: `${brand} ${model}`,
+        brand,
+        model,
+        year,
+        price,
+        mileage,
+        fuel,
+        region,
+        color,
+
+        steering: "left",
+        condition: "Օգտագործված",
+        vin: "",
+        phone: "",
+
+        image: `https://images.unsplash.com/photo-${photo}?auto=format&fit=crop&q=80&w=900`,
+
+        images: [
+            `https://images.unsplash.com/photo-${photo}?auto=format&fit=crop&q=85&w=1400`,
+            "https://images.unsplash.com/photo-1507136566006-cfc505b114fc?auto=format&fit=crop&q=80&w=1400",
+        ],
+
+        description: `${brand} ${model}, ${year} թ․, ${mileage.toLocaleString("en-US")} կմ վազքով։ Սա ցուցադրական հայտարարություն է։ Նկարները պատկերավոր են և կարող են չհամապատասխանել նշված մոդելին։`,
+
+        createdAt: new Date(
+            Date.UTC(2026, 9, 4, 12) - index * 86400000,
+        ).toISOString(),
+    }),
+);
+
+export const PARTS = [
+    {
+        title: "Շարժիչի յուղ Mobil 1 5W-30",
+        price: 25000,
+        condition: "Նոր",
+        photo: "1620916566398-39f1143ab7be",
+    },
+    {
+        title: "Արգելակի սկավառակ (Brembo)",
+        price: 45000,
+        condition: "Օգտագործված",
+        photo: "1486262715619-67b85e0b08d3",
+    },
+    {
+        title: "Ամորտիզատոր (KYB)",
+        price: 18000,
+        condition: "Նոր",
+        photo: "1494976388531-d1058494cdd8",
+    },
+].map((part, index) => ({
+    ...part,
+
+    id: `demo-part-${index + 1}`,
+    type: "part",
+    isDemo: true,
+    region: "Երևան",
+    phone: "",
+
+    description:
+        "Ցուցադրական պահեստամասի հայտարարություն։ Նկարը պատկերավոր է։ Իրական վաճառքի առաջարկ չէ։",
+
+    image: `https://images.unsplash.com/photo-${part.photo}?auto=format&fit=crop&q=80&w=900`,
+
+    images: [
+        `https://images.unsplash.com/photo-${part.photo}?auto=format&fit=crop&q=80&w=1200`,
+    ],
+}));
+
+export const DEMO_PRODUCTS = [...CARS, ...PARTS];

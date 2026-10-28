@@ -1,0 +1,455 @@
+/* =========================================
+   ARMMOTORS — SUPPORT WIDGET
+   MODERN WHITE & NAVY
+========================================= */
+
+.support-trigger {
+    position: fixed;
+    right: 22px;
+    bottom: 25px;
+    z-index: 10000;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+
+    min-width: 54px;
+    min-height: 54px;
+    padding: 12px 17px;
+
+    border: 1px solid #c9a052;
+    border-radius: 16px;
+
+    background: #14263f;
+    color: #ffffff;
+
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 800;
+
+    cursor: pointer;
+
+    box-shadow: 0 10px 30px rgba(20, 38, 63, 0.25);
+
+    transition:
+        transform 0.2s,
+        background 0.2s;
+}
+
+.support-trigger:hover {
+    transform: translateY(-3px);
+    background: #203b59;
+}
+
+.support-trigger svg {
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+}
+
+/* =========================================
+   DIALOG
+========================================= */
+
+.support-dialog {
+    position: fixed;
+    right: 22px;
+    bottom: 90px;
+    z-index: 10001;
+
+    width: min(390px, calc(100vw - 24px));
+    max-height: min(640px, calc(100dvh - 115px));
+
+    overflow-y: auto;
+    padding: 23px;
+
+    border: 1px solid #e3e9f1;
+    border-radius: 18px;
+
+    background: #ffffff;
+    color: #14263f;
+
+    box-shadow: 0 20px 65px rgba(20, 38, 63, 0.2);
+}
+
+.support-dialog * {
+    box-sizing: border-box;
+}
+
+.support-dialog::backdrop {
+    background: rgba(10, 22, 39, 0.42);
+    backdrop-filter: blur(3px);
+}
+
+.support-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.support-heading h2,
+.support-heading h3 {
+    margin: 0;
+    color: #14263f;
+    font-size: 19px;
+    font-weight: 800;
+}
+
+.support-heading p {
+    margin: 7px 0 0;
+    color: #64748b;
+    font-size: 12px;
+    line-height: 1.7;
+}
+
+.support-heading button {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+
+    width: 33px;
+    height: 33px;
+    padding: 0;
+
+    border: 1px solid #e3e9f1;
+    border-radius: 9px;
+
+    background: #f8fafd;
+    color: #64748b;
+
+    cursor: pointer;
+}
+
+/* =========================================
+   FORM
+========================================= */
+
+.support-dialog form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.support-dialog fieldset {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.support-dialog label {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+
+    color: #475569;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.support-dialog input,
+.support-dialog select,
+.support-dialog textarea {
+    width: 100%;
+    min-width: 0;
+    padding: 12px 13px;
+
+    border: 1px solid #dce5ef;
+    border-radius: 9px;
+    outline: none;
+
+    background: #ffffff;
+    color: #14263f;
+
+    font-family: inherit;
+    font-size: 13px;
+}
+
+.support-dialog textarea {
+    min-height: 110px;
+    resize: vertical;
+    line-height: 1.7;
+}
+
+.support-dialog input:focus,
+.support-dialog select:focus,
+.support-dialog textarea:focus {
+    border-color: #c9a052;
+    box-shadow: 0 0 0 3px rgba(201, 160, 82, 0.12);
+}
+
+/* =========================================
+   SUBMIT BUTTON
+========================================= */
+
+.support-submit {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 100%;
+    min-height: 45px;
+    padding: 12px;
+
+    border: 1px solid #14263f;
+    border-radius: 10px;
+
+    background: #14263f;
+    color: #ffffff;
+
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 800;
+
+    cursor: pointer;
+}
+
+.support-submit:hover:not(:disabled) {
+    background: #203b59;
+}
+
+.support-submit:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* =========================================
+   SUCCESS
+========================================= */
+
+.support-success {
+    padding: 15px;
+
+    border: 1px solid #c9e8d4;
+    border-radius: 10px;
+
+    background: #edf8f0;
+    color: #21864b;
+
+    font-size: 12px;
+    line-height: 1.8;
+}
+
+/* =========================================
+   LISTING
+========================================= */
+
+.support-listing {
+    display: flex;
+    flex-direction: column;
+    gap: 11px;
+    margin-top: 18px;
+}
+
+.support-listing > * {
+    padding: 13px;
+
+    border: 1px solid #e3e9f1;
+    border-radius: 10px;
+
+    background: #f8fafd;
+    color: #475569;
+
+    font-size: 12px;
+    line-height: 1.7;
+}
+
+/* =========================================
+   ADMIN MESSAGES
+========================================= */
+
+.admin-message {
+    margin-bottom: 12px;
+    padding: 17px;
+
+    border: 1px solid #e3e9f1;
+    border-radius: 12px;
+
+    background: #ffffff;
+    color: #334155;
+
+    font-size: 12px;
+    line-height: 1.8;
+
+    overflow-wrap: anywhere;
+}
+
+.admin-message strong {
+    color: #14263f;
+}
+
+.admin-message small {
+    display: block;
+    margin-top: 8px;
+
+    color: #94a3b8;
+    font-size: 11px;
+}
+
+/* =========================================
+   ADMIN PAGINATION
+========================================= */
+
+.admin-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 22px;
+}
+
+.admin-pagination button {
+    min-height: 38px;
+    padding: 9px 14px;
+
+    border: 1px solid #e3e9f1;
+    border-radius: 8px;
+
+    background: #ffffff;
+    color: #14263f;
+
+    font-family: inherit;
+    font-size: 12px;
+
+    cursor: pointer;
+}
+
+.admin-pagination button:hover:not(:disabled) {
+    border-color: #c9a052;
+    background: #faf4e8;
+}
+
+.admin-pagination button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+/* =========================================
+   MOBILE FIX — IMPORTANT
+========================================= */
+
+@media (max-width: 650px) {
+    /*
+       Mobile bottom navigation = 65px.
+       Support button must stay ABOVE it.
+    */
+
+    .support-trigger {
+        position: fixed;
+
+        right: 14px;
+
+        bottom: calc(65px + env(safe-area-inset-bottom, 0px) + 14px);
+
+        z-index: 1100;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        width: 48px;
+        height: 48px;
+
+        min-width: 48px;
+        min-height: 48px;
+
+        padding: 0;
+
+        border-radius: 14px;
+
+        background: #14263f;
+        color: #ffffff;
+
+        box-shadow: 0 6px 20px rgba(20, 38, 63, 0.22);
+    }
+
+    .support-trigger svg {
+        width: 22px;
+        height: 22px;
+    }
+
+    .support-trigger:hover {
+        transform: none;
+    }
+
+    /*
+       Dialog is also ABOVE
+       the mobile bottom navigation.
+    */
+
+    .support-dialog {
+        position: fixed;
+
+        inset: auto 12px calc(65px + env(safe-area-inset-bottom, 0px) + 74px)
+            auto;
+
+        width: calc(100vw - 24px);
+        max-width: 390px;
+
+        max-height: calc(
+            100dvh - 65px - env(safe-area-inset-bottom, 0px) - 105px
+        );
+
+        margin: 0;
+        padding: 17px;
+
+        overflow-y: auto;
+        overscroll-behavior: contain;
+
+        border-radius: 14px;
+
+        z-index: 1101;
+    }
+
+    .support-heading h2,
+    .support-heading h3 {
+        font-size: 17px;
+    }
+
+    .support-dialog textarea {
+        min-height: 90px;
+    }
+}
+
+/* =========================================
+   VERY SMALL PHONES
+========================================= */
+
+@media (max-width: 380px) {
+    .support-trigger {
+        right: 10px;
+        width: 44px;
+        height: 44px;
+        min-width: 44px;
+        min-height: 44px;
+        border-radius: 12px;
+    }
+
+    .support-dialog {
+        right: 8px;
+        width: calc(100vw - 16px);
+        padding: 14px;
+    }
+}
+
+/* =========================================
+   ACCESSIBILITY
+========================================= */
+
+.support-trigger:focus-visible,
+.support-dialog button:focus-visible {
+    outline: 2px solid #78a7d6;
+    outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .support-trigger {
+        transition: none;
+    }
+}

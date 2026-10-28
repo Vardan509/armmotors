@@ -1,0 +1,426 @@
+/* =========================================
+   ARMMOTORS — FILTER
+   MODERN WHITE & NAVY
+========================================= */
+
+/* FILTER BUTTON */
+
+.am-filter-trigger {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 64px;
+    width: 64px;
+    height: 64px;
+    min-width: 64px;
+    margin: 0;
+    padding: 0;
+
+    border: 1px solid #dce5ef;
+    border-radius: 15px;
+    background: #ffffff;
+    color: #14263f;
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.am-filter-trigger:hover {
+    border-color: #b8c9da;
+    background: #edf3fa;
+    box-shadow: 0 5px 18px rgba(20, 38, 63, 0.08);
+}
+
+.am-filter-trigger svg {
+    width: 23px;
+    height: 23px;
+}
+
+.am-filter-count {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 21px;
+    height: 21px;
+    padding: 0 5px;
+    border-radius: 50%;
+    background: #14263f;
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 800;
+}
+
+/* OVERLAY */
+
+.am-filter-overlay {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 2147483647 !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(15, 23, 42, 0.65);
+    backdrop-filter: blur(6px);
+}
+
+/* DIALOG */
+
+.am-filter-dialog {
+    display: flex;
+    flex-direction: column;
+    width: min(780px, 100%);
+    max-height: calc(100dvh - 40px);
+    overflow: hidden;
+
+    border: 1px solid #e3e9f1;
+    border-radius: 22px;
+    background: #ffffff;
+    color: #14263f;
+
+    box-shadow: 0 30px 90px rgba(15, 23, 42, 0.25);
+    font-family: Arial, "Noto Sans Armenian", sans-serif;
+    animation: amFilterAppear 0.2s ease-out;
+}
+
+.am-filter-dialog *,
+.am-filter-dialog *::before,
+.am-filter-dialog *::after {
+    box-sizing: border-box;
+}
+
+@keyframes amFilterAppear {
+    from {
+        opacity: 0;
+        transform: translateY(12px) scale(0.985);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* HEADER */
+
+.am-filter-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+    gap: 20px;
+    padding: 24px 28px;
+    border-bottom: 1px solid #e3e9f1;
+    background: #ffffff;
+}
+
+.am-filter-header-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-width: 0;
+}
+
+.am-filter-header-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 52px;
+    height: 52px;
+    border: 1px solid #dce5ef;
+    border-radius: 14px;
+    background: #edf3fa;
+    color: #14263f;
+}
+
+.am-filter-eyebrow {
+    display: block;
+    margin-bottom: 6px;
+    color: #98712e;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 2px;
+}
+
+.am-filter-header h2 {
+    margin: 0 0 5px;
+    color: #14263f;
+    font-size: 24px;
+    font-weight: 800;
+    line-height: 1.3;
+}
+
+.am-filter-header p {
+    margin: 0;
+    color: #64748b;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.am-filter-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border: 1px solid #e3e9f1;
+    border-radius: 11px;
+    background: #ffffff;
+    color: #475569;
+    cursor: pointer;
+}
+
+.am-filter-close:hover {
+    background: #edf3fa;
+    color: #14263f;
+}
+
+/* FORM */
+
+.am-filter-dialog form {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.am-filter-content {
+    flex: 1;
+    min-height: 0;
+    padding: 25px 28px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+}
+
+.am-filter-section-label {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin-bottom: 22px;
+    padding-bottom: 13px;
+    border-bottom: 1px solid #e3e9f1;
+    color: #14263f;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.am-filter-section-label svg {
+    width: 18px;
+    height: 18px;
+    color: #98712e;
+}
+
+/* GRID */
+
+.am-filter-dialog .am-filter-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+    gap: 20px;
+}
+
+.am-filter-dialog .am-catalog-field {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    min-width: 0;
+}
+
+.am-filter-dialog .am-catalog-field > span {
+    color: #475569;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.am-filter-dialog .am-catalog-field input,
+.am-filter-dialog .am-catalog-field select {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    height: 50px;
+    padding: 0 14px;
+
+    border: 1px solid #dce5ef;
+    border-radius: 11px;
+    outline: none;
+
+    background: #f8fafd;
+    color: #14263f;
+    font-family: inherit;
+    font-size: 13px;
+
+    transition:
+        border-color 0.2s ease,
+        background 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.am-filter-dialog .am-catalog-field input::placeholder {
+    color: #94a3b8;
+}
+
+.am-filter-dialog .am-catalog-field input:focus,
+.am-filter-dialog .am-catalog-field select:focus {
+    border-color: #c9a052;
+    background: #ffffff;
+    box-shadow: 0 0 0 4px rgba(201, 160, 82, 0.1);
+}
+
+.am-filter-dialog .am-catalog-field select:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.am-filter-dialog input[type="number"] {
+    appearance: textfield;
+    -moz-appearance: textfield;
+}
+
+.am-filter-dialog input[type="number"]::-webkit-inner-spin-button,
+.am-filter-dialog input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* FOOTER */
+
+.am-filter-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-shrink: 0;
+    gap: 12px;
+    padding: 18px 28px;
+    border-top: 1px solid #e3e9f1;
+    background: #ffffff;
+}
+
+.am-filter-footer button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    min-height: 47px;
+    padding: 0 22px;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.am-filter-reset {
+    border: 1px solid #dce5ef;
+    background: #ffffff;
+    color: #475569;
+}
+
+.am-filter-reset:hover {
+    background: #edf3fa;
+    color: #14263f;
+}
+
+.am-filter-submit {
+    border: 1px solid #14263f;
+    background: #14263f;
+    color: #ffffff;
+}
+
+.am-filter-submit:hover {
+    border-color: #203b59;
+    background: #203b59;
+}
+
+/* MOBILE */
+
+@media (max-width: 600px) {
+    .am-filter-trigger {
+        flex-basis: 50px;
+        width: 50px;
+        height: 50px;
+        min-width: 50px;
+        border-radius: 12px;
+    }
+
+    .am-filter-overlay {
+        align-items: stretch;
+        padding: 0 !important;
+    }
+
+    .am-filter-dialog {
+        width: 100%;
+        height: 100dvh;
+        max-height: 100dvh;
+        border-radius: 0;
+    }
+
+    .am-filter-header {
+        padding: 19px 16px;
+    }
+
+    .am-filter-header-info {
+        gap: 11px;
+    }
+
+    .am-filter-header-icon {
+        width: 42px;
+        height: 42px;
+    }
+
+    .am-filter-header h2 {
+        font-size: 19px;
+    }
+
+    .am-filter-header p {
+        font-size: 11px;
+    }
+
+    .am-filter-content {
+        padding: 20px 16px;
+    }
+
+    .am-filter-dialog .am-filter-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px 10px;
+    }
+
+    .am-filter-dialog .am-catalog-field input,
+    .am-filter-dialog .am-catalog-field select {
+        height: 46px;
+        padding: 0 10px;
+        font-size: 12px;
+    }
+
+    .am-filter-footer {
+        padding: 14px 16px;
+    }
+
+    .am-filter-footer button {
+        flex: 1;
+        padding: 0 12px;
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 360px) {
+    .am-filter-dialog .am-filter-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .am-filter-dialog {
+        animation: none;
+    }
+}

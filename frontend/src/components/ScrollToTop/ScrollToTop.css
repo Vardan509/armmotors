@@ -1,0 +1,57 @@
+/* ARMMOTORS — SCROLL TO TOP */
+
+.scroll-to-top {
+    position: fixed;
+    right: 25px;
+    bottom: 100px;
+    z-index: 900;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 44px;
+    height: 44px;
+
+    border: 1px solid #e8d9ba;
+    border-radius: 12px;
+
+    background: #ffffff;
+    color: #14263f;
+
+    font-size: 23px;
+    font-weight: 700;
+    cursor: pointer;
+
+    box-shadow: 0 6px 18px rgba(20, 38, 63, 0.12);
+    transition:
+        transform 0.2s ease,
+        background 0.2s ease,
+        border-color 0.2s ease;
+}
+
+.scroll-to-top:hover {
+    border-color: #c9a052;
+    background: #faf4e8;
+    transform: translateY(-3px);
+}
+
+.scroll-to-top:focus-visible {
+    outline: 2px solid #c9a052;
+    outline-offset: 3px;
+}
+
+@media (max-width: 600px) {
+    .scroll-to-top {
+        right: 15px;
+        bottom: 85px;
+        width: 40px;
+        height: 40px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .scroll-to-top {
+        transition: none;
+    }
+}

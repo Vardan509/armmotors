@@ -1,0 +1,188 @@
+/* =========================================
+   ARMMOTORS — EXTRA CAR DETAILS
+   MODERN WHITE & NAVY
+========================================= */
+
+.ap-detail-extras {
+    margin-top: 20px;
+    padding: 27px;
+    border: 1px solid #e3e9f1;
+    border-radius: 18px;
+    background: #ffffff;
+    box-shadow: 0 6px 24px rgba(20, 38, 63, 0.045);
+}
+
+/* HEADING */
+
+.ap-detail-extra-title {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    margin-bottom: 22px;
+}
+
+.ap-detail-extra-title-icon {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 43px;
+    height: 43px;
+    border: 1px solid #dce5ef;
+    border-radius: 12px;
+    background: #edf3fa;
+    color: #14263f;
+}
+
+.ap-detail-extras .ap-detail-extra-title h2 {
+    margin: 0;
+    color: #14263f;
+    font-size: 19px;
+    font-weight: 800;
+    line-height: 1.4;
+}
+
+/* SECTIONS */
+
+.ap-detail-extra-section {
+    padding: 20px 0;
+    border-top: 1px solid #e3e9f1;
+}
+
+.ap-detail-extra-section:first-of-type {
+    padding-top: 0;
+    border-top: none;
+}
+
+.ap-detail-extra-section:last-child {
+    padding-bottom: 0;
+}
+
+.ap-detail-extra-section h3 {
+    margin: 0 0 17px;
+    color: #14263f;
+    font-size: 15px;
+    font-weight: 800;
+}
+
+/* SPECIFICATIONS GRID */
+
+.ap-detail-extra-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 25px;
+    margin: 0;
+}
+
+.ap-detail-extra-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    min-width: 0;
+    padding: 13px 0;
+    border-bottom: 1px solid #edf1f6;
+}
+
+.ap-detail-extra-row dt {
+    color: #64748b;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.ap-detail-extra-row dd {
+    margin: 0;
+    color: #14263f;
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1.6;
+    text-align: right;
+    overflow-wrap: anywhere;
+}
+
+/* COMFORT / HEADLIGHTS */
+
+.ap-detail-feature-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.ap-detail-feature {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    min-height: 44px;
+    padding: 11px 13px;
+    border: 1px solid #e3e9f1;
+    border-radius: 10px;
+    background: #f8fafd;
+    color: #334155;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
+.ap-detail-feature > span {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #eaf5ed;
+    color: #21864b;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+/* TABLET */
+
+@media (max-width: 900px) {
+    .ap-detail-extras {
+        padding: 22px;
+    }
+}
+
+/* MOBILE */
+
+@media (max-width: 600px) {
+    .ap-detail-extras {
+        margin-top: 16px;
+        padding: 18px;
+        border-radius: 14px;
+    }
+
+    .ap-detail-extra-title {
+        gap: 10px;
+        margin-bottom: 18px;
+    }
+
+    .ap-detail-extra-title-icon {
+        width: 38px;
+        height: 38px;
+    }
+
+    .ap-detail-extras .ap-detail-extra-title h2 {
+        font-size: 16px;
+    }
+
+    .ap-detail-extra-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .ap-detail-extra-section {
+        padding: 18px 0;
+    }
+
+    .ap-detail-feature-list {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .ap-detail-feature {
+        min-height: 42px;
+        padding: 10px 12px;
+    }
+}

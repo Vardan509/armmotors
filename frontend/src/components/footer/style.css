@@ -1,0 +1,362 @@
+/* =========================================
+   ARMMOTORS — FOOTER
+   MODERN WHITE & NAVY
+
+   Footer styles are managed elsewhere.
+   No additional overrides required.
+========================================= */
+
+/* =====================================
+   ARMMOTORS PREMIUM FOOTER
+===================================== */
+
+.am-footer {
+    width: 100%;
+    margin-top: 0;
+    background: #101f32;
+    color: #ffffff;
+    font-family: Arial, sans-serif;
+}
+
+.am-footer * {
+    box-sizing: border-box;
+}
+
+.am-footer-container {
+    width: 100%;
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 75px 35px 0;
+}
+
+/* MAIN GRID */
+
+.am-footer-top {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr 1fr 1.1fr;
+    gap: 55px;
+    padding-bottom: 65px;
+}
+
+/* BRAND */
+
+.am-footer-brand {
+    max-width: 350px;
+}
+
+.am-footer-logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 25px;
+    font-weight: 900;
+    letter-spacing: -1px;
+}
+
+.am-footer-logo > span:last-child > span {
+    color: #8daecc;
+}
+
+.am-footer-logo-symbol {
+    display: grid;
+    place-items: center;
+    width: 45px;
+    height: 45px;
+    border: 1px solid #49647f;
+    border-radius: 12px;
+    background: #203e60;
+    font-size: 26px;
+}
+
+.am-footer-brand > p {
+    margin: 24px 0;
+    color: #a9b8c9;
+    font-size: 13px;
+    line-height: 2;
+}
+
+/* SOCIAL */
+
+.am-footer-social {
+    margin-top: 30px;
+}
+
+.am-footer-social > span {
+    display: block;
+    margin-bottom: 15px;
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.am-footer-social-links {
+    display: flex;
+    gap: 10px;
+}
+
+.am-footer-social-links a {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border: 1px solid #344b65;
+    border-radius: 11px;
+    background: #1b3049;
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 800;
+    transition: 0.25s ease;
+}
+
+.am-footer-social-links a:hover {
+    transform: translateY(-3px);
+    border-color: #8daecc;
+    background: #284969;
+}
+
+/* COLUMNS */
+
+.am-footer-column h3 {
+    position: relative;
+    margin: 8px 0 28px;
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 800;
+}
+
+.am-footer-column h3::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -12px;
+    width: 28px;
+    height: 2px;
+    border-radius: 5px;
+    background: #7296ba;
+}
+
+.am-footer-column ul {
+    display: flex;
+    flex-direction: column;
+    gap: 17px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.am-footer-column li a {
+    color: #a9b8c9;
+    text-decoration: none;
+    font-size: 13px;
+    line-height: 1.5;
+    transition: color 0.2s ease;
+}
+
+.am-footer-column li a:hover {
+    color: #ffffff;
+}
+
+/* CONTACT */
+
+.am-footer-contact > p {
+    margin: 0 0 16px;
+    color: #a9b8c9;
+    font-size: 13px;
+    line-height: 1.8;
+}
+
+.am-footer-contact > a {
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.am-footer-contact > a:hover {
+    color: #9fc2e5;
+}
+
+.am-footer-location {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    margin-top: 30px;
+    padding: 17px;
+    border: 1px solid #30475e;
+    border-radius: 13px;
+    background: #172b42;
+}
+
+.am-footer-location span {
+    color: #8daecc;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 2px;
+}
+
+.am-footer-location strong {
+    color: #ffffff;
+    font-size: 17px;
+}
+
+/* BANNER */
+
+.am-footer-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 25px;
+    padding: 35px 40px;
+    border: 1px solid #3a5776;
+    border-radius: 20px;
+    background:
+        radial-gradient(
+            circle at 85% 20%,
+            rgba(114, 150, 186, 0.24),
+            transparent 38%
+        ),
+        linear-gradient(115deg, #203e60, #172d47);
+}
+
+.am-footer-banner > div > span {
+    color: #a7c5e1;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 2px;
+}
+
+.am-footer-banner h2 {
+    margin: 12px 0 0;
+    color: #ffffff;
+    font-size: clamp(20px, 2.3vw, 30px);
+    font-weight: 800;
+    line-height: 1.4;
+}
+
+.am-footer-banner > a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    flex-shrink: 0;
+    min-height: 48px;
+    padding: 13px 22px;
+    border-radius: 10px;
+    background: #ffffff;
+    color: #14263f;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 800;
+    transition: 0.25s ease;
+}
+
+.am-footer-banner > a:hover {
+    transform: translateY(-2px);
+    background: #e8f1fa;
+}
+
+.am-footer-banner > a span {
+    font-size: 20px;
+}
+
+/* BOTTOM */
+
+.am-footer-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    min-height: 100px;
+    margin-top: 35px;
+    border-top: 1px solid #30475e;
+}
+
+.am-footer-bottom p,
+.am-footer-bottom > span {
+    margin: 0;
+    color: #8ea2b8;
+    font-size: 12px;
+}
+
+/* TABLET */
+
+@media (max-width: 1050px) {
+    .am-footer-top {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 45px;
+    }
+}
+
+/* MOBILE */
+
+@media (max-width: 600px) {
+    .am-footer-container {
+        padding: 50px 20px 0;
+    }
+
+    .am-footer-top {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        column-gap: 20px;
+        row-gap: 40px;
+        padding-bottom: 45px;
+    }
+
+    .am-footer-brand {
+        grid-column: 1 / -1;
+        max-width: none;
+    }
+
+    .am-footer-logo {
+        font-size: 22px;
+    }
+
+    .am-footer-brand > p {
+        margin: 18px 0;
+        font-size: 12px;
+    }
+
+    .am-footer-column h3 {
+        font-size: 13px;
+    }
+
+    .am-footer-column li a {
+        font-size: 12px;
+    }
+
+    .am-footer-contact {
+        grid-column: 1 / -1;
+    }
+
+    .am-footer-banner {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 25px 22px;
+        border-radius: 15px;
+    }
+
+    .am-footer-banner h2 {
+        font-size: 22px;
+    }
+
+    .am-footer-banner > a {
+        width: 100%;
+    }
+
+    .am-footer-bottom {
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: center;
+        gap: 10px;
+        min-height: 95px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .am-footer * {
+        transition: none !important;
+    }
+}

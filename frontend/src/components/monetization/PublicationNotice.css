@@ -1,0 +1,28 @@
+/* ARMMOTORS — PUBLICATION NOTICE */
+
+.publication-notice {
+    padding: 17px 20px;
+    border: 1px solid #e8d9ba;
+    border-radius: 12px;
+    background: #faf4e8;
+    color: #806027;
+}
+
+.publication-notice b {
+    color: #98712e;
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.publication-notice p {
+    margin: 8px 0 0;
+    color: #806f50;
+    font-size: 12px;
+    line-height: 1.7;
+}
+
+@media (max-width: 600px) {
+    .publication-notice {
+        padding: 14px 15px;
+    }
+}

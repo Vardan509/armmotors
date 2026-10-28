@@ -1,0 +1,290 @@
+/* =========================================
+   ARMMOTORS — SUCCESS MODAL
+   MODERN WHITE & NAVY
+========================================= */
+
+.ap-success-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 20000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(15, 23, 42, 0.65);
+    backdrop-filter: blur(7px);
+}
+
+.ap-success-modal {
+    position: relative;
+    width: 100%;
+    max-width: 475px;
+    max-height: calc(100dvh - 40px);
+    overflow-y: auto;
+    padding: 40px 34px 30px;
+    border: 1px solid #e3e9f1;
+    border-radius: 22px;
+    background: #ffffff;
+    color: #14263f;
+    text-align: center;
+    box-shadow: 0 30px 90px rgba(15, 23, 42, 0.25);
+    animation: successOpen 0.3s ease;
+}
+
+.ap-success-modal *,
+.ap-success-modal *::before,
+.ap-success-modal *::after {
+    box-sizing: border-box;
+}
+
+/* CLOSE BUTTON */
+
+.ap-success-close {
+    position: absolute;
+    top: 16px;
+    right: 17px;
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: 1px solid #e3e9f1;
+    border-radius: 50%;
+    background: #f8fafd;
+    color: #64748b;
+    font-size: 23px;
+    cursor: pointer;
+    transition:
+        background 0.2s,
+        color 0.2s;
+}
+
+.ap-success-close:hover {
+    background: #edf3fa;
+    color: #14263f;
+}
+
+/* SUCCESS ICON */
+
+.ap-success-icon {
+    display: grid;
+    place-items: center;
+    width: 82px;
+    height: 82px;
+    margin: 0 auto 20px;
+    border: 1px solid #e8d9ba;
+    border-radius: 50%;
+    background: #faf4e8;
+    color: #98712e;
+}
+
+.ap-success-icon svg {
+    width: 38px;
+    height: 38px;
+}
+
+/* HEADING */
+
+.ap-success-eyebrow {
+    display: block;
+    margin-bottom: 10px;
+    color: #98712e;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+.ap-success-modal h2 {
+    margin: 0 0 13px;
+    color: #14263f;
+    font-size: 25px;
+    font-weight: 800;
+    line-height: 1.4;
+}
+
+.ap-success-description {
+    margin: 0 0 24px;
+    color: #64748b;
+    font-size: 13px;
+    line-height: 1.85;
+}
+
+/* TIP CARD */
+
+.ap-success-tip {
+    margin-bottom: 23px;
+    padding: 18px;
+    border: 1px solid #e8d9ba;
+    border-radius: 14px;
+    background: #faf7f0;
+    text-align: left;
+}
+
+.ap-success-tip-heading {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin-bottom: 10px;
+    color: #98712e;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.ap-success-tip-star {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: #efe2c8;
+    color: #98712e;
+}
+
+.ap-success-tip p {
+    margin: 0;
+    color: #64748b;
+    font-size: 12px;
+    line-height: 1.85;
+}
+
+/* PRIMARY ACTION */
+
+.ap-success-primary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    min-height: 49px;
+    padding: 12px 18px;
+    border: 1px solid #14263f;
+    border-radius: 11px;
+    background: #14263f;
+    color: #ffffff;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 800;
+    text-decoration: none;
+    transition:
+        transform 0.2s ease,
+        background 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.ap-success-primary:hover {
+    transform: translateY(-2px);
+    background: #203b59;
+    color: #ffffff;
+    box-shadow: 0 8px 22px rgba(20, 38, 63, 0.2);
+}
+
+/* SECONDARY ACTIONS */
+
+.ap-success-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 18px;
+}
+
+.ap-success-actions a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    padding: 10px 13px;
+    border: 1px solid #e3e9f1;
+    border-radius: 9px;
+    background: #ffffff;
+    color: #475569;
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    transition:
+        background 0.2s,
+        color 0.2s;
+}
+
+.ap-success-actions a:hover {
+    background: #edf3fa;
+    color: #14263f;
+}
+
+.ap-success-plans {
+    display: inline-block;
+    margin-top: 19px;
+    color: #98712e;
+    font-size: 12px;
+    font-weight: 800;
+    text-decoration: none;
+}
+
+.ap-success-plans:hover {
+    text-decoration: underline;
+}
+
+/* LOCATION */
+
+.ap-existing-location {
+    margin: 7px 0 12px;
+    color: #64748b;
+    font-size: 12px;
+    line-height: 1.7;
+}
+
+/* ANIMATION */
+
+@keyframes successOpen {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.96);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* MOBILE */
+
+@media (max-width: 520px) {
+    .ap-success-overlay {
+        padding: 12px;
+    }
+
+    .ap-success-modal {
+        padding: 34px 20px 25px;
+        border-radius: 17px;
+    }
+
+    .ap-success-modal h2 {
+        font-size: 21px;
+    }
+
+    .ap-success-icon {
+        width: 72px;
+        height: 72px;
+    }
+
+    .ap-success-tip {
+        padding: 15px;
+    }
+
+    .ap-success-actions {
+        gap: 8px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ap-success-modal {
+        animation: none;
+    }
+
+    .ap-success-modal * {
+        transition: none !important;
+    }
+}

@@ -1,0 +1,203 @@
+/* =========================================
+   ARMMOTORS — GLOBAL DESIGN SYSTEM
+   MODERN WHITE & NAVY
+========================================= */
+
+:root {
+    font-family: Arial, "Noto Sans Armenian", sans-serif;
+    color: #14263f;
+    background: #f5f7fb;
+
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+
+    --am-gold: #c9a052;
+    --am-gold-dark: #98712e;
+    --am-bg: #f5f7fb;
+    --am-border: #e3e9f1;
+    --am-navy: #14263f;
+    --am-navy-hover: #203b59;
+    --am-white: #ffffff;
+    --am-muted: #64748b;
+    --am-gold-soft: #faf4e8;
+    --am-radius: 18px;
+    --am-shadow: 0 6px 24px rgba(20, 38, 63, 0.055);
+    --am-shadow-hover: 0 16px 38px rgba(20, 38, 63, 0.11);
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 170px;
+}
+
+body {
+    margin: 0;
+    min-width: 320px;
+    background: var(--am-bg);
+    color: #14263f;
+}
+
+button,
+input,
+select,
+textarea {
+    font: inherit;
+}
+
+button {
+    cursor: pointer;
+}
+
+button:disabled {
+    cursor: not-allowed;
+}
+
+a {
+    color: inherit;
+}
+
+a.product-card {
+    display: flex;
+    text-decoration: none;
+    color: inherit;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: 2px solid #c9a052;
+    outline-offset: 3px;
+}
+
+.demo-label {
+    display: block;
+    margin-bottom: 7px;
+    color: var(--am-gold-dark);
+    font-size: 10px;
+}
+
+.category-card {
+    color: inherit;
+    text-decoration: none;
+}
+
+.product-card:hover .product-title {
+    color: var(--am-gold-dark);
+}
+
+.site-form input,
+.site-form textarea,
+.site-form select {
+    max-width: 100%;
+}
+
+/* =========================================
+   GLOBAL FAVORITES
+========================================= */
+
+button:has(> svg.lucide-heart),
+button:has(> svg[class*="heart"]),
+button:has(> .lucide-heart),
+button[aria-label*="favorite" i],
+button[aria-label*="wishlist" i],
+button[aria-label*="սիրելի" i] {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+    border: 1px solid rgba(20, 38, 63, 0.07);
+    border-radius: 50%;
+
+    background: rgba(255, 255, 255, 0.96);
+    color: #14263f;
+
+    box-shadow: 0 4px 15px rgba(20, 38, 63, 0.08);
+    backdrop-filter: blur(8px);
+
+    cursor: pointer;
+
+    transition:
+        transform 0.2s ease,
+        background 0.2s ease,
+        color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+button:has(> svg.lucide-heart):hover,
+button:has(> svg[class*="heart"]):hover,
+button[aria-label*="favorite" i]:hover,
+button[aria-label*="սիրելի" i]:hover {
+    transform: scale(1.08);
+    background: #fff4f4;
+    color: #d63d4c;
+    box-shadow: 0 6px 20px rgba(214, 61, 76, 0.14);
+}
+
+button:has(> svg.lucide-heart) svg,
+button:has(> svg[class*="heart"]) svg {
+    width: 22px;
+    height: 22px;
+    stroke-width: 1.8;
+}
+
+button[aria-pressed="true"]:has(svg.lucide-heart),
+button[aria-pressed="true"]:has(svg[class*="heart"]),
+button[aria-label*="remove from favorites" i] {
+    background: #fff0f1;
+    color: #dc4050;
+}
+
+button[aria-pressed="true"]:has(svg.lucide-heart) svg,
+button[aria-pressed="true"]:has(svg[class*="heart"]) svg {
+    fill: currentColor;
+}
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 600px) {
+    button:has(> svg.lucide-heart),
+    button:has(> svg[class*="heart"]),
+    button[aria-label*="favorite" i],
+    button[aria-label*="սիրելի" i] {
+        width: 38px;
+        height: 38px;
+        min-width: 38px;
+        min-height: 38px;
+    }
+
+    button:has(> svg.lucide-heart) svg,
+    button:has(> svg[class*="heart"]) svg {
+        width: 20px;
+        height: 20px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+        animation: none !important;
+        transition: none !important;
+    }
+}

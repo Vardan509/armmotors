@@ -1,0 +1,98 @@
+/* =========================================
+   ARMMOTORS — SEARCH LAYOUT FIX
+========================================= */
+
+.home-wrapper .intro-section {
+    display: block !important;
+    width: 100%;
+    min-height: 0 !important;
+}
+
+.home-wrapper .home-search-controls {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 12px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+}
+
+.home-wrapper .home-search-controls > .search-area {
+    position: relative;
+    display: block !important;
+    flex: 1 1 0 !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    margin: 0 !important;
+}
+
+.home-wrapper .home-search-controls > .am-filter-trigger {
+    flex: 0 0 64px !important;
+    width: 64px !important;
+    height: 64px !important;
+    min-width: 64px !important;
+    margin: 0 !important;
+}
+
+.home-wrapper .search-area .search-box {
+    display: flex !important;
+    align-items: center !important;
+    width: 100% !important;
+    min-height: 64px !important;
+    padding: 0 18px !important;
+    border: 1px solid #e3e9f1 !important;
+    border-radius: 15px !important;
+    background: #f8fafd !important;
+    box-shadow: none !important;
+}
+
+.home-wrapper .search-area .search-box:focus-within {
+    border-color: #c9a052 !important;
+    box-shadow: 0 0 0 3px rgba(201, 160, 82, 0.12) !important;
+}
+
+.home-wrapper .search-area .search-box input {
+    flex: 1 1 auto !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 60px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: 0 !important;
+    outline: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: #14263f !important;
+    font-size: 14px !important;
+}
+
+.home-wrapper .search-area .search-box svg {
+    flex-shrink: 0;
+    color: #98712e;
+}
+
+@media (max-width: 600px) {
+    .home-wrapper .home-search-controls {
+        gap: 9px !important;
+    }
+
+    .home-wrapper .home-search-controls > .am-filter-trigger {
+        flex-basis: 50px !important;
+        width: 50px !important;
+        height: 50px !important;
+        min-width: 50px !important;
+    }
+
+    .home-wrapper .search-area .search-box {
+        min-height: 50px !important;
+        padding: 0 12px !important;
+        border-radius: 12px !important;
+    }
+
+    .home-wrapper .search-area .search-box input {
+        min-height: 48px !important;
+        font-size: 13px !important;
+    }
+}
