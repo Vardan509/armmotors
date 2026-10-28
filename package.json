@@ -1,12 +1,23 @@
+
 {
-  "name": "23project",
+  "name": "armmotors",
   "version": "1.0.0",
-  "description": "Կայքի ապրանքները, գրանցումները, նախընտրելիները, գնման հայտերը, հաղորդագրությունները և ադմինի գործողությունները պահպանվում են MongoDB-ում։ Ստատիկ ցուցադրական ապրանքներ այլևս չեն ցուցադրվում։ Դատարկ բազայի դեպքում ապրանք ավելացրեք ադմինից կամ հայտարարության էջից։",
+  "description": "ArmMotors — ավտոմեքենաների առցանց հայտարարությունների հարթակ՝ React, Node.js, Express և MongoDB տեխնոլոգիաներով։",
+  "private": true,
   "license": "ISC",
   "author": "",
   "type": "commonjs",
-  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "npm --prefix backend run dev",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "dev:backend": "npm --prefix backend run dev",
+    "build": "npm --prefix frontend run build",
+    "start": "npm --prefix backend start",
+    "install:all": "npm --prefix backend install && npm --prefix frontend install",
+    "render:build": "npm run install:all && npm run build",
+    "test": "npm --prefix backend test"
+  },
+  "engines": {
+    "node": ">=22"
   }
 }

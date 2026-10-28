@@ -1,8 +1,10 @@
+
 import express from "express";
 import cors from "cors";
 import mongoose from "mongoose";
 import rateLimit from "express-rate-limit";
 import path from "node:path";
+import fs from "node:fs";
 import { fileURLToPath } from "node:url";
 
 import notificationRoutes from "./routes/notificationRoutes.js";
@@ -22,9 +24,16 @@ import translationRoutes from "./routes/translationRoutes.js";
 
 import errorHandler from "./middleware/errorHandler.js";
 
-const backendDirectory = fileURLToPath(new URL("./", import.meta.url));
+const backendDirectory = path.dirname(fileURLToPath(import.meta.url));
 
 const uploadsDirectory = path.join(backendDirectory, "uploads");
+
+const frontendDirectory = path.resolve(
+    backendDirectory,
+    "../frontend/dist"
+);
+
+const frontendIndex = path.join(frontendDirectory, "index.html");
 
 function getAllowedOrigins() {
     const configured = process.env.CLIENT_ORIGIN || "";
@@ -45,12 +54,12 @@ function getAllowedOrigins() {
                     return new URL(item).origin;
                 } catch {
                     console.warn(
-                        "[ArmMotors] Invalid CLIENT_ORIGIN entry ignored.",
+                        "[ArmMotors] Invalid CLIENT_ORIGIN entry ignored."
                     );
                     return "";
                 }
             })
-            .filter(Boolean),
+            .filter(Boolean)
     );
 }
 
@@ -64,20 +73,28 @@ export function createApp() {
         app.set("trust proxy", 1);
     }
 
+    // ======================================
+    // SECURITY HEADERS
+    // ======================================
+
     app.use((req, res, next) => {
         res.setHeader("X-Content-Type-Options", "nosniff");
-
-        res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
-
+        res.setHeader(
+            "Referrer-Policy",
+            "strict-origin-when-cross-origin"
+        );
         res.setHeader("X-Frame-Options", "DENY");
-
         res.setHeader(
             "Permissions-Policy",
-            "camera=(), microphone=(), geolocation=()",
+            "camera=(), microphone=(), geolocation=()"
         );
 
         next();
     });
+
+    // ======================================
+    // CORS
+    // ======================================
 
     app.use(
         cors({
@@ -89,18 +106,31 @@ export function createApp() {
                 return callback(null, allowedOrigins.has(origin));
             },
             credentials: true,
-            methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-            allowedHeaders: ["Content-Type", "Authorization"],
-        }),
+            methods: [
+                "GET",
+                "POST",
+                "PUT",
+                "PATCH",
+                "DELETE",
+                "OPTIONS",
+            ],
+            allowedHeaders: [
+                "Content-Type",
+                "Authorization",
+            ],
+        })
     );
 
     app.use(
         express.json({
             limit: "100kb",
-        }),
+        })
     );
 
-    // Public uploaded images
+    // ======================================
+    // UPLOADS
+    // ======================================
+
     app.use(
         "/uploads",
         express.static(uploadsDirectory, {
@@ -109,15 +139,21 @@ export function createApp() {
             fallthrough: false,
             maxAge: "1d",
             setHeaders(res) {
-                res.setHeader("X-Content-Type-Options", "nosniff");
-
+                res.setHeader(
+                    "X-Content-Type-Options",
+                    "nosniff"
+                );
                 res.setHeader(
                     "Content-Security-Policy",
-                    "default-src 'none'; sandbox",
+                    "default-src 'none'; sandbox"
                 );
             },
-        }),
+        })
     );
+
+    // ======================================
+    // HEALTH
+    // ======================================
 
     app.get("/api/health", (req, res) => {
         const connected = mongoose.connection.readyState === 1;
@@ -125,9 +161,15 @@ export function createApp() {
         return res.status(connected ? 200 : 503).json({
             status: connected ? "ok" : "degraded",
             service: "ArmMotors API",
-            database: connected ? "connected" : "disconnected",
+            database: connected
+                ? "connected"
+                : "disconnected",
         });
     });
+
+    // ======================================
+    // DATABASE CHECK
+    // ======================================
 
     app.use("/api", (req, res, next) => {
         if (mongoose.connection.readyState !== 1) {
@@ -148,16 +190,15 @@ export function createApp() {
             ...options,
         });
 
+    // ======================================
+    // API ROUTES
+    // ======================================
+
     app.use("/api/notifications", notificationRoutes);
-
     app.use("/api/auth", authRoutes);
-
     app.use("/api/monetization", monetizationRoutes);
-
     app.use("/api/products", productRoutes);
-
     app.use("/api/sellers", sellerRoutes);
-
     app.use("/api/listings", listingQueryRoutes);
 
     app.use(
@@ -171,15 +212,12 @@ export function createApp() {
                     "Թարգմանության հարցումների սահմանաչափը լրացել է։ Փորձեք ավելի ուշ։",
             },
         }),
-        translationRoutes,
+        translationRoutes
     );
 
     app.use("/api/uploads", uploadRoutes);
-
     app.use("/api/messages", messageRoutes);
-
     app.use("/api/conversations", conversationRoutes);
-
     app.use("/api/favorites", favoriteRoutes);
 
     app.use(
@@ -188,7 +226,7 @@ export function createApp() {
             windowMs: 15 * 60 * 1000,
             limit: 100,
         }),
-        orderRoutes,
+        orderRoutes
     );
 
     app.use("/api/admin", adminRoutes);
@@ -199,14 +237,72 @@ export function createApp() {
             windowMs: 15 * 60 * 1000,
             limit: 20,
         }),
-        reportRoutes,
+        reportRoutes
     );
 
-    app.use((req, res) => {
+    // ======================================
+    // API 404
+    // ======================================
+
+    app.use("/api", (req, res) => {
         return res.status(404).json({
             message: "API հասցեն չի գտնվել։",
         });
     });
+
+    // ======================================
+    // REACT FRONTEND
+    // ======================================
+
+    if (fs.existsSync(frontendIndex)) {
+        app.use(
+            express.static(frontendDirectory, {
+                index: false,
+                dotfiles: "deny",
+            })
+        );
+
+        app.get("/{*path}", (req, res, next) => {
+            if (req.method !== "GET") {
+                return next();
+            }
+
+            // Only HTML navigation requests
+            if (!req.accepts("html")) {
+                return next();
+            }
+
+            // Do not return HTML for missing files
+            if (path.extname(req.path)) {
+                return next();
+            }
+
+            return res.sendFile(frontendIndex);
+        });
+
+        console.log(
+            "[ArmMotors] React frontend enabled:",
+            frontendDirectory
+        );
+    } else {
+        console.warn(
+            "[ArmMotors] React build not found. Run npm run build."
+        );
+    }
+
+    // ======================================
+    // 404
+    // ======================================
+
+    app.use((req, res) => {
+        return res.status(404).json({
+            message: "Հասցեն չի գտնվել։",
+        });
+    });
+
+    // ======================================
+    // ERROR HANDLER
+    // ======================================
 
     app.use(errorHandler);
 
