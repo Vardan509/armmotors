@@ -1,15 +1,23 @@
 /* =========================================
    ARMMOTORS — EXTRA CAR DETAILS
-   MODERN WHITE & NAVY
+   PREMIUM WHITE & NAVY
 ========================================= */
 
 .ap-detail-extras {
     margin-top: 20px;
-    padding: 27px;
-    border: 1px solid #e3e9f1;
-    border-radius: 18px;
+    padding: 26px;
+
+    border: 1px solid #e2e9f2;
+    border-radius: 19px;
+
     background: #ffffff;
-    box-shadow: 0 6px 24px rgba(20, 38, 63, 0.045);
+    box-shadow: 0 7px 25px rgba(20, 38, 63, 0.035);
+}
+
+.ap-detail-extras *,
+.ap-detail-extras *::before,
+.ap-detail-extras *::after {
+    box-sizing: border-box;
 }
 
 /* HEADING */
@@ -18,34 +26,44 @@
     display: flex;
     align-items: center;
     gap: 13px;
-    margin-bottom: 22px;
+
+    margin-bottom: 20px;
+    padding-bottom: 18px;
+
+    border-bottom: 1px solid #e8edf4;
 }
 
 .ap-detail-extra-title-icon {
     display: grid;
     place-items: center;
     flex-shrink: 0;
+
     width: 43px;
     height: 43px;
-    border: 1px solid #dce5ef;
+
+    border: 1px solid #dce7f3;
     border-radius: 12px;
-    background: #edf3fa;
+
+    background: #edf4fc;
     color: #14263f;
 }
 
 .ap-detail-extras .ap-detail-extra-title h2 {
     margin: 0;
+
     color: #14263f;
-    font-size: 19px;
+    font-size: 18px;
     font-weight: 800;
-    line-height: 1.4;
+    line-height: 1.5;
 }
 
 /* SECTIONS */
 
 .ap-detail-extra-section {
+    min-width: 0;
     padding: 20px 0;
-    border-top: 1px solid #e3e9f1;
+
+    border-top: 1px solid #e8edf4;
 }
 
 .ap-detail-extra-section:first-of-type {
@@ -58,10 +76,12 @@
 }
 
 .ap-detail-extra-section h3 {
-    margin: 0 0 17px;
+    margin: 0 0 14px;
+
     color: #14263f;
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 800;
+    line-height: 1.5;
 }
 
 /* SPECIFICATIONS GRID */
@@ -69,58 +89,91 @@
 .ap-detail-extra-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0 25px;
+    gap: 10px;
+
     margin: 0;
 }
 
 .ap-detail-extra-row {
     display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 12px;
+    flex-direction: column;
+    justify-content: center;
+    gap: 7px;
+
     min-width: 0;
-    padding: 13px 0;
-    border-bottom: 1px solid #edf1f6;
+    min-height: 73px;
+
+    margin: 0;
+    padding: 13px 15px;
+
+    border: 1px solid #e5ebf3;
+    border-radius: 11px;
+
+    background: #f8fafd;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.ap-detail-extra-row:hover {
+    background: #f1f6fc;
+    border-color: #c5d7ec;
+    transform: translateY(-1px);
 }
 
 .ap-detail-extra-row dt {
-    color: #64748b;
-    font-size: 12px;
-    line-height: 1.6;
+    margin: 0;
+
+    color: #77869b;
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.5;
+
+    overflow-wrap: anywhere;
 }
 
 .ap-detail-extra-row dd {
     margin: 0;
+
     color: #14263f;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 800;
-    line-height: 1.6;
-    text-align: right;
+    line-height: 1.5;
+    text-align: left;
+
     overflow-wrap: anywhere;
 }
 
 /* COMFORT / HEADLIGHTS */
 
 .ap-detail-feature-list {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
 }
 
 .ap-detail-feature {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 10px;
-    min-width: 0;
-    min-height: 44px;
-    padding: 11px 13px;
-    border: 1px solid #e3e9f1;
-    border-radius: 10px;
-    background: #f8fafd;
-    color: #334155;
-    font-size: 12px;
-    font-weight: 600;
+    gap: 8px;
+
+    max-width: 100%;
+    min-height: 35px;
+
+    padding: 8px 12px;
+
+    border: 1px solid #dce8f4;
+    border-radius: 9px;
+
+    background: #f3f7fc;
+    color: #294e79;
+
+    font-size: 11px;
+    font-weight: 700;
     line-height: 1.5;
+
     overflow-wrap: anywhere;
 }
 
@@ -128,12 +181,16 @@
     display: grid;
     place-items: center;
     flex-shrink: 0;
-    width: 20px;
-    height: 20px;
+
+    width: 18px;
+    height: 18px;
+
     border-radius: 50%;
-    background: #eaf5ed;
-    color: #21864b;
-    font-size: 12px;
+
+    background: #dceafa;
+    color: #205c99;
+
+    font-size: 10px;
     font-weight: 800;
 }
 
@@ -150,13 +207,14 @@
 @media (max-width: 600px) {
     .ap-detail-extras {
         margin-top: 16px;
-        padding: 18px;
+        padding: 17px;
         border-radius: 14px;
     }
 
     .ap-detail-extra-title {
         gap: 10px;
-        margin-bottom: 18px;
+        margin-bottom: 17px;
+        padding-bottom: 14px;
     }
 
     .ap-detail-extra-title-icon {
@@ -168,21 +226,63 @@
         font-size: 16px;
     }
 
-    .ap-detail-extra-grid {
-        grid-template-columns: 1fr;
-    }
-
     .ap-detail-extra-section {
         padding: 18px 0;
     }
 
+    .ap-detail-extra-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    .ap-detail-extra-row {
+        min-height: 67px;
+        padding: 10px;
+        gap: 5px;
+    }
+
+    .ap-detail-extra-row dt {
+        font-size: 10px;
+    }
+
+    .ap-detail-extra-row dd {
+        font-size: 12px;
+    }
+
     .ap-detail-feature-list {
-        grid-template-columns: 1fr;
         gap: 8px;
     }
 
     .ap-detail-feature {
-        min-height: 42px;
-        padding: 10px 12px;
+        min-height: 34px;
+        padding: 8px 10px;
+        font-size: 11px;
+    }
+}
+
+/* SMALL PHONES */
+
+@media (max-width: 360px) {
+    .ap-detail-extra-grid {
+        gap: 6px;
+    }
+
+    .ap-detail-extra-row {
+        padding: 9px;
+    }
+
+    .ap-detail-extra-row dd {
+        font-size: 11px;
+    }
+}
+
+/* ACCESSIBILITY */
+
+@media (prefers-reduced-motion: reduce) {
+    .ap-detail-extras *,
+    .ap-detail-extras *::before,
+    .ap-detail-extras *::after {
+        transition: none !important;
+        animation: none !important;
     }
 }

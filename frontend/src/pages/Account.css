@@ -1,17 +1,18 @@
 /* =========================================
    ARMMOTORS — ACCOUNT PAGE
-   MODERN WHITE & NAVY
+   PREMIUM WHITE / NAVY / BLUE
 ========================================= */
 
 .account-page {
-    --account-navy: #14263f;
-    --account-gold: #c9a052;
-    --account-border: #e3e9f1;
-    --account-muted: #64748b;
+    --account-navy: #102b4e;
+    --account-blue: #245da1;
+    --account-border: #e3eaf3;
+    --account-muted: #728197;
+    --account-bg: #f5f7fb;
 
     min-height: 100vh;
-    padding: 35px 24px 95px;
-    background: #f5f7fb;
+    padding: 42px 24px 100px;
+    background: var(--account-bg);
     color: var(--account-navy);
     font-family: Arial, "Noto Sans Armenian", sans-serif;
 }
@@ -22,45 +23,65 @@
     box-sizing: border-box;
 }
 
-.account-page > * {
+.account-container {
+    width: 100%;
     max-width: 1320px;
-    margin-left: auto;
-    margin-right: auto;
+    margin: 0 auto;
 }
 
-/* HEADING */
+.account-page a {
+    text-decoration: none;
+}
+
+.account-page button,
+.account-page input,
+.account-page select {
+    font-family: inherit;
+}
+
+.account-page button:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+/* =========================================
+   HEADER
+========================================= */
 
 .account-heading {
     display: flex;
-    align-items: center;
+    align-items: flex-end;
     justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 20px;
-    margin-bottom: 25px;
+    gap: 24px;
+    margin-bottom: 28px;
+}
+
+.account-heading-copy {
+    min-width: 0;
 }
 
 .account-eyebrow {
     display: block;
-    margin-bottom: 8px;
-    color: #98712e;
-    font-size: 10px;
+    margin-bottom: 11px;
+    color: var(--account-blue);
+    font-size: 11px;
     font-weight: 800;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
+    letter-spacing: 2px;
 }
 
 .account-heading h1 {
-    margin: 0 0 9px;
-    color: var(--account-navy);
-    font-size: clamp(25px, 3vw, 36px);
+    margin: 0 0 10px;
+    font-size: clamp(28px, 3vw, 38px);
+    line-height: 1.2;
     font-weight: 800;
+    letter-spacing: -0.6px;
 }
 
 .account-heading p {
     margin: 0;
     color: var(--account-muted);
     font-size: 13px;
-    line-height: 1.7;
+    line-height: 1.8;
 }
 
 .account-heading-actions {
@@ -71,133 +92,262 @@
 }
 
 .account-add-link,
-.account-money-link {
+.account-money-link,
+.account-section-add {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    min-height: 43px;
-    padding: 10px 16px;
-    border: 1px solid var(--account-navy);
-    border-radius: 10px;
-    background: var(--account-navy);
-    color: #ffffff;
+    gap: 9px;
+    min-height: 45px;
+    padding: 11px 17px;
+    border-radius: 11px;
     font-size: 12px;
     font-weight: 800;
-    text-decoration: none;
-    cursor: pointer;
+    transition: 0.2s ease;
+    white-space: nowrap;
+}
+
+.account-add-link {
+    border: 1px solid var(--account-navy);
+    background: var(--account-navy);
+    color: #ffffff;
 }
 
 .account-add-link:hover {
-    background: #203b59;
+    background: #1a426e;
     color: #ffffff;
+    transform: translateY(-2px);
 }
 
 .account-money-link {
-    border-color: var(--account-border);
+    border: 1px solid var(--account-border);
     background: #ffffff;
     color: var(--account-navy);
 }
 
 .account-money-link:hover {
-    background: #edf3fa;
+    background: #edf3fb;
+    border-color: #cbd9eb;
 }
 
-/* PROFILE */
+/* =========================================
+   PROFILE
+========================================= */
 
 .account-profile {
+    position: relative;
     display: flex;
     align-items: center;
-    gap: 20px;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 28px 30px;
     margin-bottom: 20px;
-    padding: 25px;
+    overflow: hidden;
     border: 1px solid var(--account-border);
-    border-radius: 19px;
+    border-radius: 20px;
     background: #ffffff;
-    box-shadow: 0 5px 22px rgba(20, 38, 63, 0.045);
+    box-shadow: 0 8px 30px rgba(16, 43, 78, 0.035);
+}
+
+.account-profile::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 5px;
+    background: var(--account-navy);
+}
+
+.account-profile-main {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    min-width: 0;
 }
 
 .account-avatar {
     display: grid;
     place-items: center;
     flex-shrink: 0;
-    width: 75px;
-    height: 75px;
-    overflow: hidden;
-    border: 1px solid #dce6f1;
-    border-radius: 19px;
-    background: #edf3fa;
-    color: var(--account-navy);
-    font-size: 27px;
+    width: 88px;
+    height: 88px;
+    border: 1px solid #244d7b;
+    border-radius: 20px;
+    background: linear-gradient(145deg, #102b4e, #285a91);
+    color: #ffffff;
+    font-size: 35px;
     font-weight: 800;
-}
-
-.account-avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+    box-shadow: 0 8px 20px rgba(16, 43, 78, 0.12);
 }
 
 .account-profile-info {
     min-width: 0;
 }
 
-.account-profile-info h2 {
-    margin: 0 0 9px;
-    color: var(--account-navy);
-    font-size: 21px;
+.account-profile-label {
+    display: block;
+    margin-bottom: 7px;
+    color: var(--account-blue);
+    font-size: 10px;
     font-weight: 800;
+    letter-spacing: 1.3px;
 }
 
-.account-profile-info p {
-    margin: 5px 0;
-    color: var(--account-muted);
-    font-size: 12px;
-    line-height: 1.6;
+.account-profile-info h2 {
+    margin: 0 0 11px;
+    font-size: clamp(19px, 2vw, 24px);
+    line-height: 1.3;
+    font-weight: 800;
     overflow-wrap: anywhere;
 }
 
-/* STATISTICS */
+.account-profile-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 22px;
+}
+
+.account-profile-details span {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--account-muted);
+    font-size: 12px;
+    overflow-wrap: anywhere;
+}
+
+.account-profile-details svg {
+    flex-shrink: 0;
+    color: var(--account-blue);
+}
+
+.account-profile-actions {
+    flex-shrink: 0;
+}
+
+.account-favorites-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+    padding: 11px 16px;
+    border: 1px solid #dce6f2;
+    border-radius: 11px;
+    background: #f8fafd;
+    color: var(--account-navy);
+    font-size: 12px;
+    font-weight: 800;
+    transition: 0.2s ease;
+}
+
+.account-favorites-link:hover {
+    background: #eaf2fb;
+    border-color: #cbd9eb;
+}
+
+/* =========================================
+   STATISTICS — 4 IN ONE ROW
+========================================= */
 
 .account-statistics {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 15px;
-    margin-bottom: 24px;
+    margin-bottom: 26px;
 }
 
 .account-stat {
     min-width: 0;
+    min-height: 170px;
     padding: 23px;
     border: 1px solid var(--account-border);
-    border-radius: 16px;
+    border-radius: 17px;
     background: #ffffff;
-    box-shadow: 0 4px 17px rgba(20, 38, 63, 0.04);
+    box-shadow: 0 6px 25px rgba(16, 43, 78, 0.035);
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        border-color 0.2s ease;
+}
+
+.account-stat:hover {
+    transform: translateY(-3px);
+    border-color: #cbd9eb;
+    box-shadow: 0 12px 30px rgba(16, 43, 78, 0.07);
+}
+
+.account-stat-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 19px;
+}
+
+.account-stat-icon {
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+}
+
+.account-stat-icon-blue {
+    background: #e9f1fc;
+    color: #245da1;
+}
+
+.account-stat-icon-green {
+    background: #e9f6f0;
+    color: #25835d;
+}
+
+.account-stat-icon-purple {
+    background: #f0edfb;
+    color: #6c55ad;
+}
+
+.account-stat-icon-orange {
+    background: #fff2e6;
+    color: #b97536;
+}
+
+.account-stat-mark {
+    color: #b2bfd0;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 1px;
 }
 
 .account-stat strong {
     display: block;
-    margin-bottom: 8px;
+    margin-bottom: 7px;
     color: var(--account-navy);
-    font-size: 28px;
+    font-size: 32px;
+    line-height: 1.1;
     font-weight: 800;
 }
 
-.account-stat span {
+.account-stat-title {
+    display: block;
     color: var(--account-muted);
     font-size: 12px;
     font-weight: 600;
+    line-height: 1.5;
 }
 
-/* SECTIONS */
+/* =========================================
+   SECTIONS
+========================================= */
 
 .account-section {
     margin-bottom: 24px;
-    padding: 24px;
+    padding: 28px;
     border: 1px solid var(--account-border);
-    border-radius: 19px;
+    border-radius: 20px;
     background: #ffffff;
-    box-shadow: 0 5px 22px rgba(20, 38, 63, 0.045);
+    box-shadow: 0 8px 30px rgba(16, 43, 78, 0.035);
 }
 
 .account-section-head {
@@ -206,23 +356,46 @@
     justify-content: space-between;
     flex-wrap: wrap;
     gap: 15px;
-    margin-bottom: 20px;
+    margin-bottom: 22px;
+}
+
+.account-section-kicker {
+    display: block;
+    margin-bottom: 7px;
+    color: var(--account-blue);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
 }
 
 .account-section-head h2 {
     margin: 0;
     color: var(--account-navy);
-    font-size: 20px;
+    font-size: 21px;
     font-weight: 800;
 }
 
 .account-section-head p {
-    margin: 6px 0 0;
+    margin: 7px 0 0;
     color: var(--account-muted);
     font-size: 12px;
+    line-height: 1.7;
 }
 
-/* LISTINGS */
+.account-section-add {
+    border: 1px solid var(--account-navy);
+    background: var(--account-navy);
+    color: #ffffff;
+}
+
+.account-section-add:hover {
+    background: #1a426e;
+    color: #ffffff;
+}
+
+/* =========================================
+   LISTINGS
+========================================= */
 
 .account-listings,
 .account-orders {
@@ -232,47 +405,48 @@
 }
 
 .account-listing {
-    padding: 16px;
+    padding: 17px;
     border: 1px solid var(--account-border);
-    border-radius: 14px;
+    border-radius: 15px;
     background: #ffffff;
-    transition:
-        border-color 0.2s,
-        box-shadow 0.2s;
+    transition: 0.2s ease;
 }
 
 .account-listing:hover {
-    border-color: #cbd8e6;
-    box-shadow: 0 7px 22px rgba(20, 38, 63, 0.055);
+    border-color: #cbd9eb;
+    box-shadow: 0 8px 24px rgba(16, 43, 78, 0.045);
 }
 
 .account-listing-main {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 17px;
     min-width: 0;
 }
 
 .account-listing-image,
 .account-listing-placeholder {
-    display: block;
     flex-shrink: 0;
-    width: 130px;
-    height: 95px;
+    width: 145px;
+    height: 105px;
+    border-radius: 11px;
     overflow: hidden;
-    border-radius: 10px;
     background: #edf2f8;
 }
 
 .account-listing-image {
+    display: block;
     object-fit: cover;
 }
 
 .account-listing-placeholder {
-    display: grid;
-    place-items: center;
-    color: #94a3b8;
-    font-size: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    color: #8b9cb0;
+    font-size: 11px;
 }
 
 .account-listing-info {
@@ -281,72 +455,79 @@
 }
 
 .account-listing-info h3 {
-    margin: 0 0 8px;
+    margin: 0 0 9px;
     color: var(--account-navy);
-    font-size: 16px;
+    font-size: 17px;
     font-weight: 800;
+    line-height: 1.4;
     overflow-wrap: anywhere;
 }
 
-.account-listing-info p {
-    margin: 5px 0;
-    color: var(--account-muted);
-    font-size: 12px;
-    line-height: 1.6;
-}
-
-.account-top-label {
-    display: inline-flex;
-    margin-bottom: 8px;
-    padding: 5px 8px;
-    border-radius: 6px;
-    background: #faf4e8;
-    color: #98712e;
-    font-size: 10px;
+.account-listing-price {
+    margin: 0 0 11px;
+    color: var(--account-navy);
+    font-size: 17px;
     font-weight: 800;
 }
 
-/* STATUS */
+.account-listing-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.account-listing-meta small {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--account-muted);
+    font-size: 11px;
+}
 
 .account-status {
     display: inline-flex;
     align-items: center;
-    padding: 6px 9px;
-    border: 1px solid #e3e9f1;
+    justify-content: center;
+    min-height: 26px;
+    padding: 5px 10px;
+    border: 1px solid #dce6f2;
     border-radius: 7px;
-    background: #f8fafd;
+    background: #f1f5f9;
     color: #64748b;
     font-size: 10px;
     font-weight: 800;
 }
 
 .account-status-active {
-    border-color: #c9e8d4;
-    background: #ecf9f0;
-    color: #21864b;
+    border-color: #ccebdc;
+    background: #eaf8f0;
+    color: #247b51;
 }
 
 .account-status-draft {
-    border-color: #e3e9f1;
+    border-color: #dce6f2;
     background: #f1f5f9;
     color: #64748b;
 }
 
 .account-status-sold {
-    border-color: #f0dcb4;
-    background: #fff8e8;
-    color: #98712e;
+    border-color: #cbdcf1;
+    background: #edf4fc;
+    color: #245da1;
 }
 
-/* ACTIONS */
+/* =========================================
+   LISTING ACTIONS
+========================================= */
 
 .account-listing-actions {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
     gap: 9px;
-    margin-top: 15px;
-    padding-top: 14px;
+    margin-top: 17px;
+    padding-top: 15px;
     border-top: 1px solid var(--account-border);
 }
 
@@ -356,169 +537,661 @@
     align-items: center;
     justify-content: center;
     gap: 7px;
-    min-height: 36px;
-    padding: 8px 12px;
+    min-height: 38px;
+    padding: 9px 13px;
     border: 1px solid var(--account-border);
-    border-radius: 8px;
+    border-radius: 9px;
     background: #ffffff;
     color: var(--account-navy);
-    font-family: inherit;
     font-size: 11px;
-    font-weight: 700;
-    text-decoration: none;
+    font-weight: 800;
     cursor: pointer;
+    transition: 0.2s ease;
 }
 
 .account-listing-actions button:hover,
 .account-listing-actions a:hover {
-    background: #edf3fa;
+    background: #edf3fb;
+    border-color: #cbd9eb;
 }
 
-.account-danger,
 .account-listing-actions .account-danger {
-    border-color: #f0d2d2;
-    background: #fff7f7;
-    color: #bb3d45;
+    border-color: #f0d4d8;
+    background: #fff7f8;
+    color: #b84653;
 }
 
-.account-danger:hover,
 .account-listing-actions .account-danger:hover {
-    background: #ffebeb;
+    background: #ffedf0;
 }
 
-/* EDIT FORM */
+.account-listing-actions button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* =========================================
+   EDIT FORM
+========================================= */
 
 .account-edit-form {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 15px;
-    margin-top: 16px;
+    margin-top: 17px;
     padding: 18px;
     border: 1px solid var(--account-border);
     border-radius: 12px;
-    background: #f8fafd;
+    background: #f7f9fc;
 }
 
 .account-edit-form label {
     display: flex;
     flex-direction: column;
-    gap: 7px;
-    color: #475569;
+    gap: 8px;
+    color: #53657c;
     font-size: 12px;
     font-weight: 700;
 }
 
 .account-edit-form input,
-.account-edit-form select,
-.account-edit-form textarea {
+.account-edit-form select {
     width: 100%;
     min-width: 0;
-    min-height: 42px;
+    min-height: 43px;
     padding: 10px 12px;
-    border: 1px solid #dce5ef;
+    border: 1px solid #dce6f2;
     border-radius: 9px;
     outline: none;
     background: #ffffff;
     color: var(--account-navy);
-    font-family: inherit;
-    font-size: 12px;
-}
-
-.account-edit-form textarea {
-    min-height: 95px;
-    resize: vertical;
+    font-size: 13px;
 }
 
 .account-edit-form input:focus,
-.account-edit-form select:focus,
-.account-edit-form textarea:focus {
-    border-color: var(--account-gold);
-    box-shadow: 0 0 0 3px rgba(201, 160, 82, 0.1);
+.account-edit-form select:focus {
+    border-color: var(--account-blue);
+    box-shadow: 0 0 0 3px rgba(36, 93, 161, 0.1);
 }
 
-.account-edit-form button {
-    min-height: 40px;
-    padding: 9px 15px;
+.account-edit-actions {
+    display: flex;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 9px;
+    grid-column: 1 / -1;
+}
+
+.account-edit-actions button {
+    min-height: 41px;
+    padding: 10px 16px;
     border: 1px solid var(--account-navy);
     border-radius: 9px;
     background: var(--account-navy);
     color: #ffffff;
+    font-size: 12px;
     font-weight: 800;
     cursor: pointer;
 }
 
-/* ORDERS */
+.account-edit-actions .account-cancel-btn {
+    border-color: var(--account-border);
+    background: #ffffff;
+    color: var(--account-navy);
+}
 
-.account-order,
-.money-pending-article,
-.listing-promotion {
+/* =========================================
+   ORDERS
+========================================= */
+
+.account-order {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
     padding: 17px;
     border: 1px solid var(--account-border);
-    border-radius: 12px;
-    background: #f8fafd;
-    color: #475569;
+    border-radius: 13px;
+    background: #f9fbfe;
+}
+
+.account-order-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    min-width: 0;
+}
+
+.account-order-icon {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 43px;
+    height: 43px;
+    border-radius: 11px;
+    background: #eaf1fa;
+    color: var(--account-blue);
+}
+
+.account-order-info h3 {
+    margin: 0 0 6px;
+    color: var(--account-navy);
+    font-size: 14px;
+}
+
+.account-order-info p {
+    margin: 0 0 6px;
+    color: var(--account-navy);
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.account-order-info small {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--account-muted);
+    font-size: 11px;
+}
+
+.account-order > button {
+    flex-shrink: 0;
+    min-height: 38px;
+    padding: 9px 13px;
+    border: 1px solid #e9cdd3;
+    border-radius: 9px;
+    background: #fff5f6;
+    color: #b84653;
+    font-size: 11px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+/* =========================================
+   PROMOTION
+========================================= */
+
+.money-pending-article {
+    margin-top: 15px;
+    padding: 15px;
+    border: 1px solid #dce6f2;
+    border-radius: 11px;
+    background: #f4f8fd;
+    color: var(--account-muted);
     font-size: 12px;
     line-height: 1.7;
 }
 
-.account-order strong,
-.money-pending-article strong,
-.listing-promotion strong {
-    color: var(--account-navy);
+.money-pending-article a {
+    color: var(--account-blue);
+    font-weight: 800;
 }
 
-.account-order button,
-.money-pending-article button,
-.listing-promotion button {
-    min-height: 36px;
-    margin-top: 10px;
-    padding: 8px 13px;
-    border: 1px solid var(--account-navy);
-    border-radius: 8px;
-    background: var(--account-navy);
-    color: #ffffff;
-    font-family: inherit;
-    font-size: 11px;
-    font-weight: 700;
-    cursor: pointer;
+.account-listing .listing-promotion {
+    margin-top: 15px;
 }
 
-/* EMPTY / ERROR */
+/* =========================================
+   EMPTY / LOADING / ERROR
+========================================= */
 
 .account-empty,
-.account-loading,
-.account-error {
-    padding: 35px 20px;
-    border: 1px solid var(--account-border);
-    border-radius: 13px;
-    background: #f8fafd;
+.account-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 45px 20px;
+    border: 1px dashed #d8e3f0;
+    border-radius: 14px;
+    background: #f9fbfe;
     color: var(--account-muted);
-    font-size: 13px;
-    line-height: 1.8;
     text-align: center;
 }
 
-.account-error {
-    border-color: #f0d2d2;
-    background: #fff7f7;
-    color: #bb3d45;
+.account-empty-icon {
+    display: grid;
+    place-items: center;
+    width: 58px;
+    height: 58px;
+    border-radius: 16px;
+    background: #eaf1fa;
+    color: var(--account-blue);
 }
 
-/* RESPONSIVE */
+.account-empty h2,
+.account-empty h3 {
+    margin: 0;
+    color: var(--account-navy);
+    font-size: 18px;
+    font-weight: 800;
+}
 
-@media (max-width: 850px) {
+.account-empty p {
+    max-width: 440px;
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.8;
+}
+
+.account-empty .account-add-link {
+    margin-top: 8px;
+}
+
+.account-login-empty {
+    min-height: 350px;
+}
+
+.account-error {
+    margin: 12px 0;
+    padding: 14px 16px;
+    border: 1px solid #f0d4d8;
+    border-radius: 10px;
+    background: #fff5f6;
+    color: #b84653;
+    font-size: 12px;
+    line-height: 1.7;
+}
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 1050px) {
+    .account-heading {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .account-statistics {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 700px) {
+    .account-page {
+        padding: 24px 13px 80px;
+    }
+
+    .account-heading {
+        gap: 18px;
+        margin-bottom: 22px;
+    }
+
+    .account-heading h1 {
+        font-size: 28px;
+    }
+
+    .account-heading-actions {
+        width: 100%;
+    }
+
+    .account-heading-actions a {
+        flex: 1;
+    }
+
+    .account-profile {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 20px;
+        padding: 20px;
+        border-radius: 15px;
+    }
+
+    .account-profile-main {
+        gap: 14px;
+        align-items: flex-start;
+    }
+
+    .account-avatar {
+        width: 65px;
+        height: 65px;
+        border-radius: 15px;
+        font-size: 27px;
+    }
+
+    .account-profile-info h2 {
+        font-size: 19px;
+    }
+
+    .account-profile-details {
+        flex-direction: column;
+        gap: 7px;
+    }
+
+    .account-profile-actions,
+    .account-favorites-link {
+        width: 100%;
+    }
+
+    .account-favorites-link {
+        justify-content: center;
+    }
+
     .account-statistics {
         gap: 10px;
+        margin-bottom: 20px;
     }
 
     .account-stat {
+        min-height: 145px;
+        padding: 16px;
+        border-radius: 13px;
+    }
+
+    .account-stat-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+    }
+
+    .account-stat-mark {
+        display: none;
+    }
+
+    .account-stat strong {
+        font-size: 26px;
+    }
+
+    .account-stat-title {
+        font-size: 11px;
+    }
+
+    .account-section {
         padding: 17px;
+        border-radius: 15px;
+    }
+
+    .account-section-head h2 {
+        font-size: 18px;
+    }
+
+    .account-listing {
+        padding: 12px;
+    }
+
+    .account-listing-image,
+    .account-listing-placeholder {
+        width: 100px;
+        height: 82px;
+    }
+
+    .account-listing-main {
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .account-listing-info h3 {
+        font-size: 14px;
+    }
+
+    .account-listing-price {
+        font-size: 14px;
+    }
+
+    .account-order {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .account-order > button {
+        width: 100%;
     }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 420px) {
+    .account-heading-actions {
+        flex-direction: column;
+    }
+
+    .account-heading-actions a {
+        width: 100%;
+    }
+
+    .account-stat {
+        padding: 13px;
+    }
+
+    .account-stat-title {
+        font-size: 10px;
+    }
+
+    .account-listing-image,
+    .account-listing-placeholder {
+        width: 85px;
+        height: 78px;
+    }
+
+    .account-listing-actions {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .account-listing-actions button,
+    .account-listing-actions a {
+        width: 100%;
+        padding: 9px 6px;
+    }
+
+    .account-edit-form {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .account-page *,
+    .account-page *::before,
+    .account-page *::after {
+        transition: none !important;
+        animation: none !important;
+    }
+}
+
+
+
+/* =========================================
+   ARMMOTORS — ACCOUNT DESIGN POLISH
+   COMPACT, CLEAN & RESPONSIVE
+========================================= */
+
+/* Prevent long content from stretching cards */
+
+.account-page {
+    overflow-x: clip;
+}
+
+.account-heading-copy,
+.account-profile-main,
+.account-profile-info,
+.account-listing-info,
+.account-order-info,
+.account-section-head > div {
+    min-width: 0;
+}
+
+/* Compact heading */
+
+.account-heading {
+    margin-bottom: 24px;
+}
+
+.account-heading h1 {
+    font-size: clamp(25px, 2.7vw, 34px);
+    letter-spacing: -0.4px;
+}
+
+.account-heading p {
+    max-width: 580px;
+    line-height: 1.65;
+}
+
+/* Profile */
+
+.account-profile {
+    padding: 23px 26px;
+    border-radius: 17px;
+}
+
+.account-avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 17px;
+    font-size: 29px;
+}
+
+.account-profile-info h2 {
+    margin-bottom: 8px;
+    font-size: 21px;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+}
+
+.account-profile-details span {
+    min-width: 0;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+/* Equal statistics cards */
+
+.account-statistics {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 13px;
+}
+
+.account-stat {
+    min-width: 0;
+    min-height: 150px;
+    padding: 18px;
+    border-radius: 15px;
+}
+
+.account-stat-top {
+    margin-bottom: 13px;
+}
+
+.account-stat strong {
+    margin-bottom: 7px;
+    font-size: 29px;
+}
+
+.account-stat-title {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    font-size: 11px;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
+/* Sections */
+
+.account-section {
+    padding: 24px;
+    border-radius: 17px;
+}
+
+.account-section-head h2 {
+    font-size: 19px;
+}
+
+.account-section-head p {
+    max-width: 550px;
+}
+
+/* Listing cards */
+
+.account-listing {
+    min-width: 0;
+    padding: 15px;
+    border-radius: 13px;
+}
+
+.account-listing-main {
+    min-width: 0;
+    gap: 15px;
+}
+
+.account-listing-image,
+.account-listing-placeholder {
+    width: 125px;
+    height: 95px;
+    border-radius: 10px;
+}
+
+.account-listing-info h3 {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    margin-bottom: 7px;
+    font-size: 15px;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
+.account-listing-price {
+    margin-bottom: 8px;
+    font-size: 15px;
+    overflow-wrap: anywhere;
+}
+
+.account-listing-actions {
+    margin-top: 13px;
+    padding-top: 13px;
+}
+
+.account-listing-actions button,
+.account-listing-actions a {
+    min-height: 36px;
+    padding: 8px 11px;
+}
+
+/* Orders */
+
+.account-order {
+    min-width: 0;
+}
+
+.account-order-info h3 {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow-wrap: anywhere;
+}
+
+/* Buttons with long text */
+
+.account-add-link,
+.account-money-link,
+.account-section-add,
+.account-favorites-link {
+    max-width: 100%;
+    white-space: normal;
+    text-align: center;
+    line-height: 1.5;
+}
+
+/* Tablet */
+
+@media (max-width: 1050px) {
+    .account-statistics {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+/* Mobile */
+
+@media (max-width: 700px) {
     .account-page {
-        padding: 20px 12px 95px;
+        padding: 20px 12px 75px;
     }
 
     .account-heading h1 {
@@ -527,75 +1200,101 @@
 
     .account-profile {
         padding: 17px;
-        border-radius: 14px;
     }
 
     .account-avatar {
-        width: 59px;
-        height: 59px;
-        border-radius: 14px;
+        width: 60px;
+        height: 60px;
+        font-size: 25px;
     }
 
     .account-profile-info h2 {
         font-size: 17px;
     }
 
+    .account-profile-details span {
+        font-size: 11px;
+    }
+
     .account-statistics {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 7px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 9px;
     }
 
     .account-stat {
-        padding: 13px 9px;
-        border-radius: 11px;
+        min-height: 137px;
+        padding: 13px;
     }
 
     .account-stat strong {
-        font-size: 21px;
+        font-size: 25px;
     }
 
-    .account-stat span {
+    .account-stat-title {
         font-size: 10px;
     }
 
     .account-section {
-        padding: 16px;
-        border-radius: 14px;
+        padding: 15px;
     }
 
     .account-listing {
-        padding: 12px;
-    }
-
-    .account-listing-main {
-        align-items: flex-start;
-        gap: 11px;
+        padding: 11px;
     }
 
     .account-listing-image,
     .account-listing-placeholder {
-        width: 95px;
-        height: 77px;
+        width: 88px;
+        height: 76px;
+    }
+
+    .account-listing-main {
+        gap: 10px;
     }
 
     .account-listing-info h3 {
         font-size: 13px;
     }
 
-    .account-edit-form {
-        grid-template-columns: 1fr;
-        padding: 13px;
+    .account-listing-price {
+        font-size: 13px;
+    }
+
+    .account-listing-meta {
+        gap: 6px;
+    }
+
+    .account-listing-actions {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 7px;
+    }
+
+    .account-listing-actions button,
+    .account-listing-actions a {
+        min-width: 0;
+        font-size: 10px;
     }
 }
 
+/* Small mobile */
+
 @media (max-width: 360px) {
-    .account-statistics {
-        grid-template-columns: 1fr;
+    .account-stat {
+        padding: 10px;
+    }
+
+    .account-stat-title {
+        font-size: 9px;
     }
 
     .account-listing-image,
     .account-listing-placeholder {
-        width: 75px;
-        height: 65px;
+        width: 72px;
+        height: 68px;
+    }
+
+    .account-listing-info h3 {
+        font-size: 12px;
     }
 }

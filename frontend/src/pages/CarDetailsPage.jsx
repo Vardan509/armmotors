@@ -306,8 +306,6 @@ function SellerContact({ car }) {
 
     return (
         <div className="seller-contact">
-            <div className="seller-contact-label">{t("contactSeller")}</div>
-
             <a
                 href={links.call}
                 className="seller-contact-call"
@@ -346,8 +344,6 @@ function SellerContact({ car }) {
                     <span>Viber</span>
                 </a>
             </div>
-
-            <p className="seller-contact-note">{t("contactAppNote")}</p>
         </div>
     );
 }
@@ -732,15 +728,70 @@ export default function CarDetailsPage({ id }) {
 
     const relatedCars = car
         ? (Array.isArray(products) ? products : [])
-              .filter(
-                  (item) =>
+              .filter((item) => {
+                  return (
                       getProductId(item) !== getProductId(car) &&
                       item.type === "car" &&
-                      item.brand === car.brand &&
                       item.status !== "sold" &&
-                      item.status !== "draft",
-              )
+                      item.status !== "draft"
+                  );
+              })
+              .map((item) => {
+                  let score = 0;
+
+                  // Նույն մակնիշը
+                  if (item.brand === car.brand) {
+                      score += 50;
+                  }
+
+                  // Նույն մոդելը՝ նույն մակնիշի դեպքում
+                  if (item.brand === car.brand && item.model === car.model) {
+                      score += 40;
+                  }
+
+                  // Մոտ տարեթիվ
+                  const yearDifference = Math.abs(
+                      Number(item.year) - Number(car.year),
+                  );
+
+                  if (
+                      Number.isFinite(yearDifference) &&
+                      item.year &&
+                      car.year
+                  ) {
+                      if (yearDifference <= 2) score += 20;
+                      else if (yearDifference <= 5) score += 10;
+                  }
+
+                  // Մոտ գին՝ նույն արժույթի դեպքում
+                  const itemPrice = Number(item.price);
+                  const carPrice = Number(car.price);
+
+                  if (
+                      itemPrice > 0 &&
+                      carPrice > 0 &&
+                      (item.currency || "AMD") === (car.currency || "AMD")
+                  ) {
+                      const difference =
+                          Math.abs(itemPrice - carPrice) / carPrice;
+
+                      if (difference <= 0.15) score += 20;
+                      else if (difference <= 0.3) score += 10;
+                  }
+
+                  // Նույն տրանսպորտային տեսակը
+                  if (
+                      item.vehicleType &&
+                      item.vehicleType === car.vehicleType
+                  ) {
+                      score += 10;
+                  }
+
+                  return { item, score };
+              })
+              .sort((a, b) => b.score - a.score)
               .slice(0, 4)
+              .map(({ item }) => item)
         : [];
 
     /* =====================================
@@ -954,14 +1005,6 @@ export default function CarDetailsPage({ id }) {
                             )}
 
                             {/* SUPPORT */}
-
-                            <button
-                                type="button"
-                                className="detail-secondary"
-                                onClick={openSupport}
-                            >
-                                {t("contactSupport")}
-                            </button>
 
                             {/* REPORT */}
 

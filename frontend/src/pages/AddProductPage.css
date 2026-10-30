@@ -842,3 +842,174 @@
         animation: none !important;
     }
 }
+
+
+
+/* =========================================
+   ARMMOTORS — IMAGE UPLOAD FIX
+========================================= */
+
+.ap-upload-section {
+    width: 100%;
+    min-width: 0;
+    margin-top: 22px;
+}
+
+.ap-upload-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.ap-upload-heading h3 {
+    margin: 0 0 6px;
+    color: #14263f;
+    font-size: 16px;
+    font-weight: 800;
+}
+
+.ap-upload-heading p {
+    margin: 0;
+    color: #64748b;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.ap-images-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    width: 100%;
+    margin-top: 18px;
+}
+
+.ap-image-item {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    overflow: hidden;
+
+    border: 1px solid #e1e8f2;
+    border-radius: 12px;
+    background: #ffffff;
+}
+
+.ap-image-item > img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    object-position: center;
+    flex-shrink: 0;
+}
+
+.ap-main-image-badge {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    z-index: 2;
+
+    padding: 6px 9px;
+    border-radius: 7px;
+
+    background: #14263f;
+    color: #ffffff;
+
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.ap-image-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+
+    min-height: 45px;
+    padding: 7px;
+
+    background: #ffffff;
+}
+
+.ap-image-actions button {
+    min-height: 30px;
+    padding: 6px 9px;
+
+    border: 1px solid #dce5ef;
+    border-radius: 7px;
+
+    background: #f8fafd;
+    color: #14263f;
+
+    font-family: inherit;
+    font-size: 10px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.ap-image-actions button:hover {
+    background: #edf3fa;
+}
+
+.ap-image-actions .ap-remove-image {
+    border-color: #f3d7d7;
+    background: #fff4f4;
+    color: #c13f4c;
+}
+
+.ap-image-actions .ap-remove-image:hover {
+    background: #ffe7e7;
+}
+
+/* Keep uploader inside its container */
+
+.ap-uploader,
+.ap-uploader > *,
+.ap-uploader input[type="file"] {
+    max-width: 100%;
+}
+
+.ap-uploader img {
+    max-width: 100%;
+}
+
+/* Tablet */
+
+@media (max-width: 850px) {
+    .ap-images-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+/* Mobile */
+
+@media (max-width: 600px) {
+    .ap-images-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 9px;
+    }
+
+    .ap-image-item {
+        border-radius: 10px;
+    }
+
+    .ap-image-actions {
+        gap: 5px;
+        padding: 6px;
+    }
+
+    .ap-image-actions button {
+        font-size: 9px;
+        padding: 6px 7px;
+    }
+
+    .ap-main-image-badge {
+        top: 6px;
+        left: 6px;
+        font-size: 9px;
+    }
+}

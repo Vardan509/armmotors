@@ -171,8 +171,8 @@ export default function SupportWidget() {
                     <div>
                         <small>
                             {businessMode
-                                ? "ARMMOTORS · BUSINESS"
-                                : "ARMMOTORS · ՕԳՆՈՒԹՅՈՒՆ"}
+                                ? "  BUSINESS"
+                                : "  ՕԳՆՈՒԹՅՈՒՆ"}
                         </small>
 
                         <h2 id="support-title">
@@ -194,7 +194,7 @@ export default function SupportWidget() {
                 <p>
                     {businessMode
                         ? "Ցանկանո՞ւմ եք գովազդ տեղադրել ArmMotors կայքում։ Նշեք Ձեր անունը, email-ը և ուղարկեք առաջարկը։"
-                        : "Գրեք Ձեր հարցը և նշեք email-ը, որով ադմինը կարող է կապվել Ձեզ հետ։"}
+                        : ""}
                 </p>
 
                 {/* BUSINESS BADGE */}

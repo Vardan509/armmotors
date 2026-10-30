@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { apiRequest } from "../../utils/api";
 
 import "./ImageUploader.css";
@@ -48,40 +48,56 @@ async function compressImage(file) {
     }
 }
 
-function Preview({ file, onRemove, disabled }) {
-    const url = useMemo(() => URL.createObjectURL(file), [file]);
-
-    useEffect(() => {
-        return () => URL.revokeObjectURL(url);
-    }, [url]);
-
-    return (
-        <div className="am-upload-preview">
-            <img src={url} alt={file.name} />
-
-            <button
-                type="button"
-                disabled={disabled}
-                onClick={onRemove}
-                aria-label="Հեռացնել նկարը"
-            >
-                ×
-            </button>
-        </div>
-    );
-}
-
-export default function ImageUploader({ onUploaded, disabled = false }) {
-    const [files, setFiles] = useState([]);
+export default function ImageUploader({
+    onUploaded,
+    disabled = false,
+    currentCount = 0,
+}) {
     const [uploading, setUploading] = useState(false);
     const [error, setError] = useState("");
-    const [success, setSuccess] = useState("");
+    const [previewUrls, setPreviewUrls] = useState([]);
 
-    function handleSelect(event) {
+    const inputRef = useRef(null);
+    const previewUrlsRef = useRef([]);
+    const mountedRef = useRef(true);
+    const busyRef = useRef(false);
+
+    useEffect(() => {
+        mountedRef.current = true;
+
+        return () => {
+            mountedRef.current = false;
+
+            previewUrlsRef.current.forEach((url) => {
+                URL.revokeObjectURL(url);
+            });
+
+            previewUrlsRef.current = [];
+        };
+    }, []);
+
+    function clearPreviews() {
+        previewUrlsRef.current.forEach((url) => {
+            URL.revokeObjectURL(url);
+        });
+
+        previewUrlsRef.current = [];
+
+        if (mountedRef.current) {
+            setPreviewUrls([]);
+        }
+    }
+
+    async function handleSelect(event) {
         const selected = Array.from(event.target.files || []);
 
+        event.target.value = "";
+
+        if (!selected.length || busyRef.current || disabled) {
+            return;
+        }
+
         setError("");
-        setSuccess("");
 
         const invalid = selected.some(
             (file) =>
@@ -92,40 +108,26 @@ export default function ImageUploader({ onUploaded, disabled = false }) {
 
         if (invalid) {
             setError("Ընտրեք JPEG, PNG կամ WebP նկարներ՝ մինչև 5 ՄԲ։");
-
-            event.target.value = "";
             return;
         }
 
-        if (files.length + selected.length > MAX_FILES) {
+        if (currentCount + selected.length > MAX_FILES) {
             setError(`Թույլատրվում է առավելագույնը ${MAX_FILES} նկար։`);
-
-            event.target.value = "";
             return;
         }
 
-        setFiles((current) => [...current, ...selected]);
-
-        event.target.value = "";
-    }
-
-    function removeFile(index) {
-        setFiles((current) => current.filter((_, i) => i !== index));
-    }
-
-    async function handleUpload() {
-        if (files.length === 0 || uploading || disabled) {
-            return;
-        }
-
+        busyRef.current = true;
         setUploading(true);
-        setError("");
-        setSuccess("");
+
+        const urls = selected.map((file) => URL.createObjectURL(file));
+
+        previewUrlsRef.current = urls;
+        setPreviewUrls(urls);
 
         try {
-            const body = new FormData();
+            const prepared = await Promise.all(selected.map(compressImage));
 
-            const prepared = await Promise.all(files.map(compressImage));
+            const body = new FormData();
 
             prepared.forEach((file) => {
                 body.append("images", file);
@@ -136,20 +138,26 @@ export default function ImageUploader({ onUploaded, disabled = false }) {
                 body,
             });
 
-            const urls = result.urls || [];
+            const uploadedUrls = Array.isArray(result?.urls) ? result.urls : [];
 
-            if (!urls.length) {
-                throw new Error("Սերվերը նկարների հղումներ չվերադարձրեց։");
+            if (uploadedUrls.length !== selected.length) {
+                throw new Error("Որոշ նկարներ չհաջողվեց վերբեռնել։");
             }
 
-            onUploaded?.(urls);
-
-            setFiles([]);
-            setSuccess(`${urls.length} նկար հաջողությամբ պահպանվեց։`);
+            if (mountedRef.current) {
+                onUploaded?.(uploadedUrls);
+            }
         } catch (err) {
-            setError(err.message || "Նկարները վերբեռնել չհաջողվեց։");
+            if (mountedRef.current) {
+                setError(err.message || "Նկարները վերբեռնել չհաջողվեց։");
+            }
         } finally {
-            setUploading(false);
+            clearPreviews();
+            busyRef.current = false;
+
+            if (mountedRef.current) {
+                setUploading(false);
+            }
         }
     }
 
@@ -159,14 +167,19 @@ export default function ImageUploader({ onUploaded, disabled = false }) {
                 <h3>Հայտարարության նկարներ</h3>
 
                 <p>
-                    Ընտրեք մինչև 12 նկար ձեր համակարգչից։ Նկարները վերբեռնելուց
-                    առաջ հնարավորության դեպքում ավտոմատ սեղմվում են։
-                    Թույլատրվում են JPEG, PNG և WebP ձևաչափերը։
+                    Ընտրեք մինչև 12 նկար։ Ընտրելուց հետո դրանք ավտոմատ
+                    կվերբեռնվեն։ Թույլատրվում են JPEG, PNG և WebP ձևաչափերը՝
+                    մինչև 5 ՄԲ։
                 </p>
             </div>
 
-            <label className="am-uploader-dropzone">
+            <label
+                className={`am-uploader-dropzone ${
+                    uploading ? "is-uploading" : ""
+                }`}
+            >
                 <input
+                    ref={inputRef}
                     type="file"
                     accept="image/jpeg,image/png,image/webp"
                     multiple
@@ -174,52 +187,48 @@ export default function ImageUploader({ onUploaded, disabled = false }) {
                     onChange={handleSelect}
                 />
 
-                <span className="am-uploader-symbol">+</span>
+                <span className="am-uploader-symbol">
+                    {uploading ? "…" : "+"}
+                </span>
 
-                <strong>Ընտրել նկարներ</strong>
+                <strong>
+                    {uploading
+                        ? "Նկարները վերբեռնվում են..."
+                        : "Ընտրել նկարներ"}
+                </strong>
 
-                <small>Մինչև 5 ՄԲ յուրաքանչյուր նկար</small>
+                <small>
+                    {uploading
+                        ? "Սպասեք մինչև վերբեռնումն ավարտվի"
+                        : "Սեղմեք այստեղ՝ նկարներ ընտրելու համար"}
+                </small>
             </label>
 
-            {files.length > 0 && (
-                <>
-                    <div className="am-uploader-count">
-                        Ընտրված է {files.length} նկար
-                    </div>
+            {uploading && (
+                <div className="am-uploader-loading" role="status">
+                    <span className="am-uploader-spinner" />
 
-                    <div className="am-uploader-grid">
-                        {files.map((file, index) => (
-                            <Preview
-                                key={`${file.name}-${file.lastModified}-${index}`}
-                                file={file}
-                                disabled={uploading}
-                                onRemove={() => removeFile(index)}
-                            />
-                        ))}
-                    </div>
+                    <span>Նկարները մշակվում և պահպանվում են...</span>
+                </div>
+            )}
 
-                    <button
-                        type="button"
-                        className="am-uploader-submit"
-                        disabled={uploading || disabled}
-                        onClick={handleUpload}
-                    >
-                        {uploading
-                            ? "Նկարները վերբեռնվում են..."
-                            : "Վերբեռնել նկարները"}
-                    </button>
-                </>
+            {previewUrls.length > 0 && (
+                <div className="am-uploader-grid">
+                    {previewUrls.map((url, index) => (
+                        <div className="am-upload-preview" key={url}>
+                            <img src={url} alt={`Ընտրված նկար ${index + 1}`} />
+
+                            <span className="am-upload-preview-status">
+                                Վերբեռնվում է
+                            </span>
+                        </div>
+                    ))}
+                </div>
             )}
 
             {error && (
                 <p className="am-uploader-error" role="alert">
                     {error}
-                </p>
-            )}
-
-            {success && (
-                <p className="am-uploader-success" role="status">
-                    {success}
                 </p>
             )}
         </section>
