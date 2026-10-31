@@ -1,37 +1,122 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
-import Header from "../components/header/Header";
 import { apiRequest } from "../utils/api";
+import { useI18n } from "../utils/i18n";
+
+const PAGE_SIZE = 30;
+
+const TEXTS = {
+    hy: {
+        section: "ԱԴՄԻՆԻ ԲԱԺԻՆ",
+        title: "Հաղորդագրություններ",
+        total: "Հաղորդագրություններ՝",
+        refresh: "Թարմացնել",
+        loading: "Բեռնվում է...",
+        empty: "Հաղորդագրություններ չկան։",
+        new: "Նոր",
+        resolved: "Մշակված",
+        openListing: "Բացել հայտարարությունը",
+        reply: "Պատասխանել էլ. փոստով",
+        subject: "ArmMotors — Ձեր հարցը",
+        saving: "Պահպանվում է...",
+        markResolved: "Նշել մշակված",
+        markNew: "Նշել նոր",
+        pagination: "Հաղորդագրությունների էջեր",
+        previous: "Նախորդ",
+        next: "Հաջորդ",
+        page: "Էջ",
+        loadError: "Հաղորդագրությունները բեռնել չհաջողվեց։",
+        updateError: "Հաղորդագրության կարգավիճակը փոխել չհաջողվեց։",
+        login: "Ադմինի մուտք",
+    },
+
+    ru: {
+        section: "ПАНЕЛЬ АДМИНИСТРАТОРА",
+        title: "Сообщения",
+        total: "Сообщений:",
+        refresh: "Обновить",
+        loading: "Загрузка...",
+        empty: "Сообщений нет.",
+        new: "Новое",
+        resolved: "Обработано",
+        openListing: "Открыть объявление",
+        reply: "Ответить по email",
+        subject: "ArmMotors — Ваш вопрос",
+        saving: "Сохранение...",
+        markResolved: "Отметить обработанным",
+        markNew: "Отметить новым",
+        pagination: "Страницы сообщений",
+        previous: "Назад",
+        next: "Далее",
+        page: "Страница",
+        loadError: "Не удалось загрузить сообщения.",
+        updateError: "Не удалось изменить статус сообщения.",
+        login: "Вход администратора",
+    },
+
+    en: {
+        section: "ADMINISTRATION",
+        title: "Messages",
+        total: "Messages:",
+        refresh: "Refresh",
+        loading: "Loading...",
+        empty: "No messages.",
+        new: "New",
+        resolved: "Resolved",
+        openListing: "Open listing",
+        reply: "Reply by email",
+        subject: "ArmMotors — Your inquiry",
+        saving: "Saving...",
+        markResolved: "Mark as resolved",
+        markNew: "Mark as new",
+        pagination: "Message pages",
+        previous: "Previous",
+        next: "Next",
+        page: "Page",
+        loadError: "Could not load messages.",
+        updateError: "Could not update the message status.",
+        login: "Administrator sign-in",
+    },
+};
 
 export default function AdminMessagesPage() {
+    const { language } = useI18n();
+    const text = TEXTS[language] || TEXTS.hy;
+
+    const locale =
+        language === "ru" ? "ru-RU" : language === "en" ? "en-US" : "hy-AM";
+
     const [messages, setMessages] = useState([]);
     const [page, setPage] = useState(1);
     const [total, setTotal] = useState(0);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState("");
+    const [errorKey, setErrorKey] = useState("");
     const [busy, setBusy] = useState("");
-    const [refresh, setRefresh] = useState(0);
+    const [revision, setRevision] = useState(0);
 
     useEffect(() => {
         const controller = new AbortController();
 
-        async function load() {
-            setLoading(true);
-            setError("");
+        setLoading(true);
+        setErrorKey("");
 
+        async function loadMessages() {
             try {
-                const data = await apiRequest(
-                    `/messages?page=${page}`,
-                    {
-                        signal: controller.signal
-                    }
+                const result = await apiRequest(`/messages?page=${page}`, {
+                    signal: controller.signal,
+                });
+
+                if (controller.signal.aborted) return;
+
+                setMessages(
+                    Array.isArray(result?.messages) ? result.messages : [],
                 );
 
-                setMessages(data.messages);
-                setTotal(data.total);
-            } catch (error) {
+                setTotal(Math.max(0, Number(result?.total) || 0));
+            } catch {
                 if (!controller.signal.aborted) {
-                    setError(error.message);
+                    setErrorKey("loadError");
                     setMessages([]);
                 }
             } finally {
@@ -41,162 +126,204 @@ export default function AdminMessagesPage() {
             }
         }
 
-        load();
+        void loadMessages();
 
         return () => controller.abort();
-    }, [page, refresh]);
+    }, [page, revision]);
 
     async function changeStatus(message) {
-        setBusy(message._id);
-        setError("");
+        if (busy) return;
+
+        const id = String(message._id || message.id || "");
+
+        if (!id) return;
+
+        setBusy(id);
+        setErrorKey("");
 
         try {
-            const updated = await apiRequest(
-                `/messages/${message._id}`,
-                {
-                    method: "PATCH",
+            await apiRequest(`/messages/${encodeURIComponent(id)}`, {
+                method: "PATCH",
+                body: JSON.stringify({
+                    status: message.status === "new" ? "resolved" : "new",
+                }),
+            });
 
-                    body: JSON.stringify({
-                        status: message.status === "new"
-                            ? "resolved"
-                            : "new"
-                    })
-                }
-            );
-
-            setMessages(prev =>
-                prev.map(item =>
-                    item._id === updated._id ? updated : item
-                )
-            );
-        } catch (error) {
-            setError(error.message);
+            setRevision((current) => current + 1);
+        } catch {
+            setErrorKey("updateError");
         } finally {
             setBusy("");
         }
     }
 
+    function formatDate(value) {
+        const date = new Date(value);
+
+        return Number.isFinite(date.getTime())
+            ? date.toLocaleString(locale)
+            : "";
+    }
+
+    function getListingId(value) {
+        if (!value) return "";
+
+        return typeof value === "object"
+            ? String(value._id || value.id || "")
+            : String(value);
+    }
+
     return (
-        <>
-            <Header />
+        <main className="details-page">
+            <div className="detail-heading">
+                <div>
+                    <span className="section-label">{text.section}</span>
 
-            <main className="details-page">
-                <div className="detail-heading">
-                    <div>
-                        <span className="section-label">
-                            ԱԴՄԻՆԻ ԲԱԺԻՆ
-                        </span>
+                    <h1>{text.title}</h1>
 
-                        <h1>Հաղորդագրություններ</h1>
-
-                        <p>{total} հաղորդագրություն</p>
-                    </div>
-
-                    <button
-                        className="detail-secondary"
-                        disabled={loading}
-                        onClick={() => setRefresh(value => value + 1)}
-                    >
-                        Թարմացնել
-                    </button>
+                    <p>
+                        {text.total} {total.toLocaleString(locale)}
+                    </p>
                 </div>
 
-                {error && (
-                    <p role="alert">
-                        {error}{" "}
+                <button
+                    type="button"
+                    className="detail-secondary"
+                    disabled={loading || Boolean(busy)}
+                    onClick={() => setRevision((current) => current + 1)}
+                >
+                    {text.refresh}
+                </button>
+            </div>
 
-                        <a href="/login?next=/admin/messages">
-                            Ադմինի մուտք
-                        </a>
-                    </p>
-                )}
+            {errorKey && (
+                <p role="alert">
+                    {text[errorKey]}{" "}
+                    {errorKey === "loadError" && (
+                        <Link to="/login?next=%2Fadmin%2Fmessages">
+                            {text.login}
+                        </Link>
+                    )}
+                </p>
+            )}
 
-                {loading ? (
-                    <p role="status">Բեռնվում է…</p>
-                ) : !error && messages.length === 0 ? (
-                    <p>Հաղորդագրություններ չկան։</p>
-                ) : (
-                    messages.map(message => (
-                        <article
-                            className="admin-message"
-                            key={message._id}
-                        >
+            {loading ? (
+                <p role="status">{text.loading}</p>
+            ) : messages.length === 0 ? (
+                !errorKey && <p>{text.empty}</p>
+            ) : (
+                messages.map((message) => {
+                    const id = String(message._id || message.id || "");
+
+                    const listingId = getListingId(message.listingId);
+
+                    const isNew = message.status === "new";
+                    const date = formatDate(message.createdAt);
+
+                    return (
+                        <article className="admin-message" key={id}>
                             <header>
                                 <strong>{message.name}</strong>
 
                                 <span>
-                                    {message.status === "new"
-                                        ? "● Նոր"
-                                        : "✓ Մշակված"}
+                                    {isNew
+                                        ? `● ${text.new}`
+                                        : `✓ ${text.resolved}`}
                                 </span>
                             </header>
 
                             <p>{message.email}</p>
 
-                            <time>
-                                {new Date(message.createdAt)
-                                    .toLocaleString("hy-AM")}
-                            </time>
+                            {date && (
+                                <time
+                                    dateTime={new Date(
+                                        message.createdAt,
+                                    ).toISOString()}
+                                >
+                                    {date}
+                                </time>
+                            )}
 
-                            {message.listingId && (
+                            {listingId && (
                                 <p>
-                                    <a
-                                        href={`/cars/${encodeURIComponent(message.listingId)}`}
+                                    <Link
+                                        to={`/cars/${encodeURIComponent(
+                                            listingId,
+                                        )}`}
                                     >
-                                        Բացել հայտարարությունը →
-                                    </a>
+                                        {text.openListing} →
+                                    </Link>
                                 </p>
                             )}
 
-                            <p>{message.text}</p>
+                            <p
+                                style={{
+                                    whiteSpace: "pre-wrap",
+                                    overflowWrap: "anywhere",
+                                }}
+                            >
+                                {message.text}
+                            </p>
 
                             <footer>
-                                <a
-                                    className="detail-primary"
-                                    href={`mailto:${encodeURIComponent(message.email)}?subject=${encodeURIComponent("ArmMotors — Ձեր հարցը")}`}
-                                >
-                                    Պատասխանել email-ով
-                                </a>
+                                {message.email && (
+                                    <a
+                                        className="detail-primary"
+                                        href={`mailto:${encodeURIComponent(
+                                            message.email,
+                                        )}?subject=${encodeURIComponent(
+                                            text.subject,
+                                        )}`}
+                                    >
+                                        {text.reply}
+                                    </a>
+                                )}
 
                                 <button
+                                    type="button"
                                     className="detail-secondary"
-                                    disabled={Boolean(busy)}
+                                    disabled={loading || Boolean(busy)}
                                     onClick={() => changeStatus(message)}
                                 >
-                                    {busy === message._id
-                                        ? "Պահպանվում է…"
-                                        : message.status === "new"
-                                            ? "Նշել մշակված"
-                                            : "Նշել նոր"}
+                                    {busy === id
+                                        ? text.saving
+                                        : isNew
+                                          ? text.markResolved
+                                          : text.markNew}
                                 </button>
                             </footer>
                         </article>
-                    ))
-                )}
+                    );
+                })
+            )}
 
-                <nav
-                    className="admin-pagination"
-                    aria-label="Հաղորդագրությունների էջեր"
-                >
+            {!loading && total > PAGE_SIZE && (
+                <nav className="admin-pagination" aria-label={text.pagination}>
                     <button
+                        type="button"
                         className="detail-secondary"
-                        disabled={page === 1 || loading}
-                        onClick={() => setPage(value => value - 1)}
+                        disabled={page === 1 || Boolean(busy)}
+                        onClick={() =>
+                            setPage((current) => Math.max(1, current - 1))
+                        }
                     >
-                        ← Նախորդ
+                        ← {text.previous}
                     </button>
 
-                    <span>{page}</span>
+                    <span>
+                        {text.page} {page}
+                    </span>
 
                     <button
+                        type="button"
                         className="detail-secondary"
-                        disabled={page * 30 >= total || loading}
-                        onClick={() => setPage(value => value + 1)}
+                        disabled={page * PAGE_SIZE >= total || Boolean(busy)}
+                        onClick={() => setPage((current) => current + 1)}
                     >
-                        Հաջորդ →
+                        {text.next} →
                     </button>
                 </nav>
-            </main>
-        </>
+            )}
+        </main>
     );
 }

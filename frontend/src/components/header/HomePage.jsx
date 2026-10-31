@@ -1,271 +1,334 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 import ProductCard from "../ProductCard/ProductCard";
-import Filter from "../filterCar/filter.jsx";
 import SmartSearch from "../SmartSearch/SmartSearch";
+import Filter from "../filterCar/filter.jsx";
 
 import useProducts from "../../utils/useProducts";
 import { useI18n } from "../../utils/i18n";
+import { localizeListingValue } from "../../utils/localizeListing";
 import { asset } from "../../utils/asset";
 
 import "./HomePage.css";
 import "../../styles/ArmMotorsMobile.css";
+import "./HomeCategoriesCarousel.css";
+import "./CategoryShowroom.css";
+
+const BANNERS = {
+    hy: "/data/armmotors-banner.png",
+    ru: "/data/armmotors-banner-ru.png",
+    en: "/data/armmotors-banner-en.png",
+};
+
+const TEXTS = {
+    hy: {
+        categories: "Կատեգորիաներ",
+        previousCategory: "Նախորդ կատեգորիաները",
+        nextCategory: "Հաջորդ կատեգորիաները",
+        previousBrands: "Նախորդ մակնիշները",
+        nextBrands: "Հաջորդ մակնիշները",
+        advertisement: "Ձեր գովազդը մեր հարթակում",
+        contact: "Կապվել գովազդի և համագործակցության համար",
+        suggestions: "Որոնման առաջարկներ",
+        error: "Հայտարարությունները բեռնել չհաջողվեց։",
+    },
+    ru: {
+        categories: "Категории",
+        previousCategory: "Предыдущие категории",
+        nextCategory: "Следующие категории",
+        previousBrands: "Предыдущие марки",
+        nextBrands: "Следующие марки",
+        advertisement: "Ваша реклама на нашей платформе",
+        contact: "Связаться по вопросам рекламы и сотрудничества",
+        suggestions: "Поисковые подсказки",
+        error: "Не удалось загрузить объявления.",
+    },
+    en: {
+        categories: "Categories",
+        previousCategory: "Previous categories",
+        nextCategory: "Next categories",
+        previousBrands: "Previous brands",
+        nextBrands: "Next brands",
+        advertisement: "Your ad on our platform",
+        contact: "Contact us about advertising and collaboration",
+        suggestions: "Search suggestions",
+        error: "Could not load listings.",
+    },
+};
 
 const CATEGORIES = [
     {
-        id: 1,
+        id: "electric",
+        image: "/categories/electric.png",
         title: {
             hy: "Էլեկտրական",
             ru: "Электромобили",
             en: "Electric",
         },
-        value: "electric",
-        image: "/categories/electric.png",
     },
     {
-        id: 2,
+        id: "hybrid",
+        image: "/categories/hybrid.png",
         title: {
             hy: "Հիբրիդ",
             ru: "Гибриды",
             en: "Hybrid",
         },
-        value: "hybrid",
-        image: "/categories/hybrid.png",
     },
     {
-        id: 3,
-        title: {
-            hy: "Նոր մեքենաներ",
-            ru: "Новые автомобили",
-            en: "New cars",
-        },
-        value: "new",
+        id: "new",
         image: "/categories/new_cars.png",
-    },
-    {
-        id: 4,
         title: {
-            hy: "Բեռնատարներ",
-            ru: "Грузовики",
-            en: "Trucks",
+            hy: "Նոր",
+            ru: "Новые",
+            en: "New",
         },
-        value: "truck",
-        image: "/categories/trucks.png",
     },
+    // {
+    //     id: "truck",
+    //     image: "/categories/trucks.png",
+    //     title: {
+    //         hy: "Բեռնատարներ",
+    //         ru: "Грузовики",
+    //         en: "Trucks",
+    //     },
+    // },
 ];
 
 const BRANDS = [
-    { id: 1, name: "Mercedes-Benz", logo: "/mercedes.png" },
-    { id: 2, name: "Toyota", logo: "/toyota.png" },
-    { id: 3, name: "BMW", logo: "/bmw.png" },
-    { id: 4, name: "Tesla", logo: "/tesla.png" },
-    { id: 5, name: "Nissan", logo: "/nissan.png" },
-    { id: 6, name: "Kia", logo: "/kia.png" },
+    { name: "Mercedes-Benz", logo: "/mercedes.png" },
+    { name: "Toyota", logo: "/toyota.png" },
+    { name: "BMW", logo: "/bmw.png" },
+    { name: "Changan", logo: "/changan.png" },
+    { name: "Nissan", logo: "/nissan.png" },
+    { name: "Kia", logo: "/kia.png" },
 ];
 
-const COPY = {
-    hy: {
-        eyebrow: "ARMMOTORS · ԱՎՏՈՇՈՒԿԱ",
-        title: "Գտեք ձեր հաջորդ մեքենան",
-        description:
-            "Դիտեք ավտոմեքենաների հայտարարություններ, կապվեք վաճառողների հետ։",
-        categories: "Ընտրեք կատեգորիան",
-        categoriesSub: "Գտեք ձեզ հետաքրքրող ավտոմեքենան",
-        latest: "Վերջին հայտարարությունները",
-        brands: "Հանրաճանաչ մակնիշներ",
-        brandsSub: "Ընտրեք նախընտրած մակնիշը",
-        listings: "հայտարարություն",
-        all: "Բոլոր մեքենաները",
-        clear: "Մաքրել ֆիլտրերը",
-        empty: "Հայտարարություններ չեն գտնվել",
-        showAll: "Ցուցադրել բոլորը",
-        loading: "Բեռնվում է...",
-        adTitle: "Ձեր գովազդը՝ ArmMotors-ում",
-        adText: "Ներկայացրեք ձեր բիզնեսը մեր հարթակում։",
-        adButton: "Կապվել մեզ հետ",
-        previous: "Նախորդ մակնիշները",
-        next: "Հաջորդ մակնիշները",
-    },
-    ru: {
-        eyebrow: "ARMMOTORS · АВТОРЫНОК",
-        title: "Найдите свой следующий автомобиль",
-        description:
-            "Изучайте объявления, сравнивайте предложения и связывайтесь с продавцами.",
-        categories: "Выберите категорию",
-        categoriesSub: "Найдите подходящий автомобиль",
-        latest: "Последние объявления",
-        brands: "Популярные марки",
-        brandsSub: "Выберите любимую марку",
-        listings: "объявлений",
-        all: "Все автомобили",
-        clear: "Сбросить фильтры",
-        empty: "Объявления не найдены",
-        showAll: "Показать все",
-        loading: "Загрузка...",
-        adTitle: "Ваша реклама на ArmMotors",
-        adText: "Расскажите о своем бизнесе на нашей платформе.",
-        adButton: "Связаться с нами",
-        previous: "Предыдущие марки",
-        next: "Следующие марки",
-    },
-    en: {
-        eyebrow: "ARMMOTORS · CAR MARKETPLACE",
-        title: "Find your next car",
-        description:
-            "Explore car listings, compare offers and connect with sellers.",
-        categories: "Explore categories",
-        categoriesSub: "Find the right vehicle for you",
-        latest: "Latest listings",
-        brands: "Popular brands",
-        brandsSub: "Browse your favorite brands",
-        listings: "listings",
-        all: "All cars",
-        clear: "Clear filters",
-        empty: "No listings found",
-        showAll: "Show all",
-        loading: "Loading...",
-        adTitle: "Advertise on ArmMotors",
-        adText: "Promote your business on our marketplace.",
-        adButton: "Contact us",
-        previous: "Previous brands",
-        next: "Next brands",
-    },
-};
-
-function SearchIcon() {
-    return (
-        <svg
-            width="21"
-            height="21"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-        >
-            <circle cx="10.5" cy="10.5" r="6.5" />
-            <path d="m16 16 5 5" />
-        </svg>
-    );
-}
-
-function ArrowIcon() {
-    return (
-        <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-        >
-            <path d="M5 12h14m-6-6 6 6-6 6" />
-        </svg>
-    );
-}
-
-function getProductId(product) {
-    return String(product?._id || product?.id || "");
-}
-
-function isNewCar(product) {
-    const condition = String(product?.condition || "")
+function normalize(value) {
+    return String(value ?? "")
         .trim()
-        .toLowerCase();
-
-    return condition === "new" || condition === "նոր" || condition === "новый";
+        .toLocaleLowerCase();
 }
 
-export default function HomePage() {
-    const navigate = useNavigate();
-    const { language } = useI18n();
+function getTitle(product, language) {
+    return (
+        product.translations?.[language]?.title ||
+        product.titleTranslations?.[language] ||
+        product.title ||
+        [product.brand, product.model].filter(Boolean).join(" ")
+    );
+}
 
-    const text = COPY[language] || COPY.hy;
+function matchesSearch(product, query, language) {
+    return (
+        !query ||
+        [
+            product.title,
+            getTitle(product, language),
+            product.brand,
+            product.model,
+            product.year,
+        ].some((value) => normalize(value).includes(query))
+    );
+}
 
-    const [searchParams, setSearchParams] = useSearchParams();
-    const { products = [], loading, error } = useProducts();
+function motionBehavior() {
+    return window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        ? "auto"
+        : "smooth";
+}
 
-    const brandsTrackRef = useRef(null);
+/* Shared scrolling controls for categories and brands. */
 
-    const [brandScroll, setBrandScroll] = useState({
+function useScrollTrack(ref, revision) {
+    const [arrows, setArrows] = useState({
         left: false,
         right: false,
     });
 
-    const allProducts = Array.isArray(products) ? products : [];
+    function update() {
+        const track = ref.current;
+
+        if (!track) return;
+
+        const maximum = track.scrollWidth - track.clientWidth;
+
+        setArrows({
+            left: track.scrollLeft > 2,
+            right: track.scrollLeft < maximum - 2,
+        });
+    }
+
+    useEffect(() => {
+        const track = ref.current;
+
+        if (!track) return;
+
+        function measure() {
+            const maximum = track.scrollWidth - track.clientWidth;
+
+            setArrows({
+                left: track.scrollLeft > 2,
+                right: track.scrollLeft < maximum - 2,
+            });
+        }
+
+        measure();
+
+        const observer =
+            typeof ResizeObserver !== "undefined"
+                ? new ResizeObserver(measure)
+                : null;
+
+        observer?.observe(track);
+
+        Array.from(track.children).forEach((child) => {
+            observer?.observe(child);
+        });
+
+        window.addEventListener("resize", measure);
+
+        return () => {
+            observer?.disconnect();
+            window.removeEventListener("resize", measure);
+        };
+    }, [ref, revision]);
+
+    function scroll(direction) {
+        const track = ref.current;
+
+        if (!track) return;
+
+        const firstCard = track.firstElementChild;
+        const style = window.getComputedStyle(track);
+        const gap = parseFloat(style.columnGap) || 0;
+
+        const distance = firstCard
+            ? firstCard.getBoundingClientRect().width + gap
+            : track.clientWidth;
+
+        track.scrollBy({
+            left: direction * distance,
+            behavior: motionBehavior(),
+        });
+    }
+
+    return { arrows, update, scroll };
+}
+
+function Advertisement({ language, text, onClick }) {
+    const source = BANNERS[language] || BANNERS.hy;
+
+    return (
+        <button
+            type="button"
+            className="ad-banner"
+            onClick={onClick}
+            aria-label={text.contact}
+            title={text.contact}
+            style={{
+                display: "block",
+                width: "100%",
+                padding: 0,
+                cursor: "pointer",
+                textAlign: "left",
+                font: "inherit",
+            }}
+        >
+            <img
+                key={source}
+                src={asset(source)}
+                alt={text.advertisement}
+                className="ad-image"
+                loading="lazy"
+                onError={(event) => {
+                    const image = event.currentTarget;
+
+                    if (image.dataset.fallback === "true") return;
+
+                    image.dataset.fallback = "true";
+                    image.src = asset(BANNERS.hy);
+                }}
+                style={{
+                    display: "block",
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                }}
+            />
+        </button>
+    );
+}
+
+export default function HomePage() {
+    const { language, t } = useI18n();
+    const text = TEXTS[language] || TEXTS.hy;
+
+    const navigate = useNavigate();
+    const [searchParams, setSearchParams] = useSearchParams();
+    const { products = [], loading, error } = useProducts();
+
+    const categoryTrackRef = useRef(null);
+    const brandsTrackRef = useRef(null);
+
+    const categoryCarousel = useScrollTrack(categoryTrackRef, language);
+    const brandsCarousel = useScrollTrack(brandsTrackRef, loading);
+
+    const [search, setSearch] = useState("");
+    const [searchFocused, setSearchFocused] = useState(false);
+
+    const productList = Array.isArray(products) ? products : [];
+    const query = normalize(search);
 
     const requestedCategory = searchParams.get("category") || "";
 
-    const category = CATEGORIES.some((item) => item.value === requestedCategory)
+    const category = CATEGORIES.some((item) => item.id === requestedCategory)
         ? requestedCategory
         : "";
 
-    const filteredProducts = useMemo(() => {
-        const list = Array.isArray(products) ? products : [];
+    const selectedCategory = CATEGORIES.find((item) => item.id === category);
 
-        return list.filter((product) => {
-            if (category === "electric") {
-                return product.type === "car" && product.fuel === "electric";
-            }
+    const searchSuggestions = query
+        ? productList
+              .filter((product) => matchesSearch(product, query, language))
+              .slice(0, 6)
+        : [];
 
-            if (category === "hybrid") {
-                return product.type === "car" && product.fuel === "hybrid";
-            }
+    const filteredProducts = productList.filter((product) => {
+        if (!matchesSearch(product, query, language)) return false;
 
-            if (category === "new") {
-                return product.type === "car" && isNewCar(product);
-            }
+        if (category === "electric" || category === "hybrid") {
+            const fuel = localizeListingValue(product.fuel, "en", "fuel");
 
-            if (category === "truck") {
-                return (
-                    product.type === "car" && product.vehicleType === "truck"
-                );
-            }
-
-            return true;
-        });
-    }, [products, category]);
-
-    const firstProducts = filteredProducts.slice(0, 8);
-    const restProducts = filteredProducts.slice(8);
-
-    const selectedCategory = CATEGORIES.find((item) => item.value === category);
-
-    const brandCounts = useMemo(() => {
-        const counts = new Map();
-        const list = Array.isArray(products) ? products : [];
-
-        for (const product of list) {
-            if (product.type !== "car") continue;
-
-            const name = String(product.brand || "")
-                .trim()
-                .toLowerCase();
-
-            if (!name) continue;
-
-            counts.set(name, (counts.get(name) || 0) + 1);
+            return product.type === "car" && normalize(fuel) === category;
         }
 
-        return counts;
-    }, [products]);
+        if (category === "new") {
+            return (
+                product.type === "car" &&
+                localizeListingValue(product.condition, "en", "condition") ===
+                    "New"
+            );
+        }
+
+        if (category === "truck") {
+            return product.type === "car" && product.vehicleType === "truck";
+        }
+
+        return true;
+    });
 
     function updateCategory(value) {
-        const params = new URLSearchParams(searchParams);
+        const next = new URLSearchParams(searchParams);
 
         if (value) {
-            params.set("category", value);
+            next.set("category", value);
         } else {
-            params.delete("category");
+            next.delete("category");
         }
 
-        setSearchParams(params, {
+        setSearchParams(next, {
             replace: true,
             preventScrollReset: true,
         });
@@ -274,18 +337,25 @@ export default function HomePage() {
     function selectCategory(value) {
         updateCategory(category === value ? "" : value);
 
-        const reducedMotion = window.matchMedia(
-            "(prefers-reduced-motion: reduce)",
-        ).matches;
-
         document.getElementById("products")?.scrollIntoView({
-            behavior: reducedMotion ? "auto" : "smooth",
-            block: "start",
+            behavior: motionBehavior(),
         });
     }
 
     function resetFilters() {
+        setSearch("");
+        setSearchFocused(false);
         updateCategory("");
+    }
+
+    function submitSearch(value) {
+        setSearchFocused(false);
+
+        const params = new URLSearchParams();
+
+        if (value) params.set("q", value);
+
+        navigate(params.size ? `/search?${params.toString()}` : "/search");
     }
 
     function openBusinessProposal() {
@@ -299,88 +369,22 @@ export default function HomePage() {
         );
     }
 
-    function updateBrandArrows() {
-        const track = brandsTrackRef.current;
-
-        if (!track) return;
-
-        const maxScroll = Math.max(0, track.scrollWidth - track.clientWidth);
-
-        setBrandScroll({
-            left: track.scrollLeft > 2,
-            right: track.scrollLeft < maxScroll - 2,
-        });
-    }
-
-    function scrollBrands(direction) {
-        const track = brandsTrackRef.current;
-
-        if (!track) return;
-
-        const card = track.querySelector(".brand-card");
-
-        if (!card) return;
-
-        const gap = parseFloat(window.getComputedStyle(track).gap) || 0;
-
-        const distance = (card.getBoundingClientRect().width + gap) * 2;
-
-        const reducedMotion = window.matchMedia(
-            "(prefers-reduced-motion: reduce)",
-        ).matches;
-
-        track.scrollBy({
-            left: direction * distance,
-            behavior: reducedMotion ? "auto" : "smooth",
-        });
-    }
-
-    useEffect(() => {
-        const track = brandsTrackRef.current;
-
-        if (!track) return;
-
-        const observer =
-            typeof ResizeObserver !== "undefined"
-                ? new ResizeObserver(updateBrandArrows)
-                : null;
-
-        observer?.observe(track);
-
-        track.querySelectorAll(".brand-card").forEach((card) => {
-            observer?.observe(card);
-        });
-
-        updateBrandArrows();
-
-        window.addEventListener("resize", updateBrandArrows);
-
-        return () => {
-            observer?.disconnect();
-
-            window.removeEventListener("resize", updateBrandArrows);
-        };
-    }, [loading]);
-
     function renderBrandsAndAd() {
         return (
             <section className="brands-ad-wrapper brands-ad-middle" id="brands">
                 <div className="brands-section">
                     <div className="section-header brands-carousel-header">
-                        <div>
-                            <span className="section-label">ARMMOTORS</span>
-
-                            <h2>{text.brands}</h2>
-                            <p>{text.brandsSub}</p>
-                        </div>
+                        <span className="section-label">
+                            {t("popularBrands")}
+                        </span>
 
                         <div className="brands-carousel-controls">
                             <button
                                 type="button"
                                 className="brands-carousel-arrow"
-                                onClick={() => scrollBrands(-1)}
-                                disabled={!brandScroll.left}
-                                aria-label={text.previous}
+                                disabled={!brandsCarousel.arrows.left}
+                                onClick={() => brandsCarousel.scroll(-1)}
+                                aria-label={text.previousBrands}
                             >
                                 ‹
                             </button>
@@ -388,9 +392,9 @@ export default function HomePage() {
                             <button
                                 type="button"
                                 className="brands-carousel-arrow"
-                                onClick={() => scrollBrands(1)}
-                                disabled={!brandScroll.right}
-                                aria-label={text.next}
+                                disabled={!brandsCarousel.arrows.right}
+                                onClick={() => brandsCarousel.scroll(1)}
+                                aria-label={text.nextBrands}
                             >
                                 ›
                             </button>
@@ -400,16 +404,20 @@ export default function HomePage() {
                     <div
                         className="brands-grid"
                         ref={brandsTrackRef}
-                        onScroll={updateBrandArrows}
+                        onScroll={brandsCarousel.update}
                     >
                         {BRANDS.map((brand) => {
-                            const count =
-                                brandCounts.get(brand.name.toLowerCase()) || 0;
+                            const count = productList.filter(
+                                (product) =>
+                                    product.type === "car" &&
+                                    normalize(product.brand) ===
+                                        normalize(brand.name),
+                            ).length;
 
                             return (
                                 <button
                                     type="button"
-                                    key={brand.id}
+                                    key={brand.name}
                                     className="brand-card"
                                     onClick={() =>
                                         navigate(
@@ -419,22 +427,20 @@ export default function HomePage() {
                                         )
                                     }
                                 >
-                                    <span className="brand-logo-wrap">
-                                        <img
-                                            src={asset(brand.logo)}
-                                            alt={brand.name}
-                                            className="brand-logo"
-                                            loading="lazy"
-                                            draggable={false}
-                                        />
-                                    </span>
+                                    <img
+                                        src={asset(brand.logo)}
+                                        alt={brand.name}
+                                        className="brand-logo"
+                                        loading="lazy"
+                                        draggable={false}
+                                    />
 
                                     <span className="brand-name">
                                         {brand.name}
                                     </span>
 
                                     <small>
-                                        {count} {text.listings}
+                                        {count} {t("listingCount")}
                                     </small>
                                 </button>
                             );
@@ -442,109 +448,193 @@ export default function HomePage() {
                     </div>
                 </div>
 
-                <div className="home-ad-section">
-                    <button
-                        type="button"
-                        className="ad-banner"
-                        onClick={openBusinessProposal}
-                        aria-label={text.adTitle}
-                    >
-                        <img
-                            src={asset("/data/armmotors-banner.png")}
-                            alt={text.adTitle}
-                            className="ad-image"
-                            loading="lazy"
-                        />
-                    </button>
-
-                    <div className="home-ad-bottom">
-                        <div>
-                            <strong>{text.adTitle}</strong>
-                            <span>{text.adText}</span>
-                        </div>
-
-                        <button
-                            type="button"
-                            onClick={openBusinessProposal}
-                            className="home-ad-contact"
-                        >
-                            {text.adButton}
-                            <ArrowIcon />
-                        </button>
-                    </div>
-                </div>
+                <Advertisement
+                    language={language}
+                    text={text}
+                    onClick={openBusinessProposal}
+                />
             </section>
+        );
+    }
+
+    function renderProducts(items, className) {
+        return (
+            <div className={`products-grid ${className}`}>
+                {items.map((product) => (
+                    <ProductCard
+                        key={product._id || product.id}
+                        item={product}
+                    />
+                ))}
+            </div>
         );
     }
 
     return (
         <div className="home-wrapper">
             <main className="main-content">
-                {/* HERO + SMART SEARCH */}
-
                 <section className="intro-section">
-                    <div className="home-hero-heading">
-                        <span className="home-hero-eyebrow">
-                            <span className="home-hero-dot" />
-                            {text.eyebrow}
-                        </span>
+                    <div
+                        className="home-search-controls"
+                        style={{
+                            display: "flex",
+                            alignItems: "flex-start",
+                            gap: 10,
+                            width: "100%",
+                            minWidth: 0,
+                        }}
+                    >
+                        <div
+                            className="search-area"
+                            style={{
+                                position: "relative",
+                                flex: "1 1 0",
+                                minWidth: 0,
+                            }}
+                            onFocus={() => setSearchFocused(true)}
+                            onBlur={(event) => {
+                                if (
+                                    !event.currentTarget.contains(
+                                        event.relatedTarget,
+                                    )
+                                ) {
+                                    setSearchFocused(false);
+                                }
+                            }}
+                            onKeyDown={(event) => {
+                                if (event.key === "Escape") {
+                                    setSearchFocused(false);
+                                }
+                            }}
+                        >
+                            <SmartSearch
+                                value={search}
+                                onChange={(value) => {
+                                    setSearch(value);
+                                    setSearchFocused(true);
+                                }}
+                                onSearch={submitSearch}
+                            />
 
-                        <h1>{text.title}</h1>
+                            {searchFocused && query && (
+                                <div
+                                    className="search-suggestions"
+                                    role="group"
+                                    aria-label={text.suggestions}
+                                >
+                                    {searchSuggestions.length ? (
+                                        searchSuggestions.map((product) => {
+                                            const title = getTitle(
+                                                product,
+                                                language,
+                                            );
 
-                        <p>{text.description}</p>
-                    </div>
+                                            return (
+                                                <button
+                                                    type="button"
+                                                    className="search-suggestion"
+                                                    key={
+                                                        product._id ||
+                                                        product.id
+                                                    }
+                                                    onMouseDown={(event) =>
+                                                        event.preventDefault()
+                                                    }
+                                                    onClick={() => {
+                                                        setSearch(title);
+                                                        setSearchFocused(false);
+                                                    }}
+                                                >
+                                                    <span className="search-suggestion-main">
+                                                        <strong>{title}</strong>
 
-                    <div className="home-search-controls">
-                        <div className="search-area">
-                            <SmartSearch />
+                                                        <small>
+                                                            {[
+                                                                product.brand,
+                                                                product.model,
+                                                                product.year,
+                                                            ]
+                                                                .filter(Boolean)
+                                                                .join(" · ")}
+                                                        </small>
+                                                    </span>
+
+                                                    <span aria-hidden="true">
+                                                        ↗
+                                                    </span>
+                                                </button>
+                                            );
+                                        })
+                                    ) : (
+                                        <p className="search-suggestion-empty">
+                                            {t("noResults")}
+                                        </p>
+                                    )}
+                                </div>
+                            )}
                         </div>
 
                         <Filter />
                     </div>
                 </section>
 
-                {/* CATEGORIES */}
+                <section
+                    className="categories-section am-category-carousel"
+                    aria-label={text.categories}
+                >
+                    <button
+                        type="button"
+                        className="am-category-arrow am-category-arrow-prev"
+                        disabled={!categoryCarousel.arrows.left}
+                        onClick={() => categoryCarousel.scroll(-1)}
+                        aria-label={text.previousCategory}
+                        aria-controls="home-category-track"
+                    >
+                        ‹
+                    </button>
 
-                <section className="categories-section">
-                    <div className="section-header">
-                        <div>
-                            <span className="section-label">EXPLORE</span>
-
-                            <h2>{text.categories}</h2>
-                            <p>{text.categoriesSub}</p>
-                        </div>
-                    </div>
-
-                    <div className="categories-grid">
-                        {CATEGORIES.map((cat) => (
+                    <div
+                        id="home-category-track"
+                        className="categories-grid"
+                        ref={categoryTrackRef}
+                        onScroll={categoryCarousel.update}
+                    >
+                        {CATEGORIES.map((item) => (
                             <button
                                 type="button"
-                                key={cat.id}
-                                className={`category-card category-card-${cat.value}`}
-                                aria-pressed={category === cat.value}
-                                onClick={() => selectCategory(cat.value)}
+                                key={item.id}
+                                className={`category-card category-card-${item.id}`}
+                                aria-pressed={category === item.id}
+                                onClick={() => selectCategory(item.id)}
                             >
                                 <span className="category-title">
-                                    {cat.title[language] || cat.title.hy}
+                                    {item.title[language] || item.title.hy}
                                 </span>
 
                                 <span className="category-image-wrapper">
                                     <img
                                         className="category-image"
-                                        src={asset(cat.image)}
+                                        src={asset(item.image)}
                                         alt=""
-                                        loading="lazy"
                                         draggable={false}
+                                        loading="lazy"
                                     />
                                 </span>
-
-                                <span className="category-card-arrow">↗</span>
                             </button>
                         ))}
                     </div>
-                </section>
 
-                {/* PRODUCTS */}
+                    <button
+                        type="button"
+                        className="am-category-arrow am-category-arrow-next"
+                        disabled={!categoryCarousel.arrows.right}
+                        onClick={() => categoryCarousel.scroll(1)}
+                        aria-label={text.nextCategory}
+                        aria-controls="home-category-track"
+                    >
+                        ›
+                    </button>
+                </section>
 
                 <section
                     className="products-section"
@@ -552,89 +642,54 @@ export default function HomePage() {
                     aria-busy={loading}
                 >
                     <div className="section-header products-heading">
-                        <div>
-                            <span className="section-label">ARMMOTORS</span>
-
-                            <h2>
-                                {selectedCategory
-                                    ? selectedCategory.title[language] ||
-                                      selectedCategory.title.hy
-                                    : text.latest}
-                            </h2>
-                        </div>
-
-                        <button
-                            type="button"
-                            className="home-all-cars"
-                            onClick={() => navigate("/cars")}
-                        >
-                            {text.all}
-                            <ArrowIcon />
-                        </button>
+                        <h2>
+                            {query
+                                ? t("searchResults")
+                                : selectedCategory
+                                  ? selectedCategory.title[language] ||
+                                    selectedCategory.title.hy
+                                  : t("latestListings")}
+                        </h2>
                     </div>
 
-                    {category && (
-                        <div className="home-filter-status">
-                            <span>
-                                {filteredProducts.length} {text.listings}
-                            </span>
-
-                            <button
-                                type="button"
-                                className="clear-filter-button"
-                                onClick={resetFilters}
-                            >
-                                {text.clear}
-                            </button>
-                        </div>
-                    )}
-
-                    {error && (
-                        <p className="catalog-notice" role="alert">
-                            {String(error)}
-                        </p>
+                    {(query || category) && (
+                        <button
+                            type="button"
+                            className="clear-filter-button"
+                            onClick={resetFilters}
+                        >
+                            {t("clearFilters")}
+                        </button>
                     )}
 
                     {loading ? (
-                        <div className="home-loading" role="status">
-                            <span className="home-loading-spinner" />
-                            {text.loading}
-                        </div>
-                    ) : filteredProducts.length > 0 ? (
+                        <p role="status">{t("loading")}</p>
+                    ) : error ? (
+                        <p className="catalog-notice" role="alert">
+                            {text.error}
+                        </p>
+                    ) : filteredProducts.length ? (
                         <>
-                            <div className="products-grid products-grid-leading">
-                                {firstProducts.map((product) => (
-                                    <ProductCard
-                                        key={getProductId(product)}
-                                        item={product}
-                                    />
-                                ))}
-                            </div>
+                            {renderProducts(
+                                filteredProducts.slice(0, 8),
+                                "products-grid-leading",
+                            )}
 
                             {renderBrandsAndAd()}
 
-                            {restProducts.length > 0 && (
-                                <div className="products-grid products-grid-trailing">
-                                    {restProducts.map((product) => (
-                                        <ProductCard
-                                            key={getProductId(product)}
-                                            item={product}
-                                        />
-                                    ))}
-                                </div>
-                            )}
+                            {filteredProducts.length > 8 &&
+                                renderProducts(
+                                    filteredProducts.slice(8),
+                                    "products-grid-trailing",
+                                )}
                         </>
                     ) : (
                         <>
                             <div className="empty-results">
-                                <div className="empty-results-icon">
-                                    <SearchIcon />
-                                </div>
-
-                                <h3>{text.empty}</h3>
+                                <p>{t("noResults")}</p>
 
                                 <button type="button" onClick={resetFilters}>
-                                    {text.showAll}
+                                    {t("showAll")}
                                 </button>
                             </div>
 
@@ -647,10 +702,7 @@ export default function HomePage() {
             <footer className="home-footer">
                 <div className="footer-container">
                     <strong>ArmMotors</strong>
-
-                    <span>
-                        © {new Date().getFullYear()} · {text.eyebrow}
-                    </span>
+                    <span>{t("headerMarket")}</span>
                 </div>
             </footer>
         </div>

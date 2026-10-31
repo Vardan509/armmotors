@@ -1,28 +1,128 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { apiRequest } from "../utils/api";
 
-let scriptPromise;
+import { apiRequest, saveAuthSession } from "../utils/api";
+
+import { useI18n } from "../utils/i18n";
+
+const GOOGLE_SCRIPT = "https://accounts.google.com/gsi/client";
+
+const TEXTS = {
+    hy: {
+        loading: "Google ծառայությունը բեռնվում է...",
+        checking: "Google հաշիվը ստուգվում է...",
+        unavailable: "Google-ով մուտքն այս պահին հասանելի չէ։",
+        loadError: "Google ծառայությունը բեռնել չհաջողվեց։",
+        loginError: "Google-ով մուտք գործել չհաջողվեց։ Կրկին փորձեք։",
+        linkError: "Google հաշիվը կապակցել չհաջողվեց։",
+        linked: "Google հաշիվը հաջողությամբ կապակցված է։",
+        retry: "Կրկին փորձել",
+    },
+
+    ru: {
+        loading: "Загрузка сервиса Google...",
+        checking: "Проверка аккаунта Google...",
+        unavailable: "Вход через Google сейчас недоступен.",
+        loadError: "Не удалось загрузить сервис Google.",
+        loginError: "Не удалось войти через Google. Попробуйте ещё раз.",
+        linkError: "Не удалось привязать аккаунт Google.",
+        linked: "Аккаунт Google успешно привязан.",
+        retry: "Повторить",
+    },
+
+    en: {
+        loading: "Loading the Google service...",
+        checking: "Verifying your Google account...",
+        unavailable: "Google sign-in is currently unavailable.",
+        loadError: "Could not load the Google service.",
+        loginError: "Could not sign in with Google. Please try again.",
+        linkError: "Could not link your Google account.",
+        linked: "Your Google account has been linked.",
+        retry: "Try again",
+    },
+};
+
+let scriptPromise = null;
 
 function loadGoogle() {
-    if (window.google?.accounts?.id) return Promise.resolve();
-
-    if (!scriptPromise) {
-        scriptPromise = new Promise((resolve, reject) => {
-            const script = document.createElement("script");
-            script.src = "https://accounts.google.com/gsi/client";
-            script.async = true;
-            script.defer = true;
-            script.onload = resolve;
-            script.onerror = () => {
-                scriptPromise = null;
-                reject(new Error("Google-ը բեռնել չհաջողվեց։"));
-            };
-            document.head.append(script);
-        });
+    if (window.google?.accounts?.id) {
+        return Promise.resolve();
     }
 
+    if (scriptPromise) {
+        return scriptPromise;
+    }
+
+    scriptPromise = new Promise((resolve, reject) => {
+        let script = Array.from(document.scripts).find(
+            (element) => element.src.split("?")[0] === GOOGLE_SCRIPT,
+        );
+
+        const created = !script;
+
+        if (!script) {
+            script = document.createElement("script");
+            script.src = GOOGLE_SCRIPT;
+            script.async = true;
+            script.defer = true;
+        }
+
+        function cleanup() {
+            window.clearTimeout(timeout);
+            script.removeEventListener("load", onLoad);
+            script.removeEventListener("error", onError);
+        }
+
+        function onLoad() {
+            cleanup();
+
+            if (window.google?.accounts?.id) {
+                resolve();
+            } else {
+                if (created) script.remove();
+                reject(new Error("GOOGLE_SCRIPT_ERROR"));
+            }
+        }
+
+        function onError() {
+            cleanup();
+
+            if (created) script.remove();
+
+            reject(new Error("GOOGLE_SCRIPT_ERROR"));
+        }
+
+        const timeout = window.setTimeout(onError, 15000);
+
+        script.addEventListener("load", onLoad);
+        script.addEventListener("error", onError);
+
+        if (created) {
+            document.head.appendChild(script);
+        }
+
+        if (window.google?.accounts?.id) {
+            onLoad();
+        }
+    }).catch((error) => {
+        scriptPromise = null;
+        throw error;
+    });
+
     return scriptPromise;
+}
+
+function safeDestination(value) {
+    if (
+        typeof value !== "string" ||
+        !value.startsWith("/") ||
+        value.startsWith("//") ||
+        /[\\\u0000-\u0020]/.test(value)
+    ) {
+        return "/";
+    }
+
+    return value;
 }
 
 export default function GoogleSignIn({
@@ -31,124 +131,218 @@ export default function GoogleSignIn({
     onLinked,
 }) {
     const navigate = useNavigate();
-    const target = useRef(null);
-    const linked = useRef(onLinked);
-    const [message, setMessage] = useState("");
+    const { language } = useI18n();
+
+    const text = TEXTS[language] || TEXTS.hy;
+
+    const targetRef = useRef(null);
+    const linkedRef = useRef(onLinked);
+    const destinationRef = useRef(destination);
+    const busyRef = useRef(false);
+
+    const [ready, setReady] = useState(false);
+    const [initializing, setInitializing] = useState(true);
     const [busy, setBusy] = useState(false);
+    const [errorKey, setErrorKey] = useState("");
+    const [success, setSuccess] = useState(false);
+    const [revision, setRevision] = useState(0);
 
     useEffect(() => {
-        linked.current = onLinked;
-    }, [onLinked]);
+        linkedRef.current = onLinked;
+        destinationRef.current = destination;
+    }, [onLinked, destination]);
 
     useEffect(() => {
         let active = true;
+        const controller = new AbortController();
 
-        async function load() {
+        setReady(false);
+        setInitializing(true);
+        setErrorKey("");
+        setSuccess(false);
+
+        async function initialize() {
+            let config;
+
             try {
-                const config = await apiRequest("/auth/config");
+                config = await apiRequest("/auth/config", {
+                    signal: controller.signal,
+                });
 
-                if (!config.googleClientId) {
-                    if (active) {
-                        setMessage(
-                            "Google մուտքը հասանելի կլինի GOOGLE_CLIENT_ID-ը կարգավորելուց հետո։",
-                        );
-                    }
-                    return;
+                if (!config?.googleClientId) {
+                    throw new Error("GOOGLE_CONFIG_MISSING");
+                }
+            } catch {
+                if (active) {
+                    setErrorKey("unavailable");
+                    setInitializing(false);
                 }
 
+                return;
+            }
+
+            try {
                 await loadGoogle();
+            } catch {
+                if (active) {
+                    setErrorKey("loadError");
+                    setInitializing(false);
+                }
 
-                if (!active || !target.current) return;
+                return;
+            }
 
+            if (!active) return;
+
+            try {
                 window.google.accounts.id.initialize({
                     client_id: config.googleClientId,
 
                     callback: async ({ credential }) => {
-                        if (!active) return;
+                        if (!active || !credential || busyRef.current) {
+                            return;
+                        }
+
+                        busyRef.current = true;
 
                         setBusy(true);
-                        setMessage("");
+                        setErrorKey("");
+                        setSuccess(false);
+
+                        let result;
 
                         try {
-                            const result = await apiRequest(
+                            result = await apiRequest(
                                 link ? "/auth/google/link" : "/auth/google",
                                 {
                                     method: "POST",
-                                    body: JSON.stringify({ credential }),
+                                    body: JSON.stringify({
+                                        credential,
+                                    }),
                                 },
                             );
 
                             if (!active) return;
 
-                            if (link) {
-                                setMessage("Google հաշիվը կապակցված է։");
-                                linked.current?.();
-                            } else {
-                                localStorage.setItem("token", result.token);
-                                localStorage.setItem(
-                                    "user",
-                                    JSON.stringify(result.user),
-                                );
-
-                                window.dispatchEvent(
-                                    new Event("session-changed"),
-                                );
-
-                                navigate(
-                                    destination === "/" && result.user.isAdmin
-                                        ? "/admin"
-                                        : destination,
-                                    { replace: true },
-                                );
+                            if (!link) {
+                                saveAuthSession(result);
                             }
-                        } catch (error) {
-                            if (active) setMessage(error.message);
+                        } catch {
+                            if (active) {
+                                setErrorKey(link ? "linkError" : "loginError");
+                            }
+
+                            return;
                         } finally {
-                            if (active) setBusy(false);
+                            busyRef.current = false;
+
+                            if (active) {
+                                setBusy(false);
+                            }
                         }
+
+                        if (!active) return;
+
+                        if (link) {
+                            setSuccess(true);
+                            linkedRef.current?.();
+                            return;
+                        }
+
+                        const requestedDestination = safeDestination(
+                            destinationRef.current,
+                        );
+
+                        navigate(
+                            requestedDestination === "/" && result.user?.isAdmin
+                                ? "/admin"
+                                : requestedDestination,
+                            { replace: true },
+                        );
                     },
                 });
 
-                target.current.innerHTML = "";
-
-                window.google.accounts.id.renderButton(target.current, {
-                    type: "standard",
-                    theme: "outline",
-                    size: "large",
-                    shape: "rectangular",
-                    text: "continue_with",
-                    logo_alignment: "left",
-                    width: Math.max(
-                        240,
-                        Math.min(400, target.current.clientWidth || 360),
-                    ),
-                });
-            } catch (error) {
-                if (active) setMessage(error.message);
+                setReady(true);
+                setInitializing(false);
+            } catch {
+                if (active) {
+                    setErrorKey("loadError");
+                    setInitializing(false);
+                }
             }
         }
 
-        void load();
+        void initialize();
 
         return () => {
             active = false;
+            controller.abort();
         };
-    }, [destination, link, navigate]);
+    }, [link, navigate, revision]);
+
+    useEffect(() => {
+        const target = targetRef.current;
+
+        if (!ready || !target || !window.google?.accounts?.id) {
+            return;
+        }
+
+        target.replaceChildren();
+
+        window.google.accounts.id.renderButton(target, {
+            type: "standard",
+            theme: "outline",
+            size: "large",
+            shape: "rectangular",
+            text: "continue_with",
+            logo_alignment: "left",
+            locale: language,
+            width: String(
+                Math.max(240, Math.min(400, target.clientWidth || 360)),
+            ),
+        });
+
+        return () => {
+            target.replaceChildren();
+        };
+    }, [ready, language]);
 
     return (
-        <div className="google-signin-modern">
-            <div className="google-button-shell" ref={target} />
+        <div className="google-signin-modern" aria-busy={initializing || busy}>
+            <div className="google-button-shell" ref={targetRef} />
 
-            {busy && (
+            {initializing && (
                 <p role="status" className="google-status">
-                    Google հաշիվը ստուգվում է…
+                    {text.loading}
                 </p>
             )}
 
-            {message && (
-                <p className="google-unavailable" role="status">
-                    {message}
+            {busy && (
+                <p role="status" className="google-status">
+                    {text.checking}
                 </p>
+            )}
+
+            {errorKey && (
+                <p className="google-unavailable" role="alert">
+                    {text[errorKey]}
+                </p>
+            )}
+
+            {success && (
+                <p className="google-status" role="status">
+                    {text.linked}
+                </p>
+            )}
+
+            {!ready && !initializing && errorKey && (
+                <button
+                    type="button"
+                    className="detail-secondary"
+                    onClick={() => setRevision((current) => current + 1)}
+                >
+                    {text.retry}
+                </button>
             )}
         </div>
     );

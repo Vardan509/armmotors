@@ -1,0 +1,358 @@
+/* ARMMOTORS — CATEGORY SHOWROOM */
+
+@media (max-width: 768px) {
+    .home-wrapper .main-content .am-category-carousel {
+        position: relative;
+        width: 100%;
+        min-width: 0;
+        padding: 0 25px;
+        isolation: isolate;
+    }
+
+    .home-wrapper .main-content .am-category-carousel .categories-grid {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        align-items: stretch !important;
+        gap: 10px !important;
+
+        width: 100% !important;
+        min-width: 0 !important;
+
+        margin: 0 !important;
+        padding: 6px 0 12px !important;
+
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+
+        scroll-snap-type: x mandatory;
+        scroll-padding-inline: 0;
+        overscroll-behavior-x: contain;
+        -webkit-overflow-scrolling: touch;
+
+        scrollbar-width: none;
+        background: transparent !important;
+    }
+
+    .home-wrapper
+        .main-content
+        .am-category-carousel
+        .categories-grid::-webkit-scrollbar {
+        display: none;
+    }
+
+    .home-wrapper .main-content .am-category-carousel .category-card {
+        position: relative;
+
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        gap: 0 !important;
+
+        flex: 0 0 calc((100% - 10px) / 2) !important;
+        width: calc((100% - 10px) / 2) !important;
+        min-width: 0 !important;
+        max-width: none !important;
+
+        height: 157px !important;
+        min-height: 157px !important;
+
+        margin: 0 !important;
+        padding: 0 3px 9px !important;
+
+        border: 0 !important;
+        border-radius: 16px !important;
+        background: transparent !important;
+        box-shadow: none !important;
+
+        color: #152a45;
+        font-family: inherit;
+        text-align: center;
+
+        cursor: pointer;
+        appearance: none;
+        -webkit-tap-highlight-color: transparent;
+
+        scroll-snap-align: start;
+        scroll-snap-stop: always;
+    }
+
+    /* Հանում ենք հին քարտի դեկորները */
+
+    .home-wrapper .main-content .am-category-carousel .category-card::before,
+    .home-wrapper .main-content .am-category-carousel .category-card::after {
+        content: none !important;
+        display: none !important;
+    }
+
+    /* Մեքենայի ցուցադրության հատված */
+
+    .home-wrapper .main-content .am-category-carousel .category-image-wrapper {
+        position: relative;
+        order: 1;
+
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+
+        flex: 0 0 118px !important;
+
+        width: 100% !important;
+        height: 118px !important;
+        min-height: 118px !important;
+
+        margin: 0 !important;
+        padding: 0 !important;
+
+        overflow: visible !important;
+        isolation: isolate;
+        background: transparent !important;
+    }
+
+    /* Հարթակը */
+
+    .home-wrapper
+        .main-content
+        .am-category-carousel
+        .category-image-wrapper::before {
+        content: "";
+        position: absolute;
+
+        left: 5%;
+        right: 5%;
+        bottom: 8px;
+
+        height: 31px;
+        z-index: -1;
+
+        border: 1px solid #e0e7ef;
+        border-radius: 50%;
+
+        background: radial-gradient(
+            ellipse at 50% 20%,
+            #ffffff 0%,
+            #f8fafc 55%,
+            #e8eef5 100%
+        );
+
+        box-shadow:
+            0 5px 0 #e2e9f1,
+            0 7px 0 #d6e0eb,
+            0 13px 14px -7px rgba(23, 46, 75, 0.2);
+
+        transition:
+            border-color 180ms ease,
+            box-shadow 180ms ease;
+    }
+
+    /* Մեքենայի ստվերը */
+
+    .home-wrapper
+        .main-content
+        .am-category-carousel
+        .category-image-wrapper::after {
+        content: "";
+        position: absolute;
+
+        left: 19%;
+        right: 19%;
+        bottom: 21px;
+
+        height: 10px;
+        z-index: 0;
+
+        border-radius: 50%;
+        background: rgba(20, 37, 59, 0.19);
+        filter: blur(5px);
+        pointer-events: none;
+    }
+
+    .home-wrapper
+        .main-content
+        .am-category-carousel
+        .category-card
+        .category-image {
+        position: relative;
+        z-index: 1;
+
+        display: block !important;
+
+        width: 100% !important;
+        max-width: 150px !important;
+        height: 100px !important;
+        min-height: 0 !important;
+        max-height: 100px !important;
+
+        margin: 0 !important;
+        padding: 0 !important;
+
+        object-fit: contain !important;
+        object-position: center !important;
+
+        transform: translateY(-2px) !important;
+        filter: drop-shadow(0 4px 3px rgba(19, 36, 58, 0.1));
+
+        transition: transform 180ms ease;
+        pointer-events: none;
+        user-select: none;
+    }
+
+    /* Անվանումը՝ մեքենայի ներքևում */
+
+    .home-wrapper .main-content .am-category-carousel .category-title {
+        order: 2;
+
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+
+        width: 100%;
+        min-height: 28px;
+
+        margin: 5px 0 0 !important;
+        padding: 0 2px !important;
+
+        color: #18314f !important;
+        font-size: 10.5px !important;
+        font-weight: 700 !important;
+        line-height: 1.35 !important;
+        letter-spacing: 0 !important;
+
+        text-align: center;
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+
+    /* Ընտրված կատեգորիա */
+
+    .home-wrapper
+        .main-content
+        .am-category-carousel
+        .category-card[aria-pressed="true"] {
+        background: linear-gradient(
+            180deg,
+            rgba(232, 241, 252, 0),
+            rgba(226, 237, 252, 0.75)
+        ) !important;
+    }
+
+    .home-wrapper
+        .main-content
+        .am-category-carousel
+        .category-card[aria-pressed="true"]
+        .category-image-wrapper::before {
+        border-color: #a9c5e6;
+
+        box-shadow:
+            0 5px 0 #cfdef0,
+            0 7px 0 #b9cee7,
+            0 13px 16px -7px rgba(39, 83, 138, 0.25);
+    }
+
+    .home-wrapper
+        .main-content
+        .am-category-carousel
+        .category-card[aria-pressed="true"]
+        .category-title {
+        color: #245b99 !important;
+    }
+
+    /* Կողային սլաքներ */
+
+    .home-wrapper .main-content .am-category-carousel .am-category-arrow {
+        position: absolute !important;
+        top: 62px !important;
+        bottom: auto !important;
+        z-index: 5;
+
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+
+        width: 23px !important;
+        min-width: 23px !important;
+        height: 34px !important;
+
+        margin: 0 !important;
+        padding: 0 0 3px !important;
+
+        border: 1px solid #dce6f2 !important;
+        border-radius: 9px !important;
+        background: #ffffff !important;
+
+        color: #234d7e !important;
+        font-family: Arial, sans-serif;
+        font-size: 25px !important;
+        font-weight: 400;
+        line-height: 1;
+
+        box-shadow: 0 3px 9px rgba(25, 49, 79, 0.05);
+
+        transform: translateY(-50%) !important;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+
+        transition:
+            opacity 180ms ease,
+            background 180ms ease;
+    }
+
+    .home-wrapper .main-content .am-category-carousel .am-category-arrow-prev {
+        left: -1px !important;
+        right: auto !important;
+    }
+
+    .home-wrapper .main-content .am-category-carousel .am-category-arrow-next {
+        right: -1px !important;
+        left: auto !important;
+    }
+
+    .home-wrapper
+        .main-content
+        .am-category-carousel
+        .am-category-arrow:disabled {
+        opacity: 0.3;
+        cursor: default;
+        box-shadow: none;
+    }
+
+    .home-wrapper
+        .main-content
+        .am-category-carousel
+        .am-category-arrow:active:not(:disabled) {
+        background: #eaf1fa !important;
+    }
+
+    .home-wrapper
+        .main-content
+        .am-category-carousel
+        .category-card:focus-visible,
+    .home-wrapper
+        .main-content
+        .am-category-carousel
+        .am-category-arrow:focus-visible {
+        outline: 2px solid #3974b9;
+        outline-offset: -2px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .home-wrapper .main-content .am-category-carousel .category-image,
+    .home-wrapper
+        .main-content
+        .am-category-carousel
+        .category-image-wrapper::before,
+    .home-wrapper .main-content .am-category-carousel .am-category-arrow {
+        transition: none !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .home-wrapper
+        .main-content
+        .am-category-carousel
+        .category-card-truck
+        .category-image {
+        transform: translateY(-10px) !important;
+    }
+}

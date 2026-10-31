@@ -1,27 +1,138 @@
-
 import { useEffect, useMemo, useState } from "react";
+
+import { useI18n } from "../../utils/i18n";
+import { localizeListingValue } from "../../utils/localizeListing";
 
 const DATA_PATH = `${import.meta.env.BASE_URL}data`;
 
-const ARMENIAN_NAMES = {
-    Ajapnyak: "Աջափնյակ",
-    Arabkir: "Արաբկիր",
-    Avan: "Ավան",
-    Davtashen: "Դավթաշեն",
-    Erebuni: "Էրեբունի",
-    "Kanaker-Zeytun": "Քանաքեռ-Զեյթուն",
-    Kentron: "Կենտրոն",
-    "Malatia-Sebastia": "Մալաթիա-Սեբաստիա",
-    "Nork-Marash": "Նորք-Մարաշ",
-    "Nor Nork": "Նոր Նորք",
-    Nubarashen: "Նուբարաշեն",
-    Shengavit: "Շենգավիթ",
+const TEXTS = {
+    hy: {
+        region: "Մարզ / Երևան",
+        district: "Վարչական շրջան",
+        community: "Համայնք",
+        settlement: "Բնակավայր",
+        chooseRegion: "Ընտրեք մարզը",
+        chooseCommunity: "Ընտրեք համայնքը",
+        chooseDistrict: "Ընտրեք վարչական շրջանը",
+        chooseSettlement: "Ընտրեք բնակավայրը",
+        loading: "Բեռնվում է...",
+        selectedAddress: "Ընտրված հասցե",
+        error: "Բնակավայրերի ցանկը բեռնել չհաջողվեց։",
+        retry: "Կրկին փորձել",
+    },
+
+    ru: {
+        region: "Область / Ереван",
+        district: "Административный район",
+        community: "Община",
+        settlement: "Населённый пункт",
+        chooseRegion: "Выберите область",
+        chooseCommunity: "Выберите общину",
+        chooseDistrict: "Выберите район",
+        chooseSettlement: "Выберите населённый пункт",
+        loading: "Загрузка...",
+        selectedAddress: "Выбранный адрес",
+        error: "Не удалось загрузить список населённых пунктов.",
+        retry: "Повторить",
+    },
+
+    en: {
+        region: "Region / Yerevan",
+        district: "Administrative district",
+        community: "Community",
+        settlement: "Settlement",
+        chooseRegion: "Choose a region",
+        chooseCommunity: "Choose a community",
+        chooseDistrict: "Choose a district",
+        chooseSettlement: "Choose a settlement",
+        loading: "Loading...",
+        selectedAddress: "Selected address",
+        error: "Could not load the location list.",
+        retry: "Try again",
+    },
 };
 
-function displayName(item) {
-    const name = item?.name?.local || item?.name?.en || "";
+const DISTRICTS = {
+    Ajapnyak: ["Աջափնյակ", "Ачапняк", "Ajapnyak"],
+    Arabkir: ["Արաբկիր", "Арабкир", "Arabkir"],
+    Avan: ["Ավան", "Аван", "Avan"],
+    Davtashen: ["Դավթաշեն", "Давташен", "Davtashen"],
+    Erebuni: ["Էրեբունի", "Эребуни", "Erebuni"],
+    "Kanaker-Zeytun": ["Քանաքեռ-Զեյթուն", "Канакер-Зейтун", "Kanaker-Zeytun"],
+    Kentron: ["Կենտրոն", "Кентрон", "Kentron"],
+    "Malatia-Sebastia": [
+        "Մալաթիա-Սեբաստիա",
+        "Малатия-Себастия",
+        "Malatia-Sebastia",
+    ],
+    "Nork-Marash": ["Նորք-Մարաշ", "Норк-Мараш", "Nork-Marash"],
+    "Nor Nork": ["Նոր Նորք", "Нор Норк", "Nor Nork"],
+    Nubarashen: ["Նուբարաշեն", "Нубарашен", "Nubarashen"],
+    Shengavit: ["Շենգավիթ", "Шенгавит", "Shengavit"],
+};
 
-    return ARMENIAN_NAMES[name] || name;
+function sameId(first, second) {
+    return String(first ?? "") === String(second ?? "");
+}
+
+function districtNames(item) {
+    const names = [item?.name?.local, item?.name?.en];
+
+    for (const name of names) {
+        if (DISTRICTS[name]) {
+            return DISTRICTS[name];
+        }
+
+        const match = Object.values(DISTRICTS).find((translations) =>
+            translations.includes(name),
+        );
+
+        if (match) return match;
+    }
+
+    return null;
+}
+
+/*
+ * Backend-ին ուղարկվող անունը չի կախված
+ * օգտագործողի ընտրած միջերեսի լեզվից։
+ */
+function storedName(item) {
+    const district = districtNames(item);
+
+    return district?.[0] || item?.name?.local || item?.name?.en || "";
+}
+
+function displayName(item, language) {
+    if (!item) return "";
+
+    const index = language === "ru" ? 1 : language === "en" ? 2 : 0;
+
+    const district = districtNames(item);
+
+    if (district) {
+        return district[index];
+    }
+
+    if (language === "hy") {
+        return item.name?.hy || storedName(item);
+    }
+
+    const explicitTranslation = item.name?.[language];
+
+    if (typeof explicitTranslation === "string" && explicitTranslation.trim()) {
+        return explicitTranslation;
+    }
+
+    const original = storedName(item);
+
+    const translated = localizeListingValue(original, language, "location");
+
+    if (translated && translated !== original) {
+        return translated;
+    }
+
+    return original;
 }
 
 function LocationSelect({
@@ -30,6 +141,7 @@ function LocationSelect({
     onChange,
     options,
     placeholder,
+    language,
     disabled = false,
 }) {
     return (
@@ -39,7 +151,7 @@ function LocationSelect({
             </span>
 
             <select
-                value={value}
+                value={value || ""}
                 onChange={(event) => onChange(event.target.value)}
                 disabled={disabled}
                 required
@@ -47,8 +159,8 @@ function LocationSelect({
                 <option value="">{placeholder}</option>
 
                 {options.map((item) => (
-                    <option key={item.id} value={item.id}>
-                        {displayName(item)}
+                    <option key={item.id} value={String(item.id)}>
+                        {displayName(item, language)}
                     </option>
                 ))}
             </select>
@@ -56,10 +168,10 @@ function LocationSelect({
     );
 }
 
-export default function LocationFields({
-    value,
-    onChange,
-}) {
+export default function LocationFields({ value = {}, onChange }) {
+    const { language } = useI18n();
+    const text = TEXTS[language] || TEXTS.hy;
+
     const [data, setData] = useState({
         regions: [],
         communities: [],
@@ -67,61 +179,58 @@ export default function LocationFields({
     });
 
     const [loading, setLoading] = useState(true);
-    const [loadError, setLoadError] = useState("");
+    const [failed, setFailed] = useState(false);
+    const [revision, setRevision] = useState(0);
 
     useEffect(() => {
         const controller = new AbortController();
 
+        setLoading(true);
+        setFailed(false);
+
         async function loadLocations() {
             try {
-                setLoading(true);
-                setLoadError("");
-
-                const names = [
+                const filenames = [
                     "all-region.json",
                     "all-community.json",
                     "all-settlement.json",
                 ];
 
-                const responses = await Promise.all(
-                    names.map((name) =>
-                        fetch(`${DATA_PATH}/${name}`, {
-                            signal: controller.signal,
-                        })
-                    )
+                const result = await Promise.all(
+                    filenames.map(async (filename) => {
+                        const response = await fetch(
+                            `${DATA_PATH}/${filename}`,
+                            {
+                                signal: controller.signal,
+                            },
+                        );
+
+                        if (!response.ok) {
+                            throw new Error("LOCATION_HTTP_ERROR");
+                        }
+
+                        const items = await response.json();
+
+                        if (!Array.isArray(items)) {
+                            throw new Error("LOCATION_FORMAT_ERROR");
+                        }
+
+                        return items;
+                    }),
                 );
 
-                if (responses.some((response) => !response.ok)) {
-                    throw new Error(
-                        "Բնակավայրերի տվյալները չեն գտնվել։"
-                    );
-                }
+                if (controller.signal.aborted) return;
 
-                const [regions, communities, settlements] =
-                    await Promise.all(
-                        responses.map((response) =>
-                            response.json()
-                        )
-                    );
+                const [regions, communities, settlements] = result;
 
-                if (
-                    !Array.isArray(regions) ||
-                    !Array.isArray(communities) ||
-                    !Array.isArray(settlements)
-                ) {
-                    throw new Error("Տվյալների սխալ ձևաչափ։");
-                }
-
+                setData({
+                    regions,
+                    communities,
+                    settlements,
+                });
+            } catch {
                 if (!controller.signal.aborted) {
-                    setData({
-                        regions,
-                        communities,
-                        settlements,
-                    });
-                }
-            } catch (error) {
-                if (!controller.signal.aborted) {
-                    setLoadError(error.message);
+                    setFailed(true);
                 }
             } finally {
                 if (!controller.signal.aborted) {
@@ -130,125 +239,144 @@ export default function LocationFields({
             }
         }
 
-        loadLocations();
+        void loadLocations();
 
         return () => controller.abort();
-    }, []);
+    }, [revision]);
 
-    const communities = useMemo(
-        () =>
-            data.communities.filter(
-                (item) => item.parent?.id === value.regionId
-            ),
-        [data.communities, value.regionId]
+    const communities = useMemo(() => {
+        if (!value.regionId) return [];
+
+        return data.communities.filter((item) =>
+            sameId(item.parent?.id, value.regionId),
+        );
+    }, [data.communities, value.regionId]);
+
+    const settlements = useMemo(() => {
+        if (!value.communityId) return [];
+
+        return data.settlements.filter(
+            (item) =>
+                sameId(item.parent?.id, value.communityId) ||
+                (item.ancestors || []).some((ancestor) =>
+                    sameId(ancestor.id, value.communityId),
+                ),
+        );
+    }, [data.settlements, value.communityId]);
+
+    const selectedRegion = data.regions.find((item) =>
+        sameId(item.id, value.regionId),
     );
 
-    const settlements = useMemo(
-        () =>
-            data.settlements.filter(
-                (item) => item.parent?.id === value.communityId
-            ),
-        [data.settlements, value.communityId]
+    const selectedCommunity = communities.find((item) =>
+        sameId(item.id, value.communityId),
     );
 
-    const selectedRegion = data.regions.find(
-        (item) => item.id === value.regionId
+    const selectedSettlement = settlements.find((item) =>
+        sameId(item.id, value.settlementId),
     );
 
-    const selectedCommunity = communities.find(
-        (item) => item.id === value.communityId
-    );
-
-    const selectedSettlement = settlements.find(
-        (item) => item.id === value.settlementId
-    );
-
-    function changeRegion(regionId) {
-        const selected = data.regions.find(
-            (item) => item.id === regionId
+    const isYerevan =
+        sameId(selectedRegion?.id, "AM01") ||
+        ["Երևան", "Yerevan", "Ереван"].includes(
+            storedName(selectedRegion) || value.region,
         );
 
+    function changeRegion(regionId) {
+        const selected = data.regions.find((item) => sameId(item.id, regionId));
+
         onChange({
+            ...value,
             regionId,
             communityId: "",
             settlementId: "",
-            region: selected ? displayName(selected) : "",
+            region: selected ? storedName(selected) : "",
             community: "",
             settlement: "",
         });
     }
 
     function changeCommunity(communityId) {
-        const selected = communities.find(
-            (item) => item.id === communityId
+        const selected = communities.find((item) =>
+            sameId(item.id, communityId),
         );
 
         onChange({
             ...value,
             communityId,
             settlementId: "",
-            community: selected ? displayName(selected) : "",
+            community: selected ? storedName(selected) : "",
             settlement: "",
         });
     }
 
     function changeSettlement(settlementId) {
-        const selected = settlements.find(
-            (item) => item.id === settlementId
+        const selected = settlements.find((item) =>
+            sameId(item.id, settlementId),
         );
 
         onChange({
             ...value,
             settlementId,
-            settlement: selected ? displayName(selected) : "",
+            settlement: selected ? storedName(selected) : "",
         });
     }
 
-    if (loadError) {
+    if (failed) {
         return (
-            <div className="ap-error" role="alert">
-                {loadError} Ստուգեք public/data պանակը։
+            <div className="ap-full">
+                <div className="ap-error" role="alert">
+                    {text.error}
+                </div>
+
+                <button
+                    type="button"
+                    className="detail-secondary"
+                    onClick={() => setRevision((current) => current + 1)}
+                >
+                    {text.retry}
+                </button>
             </div>
         );
     }
 
-    const hasSettlements = settlements.length > 0;
+    const address = [selectedRegion, selectedCommunity, selectedSettlement]
+        .filter(Boolean)
+        .map((item) => displayName(item, language))
+        .join(" / ");
 
     return (
         <>
             <LocationSelect
-                label="Մարզ / Երևան"
+                label={text.region}
                 value={value.regionId}
                 onChange={changeRegion}
                 options={data.regions}
-                placeholder={
-                    loading
-                        ? "Բեռնվում է..."
-                        : "Ընտրեք մարզը"
-                }
+                placeholder={loading ? text.loading : text.chooseRegion}
+                language={language}
                 disabled={loading}
             />
 
             <LocationSelect
-                label={
-                    value.region === "Երևան"
-                        ? "Վարչական շրջան"
-                        : "Համայնք"
-                }
+                label={isYerevan ? text.district : text.community}
                 value={value.communityId}
                 onChange={changeCommunity}
                 options={communities}
-                placeholder="Ընտրեք համայնքը"
+                placeholder={
+                    isYerevan ? text.chooseDistrict : text.chooseCommunity
+                }
+                language={language}
                 disabled={!value.regionId || loading}
             />
 
-            {hasSettlements && (
+            {settlements.length > 0 && (
                 <LocationSelect
-                    label="Բնակավայր"
+                    label={text.settlement}
                     value={value.settlementId}
                     onChange={changeSettlement}
                     options={settlements}
-                    placeholder="Ընտրեք բնակավայրը"
+                    placeholder={text.chooseSettlement}
+                    language={language}
                     disabled={!value.communityId || loading}
                 />
             )}
@@ -256,15 +384,7 @@ export default function LocationFields({
             {selectedRegion && selectedCommunity && (
                 <div className="ap-full">
                     <div className="ap-info-box">
-                        Ընտրված հասցե՝{" "}
-                        <strong>
-                            {displayName(selectedRegion)}
-                            {" / "}
-                            {displayName(selectedCommunity)}
-                            {selectedSettlement
-                                ? ` / ${displayName(selectedSettlement)}`
-                                : ""}
-                        </strong>
+                        {text.selectedAddress}: <strong>{address}</strong>
                     </div>
                 </div>
             )}

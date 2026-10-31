@@ -1,174 +1,96 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
-import { setCurrencyByLanguage } from "../../utils/useCurrency";
 import { apiRequest } from "../../utils/api";
 import { useI18n } from "../../utils/i18n";
-import { asset } from "../../utils/asset";
 import { uiText } from "../../utils/localizeListing";
+import { setCurrencyByLanguage } from "../../utils/useCurrency";
+import { asset } from "../../utils/asset";
 
 import NotificationBell from "../notifications/NotificationBell";
 
 import "./Header.css";
 
-function getStoredSession() {
+function readSession() {
     const token = localStorage.getItem("token");
 
-    if (!token) {
-        return { token: null, user: null };
-    }
+    if (!token) return { token: null, user: null };
 
     try {
-        const raw = localStorage.getItem("user");
-        const parsed = raw ? JSON.parse(raw) : null;
+        const stored = JSON.parse(localStorage.getItem("user") || "null");
 
         return {
             token,
-            user:
-                parsed && typeof parsed === "object"
-                    ? parsed.user || parsed
-                    : null,
+            user: stored?.user || stored || null,
         };
     } catch {
         return { token, user: null };
     }
 }
 
-function Icon({ name, size = 21 }) {
-    const props = {
-        width: size,
-        height: size,
-        viewBox: "0 0 24 24",
-        fill: "none",
-        stroke: "currentColor",
-        strokeWidth: 1.75,
-        strokeLinecap: "round",
-        strokeLinejoin: "round",
-        "aria-hidden": true,
-    };
+const ICONS = {
+    heart: (
+        <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z" />
+    ),
+    user: (
+        <>
+            <circle cx="12" cy="8" r="4" />
+            <path d="M4.5 21a7.5 7.5 0 0 1 15 0" />
+        </>
+    ),
+    plus: <path d="M12 5v14M5 12h14" />,
+    menu: <path d="M4 7h16M4 12h16M4 17h16" />,
+    close: <path d="m6 6 12 12M18 6 6 18" />,
+    chevron: <path d="m6 9 6 6 6-6" />,
+    home: (
+        <>
+            <path d="m3 11 9-7 9 7" />
+            <path d="M5 10v11h14V10M9 21v-7h6v7" />
+        </>
+    ),
+    cars: (
+        <>
+            <path d="m5 11 2-5h10l2 5" />
+            <rect x="3" y="11" width="18" height="7" rx="2" />
+            <path d="M6 18v2M18 18v2M7 14h1M16 14h1" />
+        </>
+    ),
+    compare: <path d="M4 7h16M16 3l4 4-4 4M20 17H4M8 13l-4 4 4 4" />,
+    message: (
+        <>
+            <path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5H5l-3 2V11.5a9.5 9.5 0 0 1 19 0Z" />
+            <path d="M7 10h10M7 14h6" />
+        </>
+    ),
+    logout: (
+        <>
+            <path d="M9 4H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4" />
+            <path d="M12 12h9m-4-4 4 4-4 4" />
+        </>
+    ),
+    settings: (
+        <>
+            <circle cx="12" cy="12" r="3" />
+            <path d="M12 2v3m0 14v3M2 12h3m14 0h3M5 5l2 2m10 10 2 2M19 5l-2 2M7 17l-2 2" />
+        </>
+    ),
+};
 
-    switch (name) {
-        case "heart":
-            return (
-                <svg {...props}>
-                    <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z" />
-                </svg>
-            );
-
-        case "user":
-            return (
-                <svg {...props}>
-                    <circle cx="12" cy="8" r="4" />
-                    <path d="M4.5 21a7.5 7.5 0 0 1 15 0" />
-                </svg>
-            );
-
-        case "plus":
-            return (
-                <svg {...props}>
-                    <path d="M12 5v14M5 12h14" />
-                </svg>
-            );
-
-        case "menu":
-            return (
-                <svg {...props}>
-                    <path d="M4 7h16M4 12h16M4 17h16" />
-                </svg>
-            );
-
-        case "chevron":
-            return (
-                <svg {...props}>
-                    <path d="m6 9 6 6 6-6" />
-                </svg>
-            );
-
-        case "compare":
-            return (
-                <svg {...props}>
-                    <path d="M8 4v16M16 4v16" />
-                    <path d="M3 8h10M11 16h10" />
-                    <path d="m5 6-2 2 2 2M19 14l2 2-2 2" />
-                </svg>
-            );
-
-        case "message":
-            return (
-                <svg {...props}>
-                    <path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5H5l-3 2V11.5a9.5 9.5 0 0 1 19 0Z" />
-                    <path d="M7 10h10M7 14h6" />
-                </svg>
-            );
-
-        case "logout":
-            return (
-                <svg {...props}>
-                    <path d="M9 4H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4" />
-                    <path d="M12 12h9m-4-4 4 4-4 4" />
-                </svg>
-            );
-
-        case "settings":
-            return (
-                <svg {...props}>
-                    <circle cx="12" cy="12" r="3" />
-                    <path d="M12 2v3m0 14v3M2 12h3m14 0h3M4.9 4.9 7 7m10 10 2.1 2.1M19.1 4.9 17 7M7 17l-2.1 2.1" />
-                </svg>
-            );
-
-        case "home":
-            return (
-                <svg {...props}>
-                    <path d="m3 11 9-7 9 7" />
-                    <path d="M5 10v11h14V10M9 21v-7h6v7" />
-                </svg>
-            );
-
-        default:
-            return null;
-    }
-}
-
-function LanguageMenu({
-    selected,
-    languages,
-    open,
-    onToggle,
-    onSelect,
-    label,
-}) {
+function Icon({ name, size = 20 }) {
     return (
-        <div className="am-language">
-            <button
-                type="button"
-                className="am-language-button"
-                onClick={onToggle}
-                aria-expanded={open}
-                aria-label={label}
-            >
-                <span>{selected?.code?.toUpperCase() || "HY"}</span>
-                <Icon name="chevron" size={13} />
-            </button>
-
-            {open && (
-                <div className="am-language-dropdown">
-                    {languages.map((item) => (
-                        <button
-                            key={item.code}
-                            type="button"
-                            className={
-                                selected?.code === item.code ? "selected" : ""
-                            }
-                            onClick={() => onSelect(item.code)}
-                        >
-                            <span>{item.flag}</span>
-                            <span>{item.label}</span>
-                        </button>
-                    ))}
-                </div>
-            )}
-        </div>
+        <svg
+            width={size}
+            height={size}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+        >
+            {ICONS[name]}
+        </svg>
     );
 }
 
@@ -180,26 +102,22 @@ export default function Header() {
 
     const tr = (key) => uiText(language, key);
 
-    const [session, setSession] = useState(getStoredSession);
-    const [languageOpen, setLanguageOpen] = useState(false);
-    const [moreOpen, setMoreOpen] = useState(false);
-    const [mobileOpen, setMobileOpen] = useState(false);
+    const [session, setSession] = useState(readSession);
+    const [openMenu, setOpenMenu] = useState("");
     const [loggingOut, setLoggingOut] = useState(false);
 
-    const [mobileViewport, setMobileViewport] = useState(() =>
-        typeof window !== "undefined"
-            ? window.matchMedia("(max-width: 768px)").matches
-            : false,
+    const [mobile, setMobile] = useState(
+        () => window.matchMedia("(max-width: 768px)").matches,
     );
 
     const headerRef = useRef(null);
+    const mobileButtonRef = useRef(null);
 
-    const token = session.token;
-    const user = session.user;
-    const isLoggedIn = Boolean(token);
+    const loggedIn = Boolean(session.token);
 
     const isAdmin =
-        isLoggedIn && (user?.isAdmin === true || user?.role === "admin");
+        loggedIn &&
+        (session.user?.isAdmin === true || session.user?.role === "admin");
 
     const path = location.pathname;
 
@@ -208,10 +126,9 @@ export default function Header() {
     const isFavorites = path === "/favorites";
     const isAccount = path === "/account";
 
-    const selectedLanguage =
-        languages.find((item) => item.code === language) || languages[0];
+    const mobileOpen = mobile && openMenu === "mobile";
 
-    const addListingUrl = isLoggedIn
+    const addListingUrl = loggedIn
         ? "/add-product"
         : "/login?next=%2Fadd-product";
 
@@ -222,134 +139,133 @@ export default function Header() {
     useEffect(() => {
         const media = window.matchMedia("(max-width: 768px)");
 
-        function updateViewport(event) {
-            setMobileViewport(event.matches);
+        function change(event) {
+            setMobile(event.matches);
+            setOpenMenu("");
         }
 
-        setMobileViewport(media.matches);
-        media.addEventListener("change", updateViewport);
+        media.addEventListener("change", change);
 
         return () => {
-            media.removeEventListener("change", updateViewport);
+            media.removeEventListener("change", change);
         };
     }, []);
 
     useEffect(() => {
         function updateSession() {
-            setSession(getStoredSession());
+            setSession(readSession());
         }
 
         window.addEventListener("session-changed", updateSession);
+
         window.addEventListener("storage", updateSession);
 
         return () => {
             window.removeEventListener("session-changed", updateSession);
+
             window.removeEventListener("storage", updateSession);
         };
     }, []);
 
     useEffect(() => {
-        if (!token) return;
+        if (!session.token) return;
 
-        let cancelled = false;
+        const controller = new AbortController();
 
-        async function loadCurrentUser() {
+        async function loadUser() {
             try {
-                const result = await apiRequest("/auth/me");
+                const result = await apiRequest("/auth/me", {
+                    signal: controller.signal,
+                });
 
-                if (cancelled) return;
+                if (controller.signal.aborted) return;
 
-                const currentUser = result?.user || result;
+                const user = result?.user || result;
 
-                if (currentUser && typeof currentUser === "object") {
-                    setSession((previous) => ({
-                        ...previous,
-                        user: currentUser,
+                if (user && typeof user === "object") {
+                    setSession((current) => ({
+                        ...current,
+                        user,
                     }));
                 }
-            } catch (error) {
-                if (cancelled) return;
-
-                if (error?.status === 401) {
-                    localStorage.removeItem("token");
-                    localStorage.removeItem("user");
-
-                    setSession({
-                        token: null,
-                        user: null,
-                    });
-
-                    window.dispatchEvent(new Event("session-changed"));
-                } else {
-                    console.warn("Unable to verify current user:", error);
-                }
+            } catch {
+                /*
+                 * SessionBootstrap և apiRequest-ը
+                 * շարունակում են կառավարել սեսիան։
+                 */
             }
         }
 
-        void loadCurrentUser();
+        void loadUser();
 
-        return () => {
-            cancelled = true;
-        };
-    }, [token]);
+        return () => controller.abort();
+    }, [session.token]);
 
     useEffect(() => {
-        setLanguageOpen(false);
-        setMoreOpen(false);
-        setMobileOpen(false);
+        setOpenMenu("");
     }, [location.pathname, location.search, location.hash]);
 
     useEffect(() => {
-        function handleOutside(event) {
-            if (
-                headerRef.current &&
-                !headerRef.current.contains(event.target)
-            ) {
-                setLanguageOpen(false);
-                setMoreOpen(false);
-                setMobileOpen(false);
+        function outside(event) {
+            if (!headerRef.current?.contains(event.target)) {
+                setOpenMenu("");
             }
         }
 
-        function handleEscape(event) {
+        function keyboard(event) {
             if (event.key === "Escape") {
-                setLanguageOpen(false);
-                setMoreOpen(false);
-                setMobileOpen(false);
+                setOpenMenu("");
+
+                if (mobileOpen) {
+                    mobileButtonRef.current?.focus();
+                }
             }
         }
 
-        document.addEventListener("pointerdown", handleOutside);
-        document.addEventListener("keydown", handleEscape);
+        document.addEventListener("pointerdown", outside);
+        document.addEventListener("keydown", keyboard);
 
         return () => {
-            document.removeEventListener("pointerdown", handleOutside);
-            document.removeEventListener("keydown", handleEscape);
+            document.removeEventListener("pointerdown", outside);
+
+            document.removeEventListener("keydown", keyboard);
         };
-    }, []);
+    }, [mobileOpen]);
 
-    function changeLanguage(code) {
-        if (!languages.some((item) => item.code === code)) {
-            return;
-        }
+    useEffect(() => {
+        if (!mobileOpen) return;
 
-        setLanguage(code);
-        setCurrencyByLanguage(code);
-        setLanguageOpen(false);
+        const previous = document.body.style.overflow;
+        document.body.style.overflow = "hidden";
+
+        return () => {
+            document.body.style.overflow = previous;
+        };
+    }, [mobileOpen]);
+
+    function toggleMenu(name) {
+        setOpenMenu((current) => (current === name ? "" : name));
     }
 
-    function handleFavoritesClick(event) {
-        if (!isLoggedIn) {
+    function changeLanguage(code) {
+        setLanguage(code);
+        setCurrencyByLanguage(code);
+        setOpenMenu("");
+    }
+
+    function favoritesClick(event) {
+        setOpenMenu("");
+
+        if (!loggedIn) {
             event.preventDefault();
             navigate("/login?next=%2Ffavorites");
         }
     }
 
     function openSupport() {
-        window.dispatchEvent(new CustomEvent("open-support"));
+        setOpenMenu("");
 
-        setMoreOpen(false);
-        setMobileOpen(false);
+        window.dispatchEvent(new CustomEvent("open-support"));
     }
 
     async function logout() {
@@ -361,66 +277,164 @@ export default function Header() {
             await apiRequest("/auth/logout", {
                 method: "POST",
             });
-        } catch (error) {
-            console.warn("Logout request failed:", error);
+        } catch {
+            // Տեղային սեսիան փակվում է նաև ցանցային սխալի դեպքում։
         } finally {
             localStorage.removeItem("token");
             localStorage.removeItem("user");
 
-            setSession({
-                token: null,
-                user: null,
-            });
+            setSession({ token: null, user: null });
+            setOpenMenu("");
+            setLoggingOut(false);
 
             window.dispatchEvent(new Event("session-changed"));
-
-            setMoreOpen(false);
-            setMobileOpen(false);
-            setLoggingOut(false);
 
             navigate("/", { replace: true });
         }
     }
 
-    function toggleMobileMenu() {
-        setMobileOpen((previous) => !previous);
-        setMoreOpen(false);
-        setLanguageOpen(false);
-    }
-
-    function toggleMoreMenu() {
-        setMoreOpen((previous) => !previous);
-        setLanguageOpen(false);
-        setMobileOpen(false);
-    }
-
-    function toggleLanguageMenu() {
-        setLanguageOpen((previous) => !previous);
-        setMoreOpen(false);
-    }
-
-    function renderNotifications() {
+    function languageControl() {
         return (
-            <div className="am-menu-notifications">
-                <span>{tr("notifications")}</span>
-                <NotificationBell />
+            <div className="am-language">
+                <button
+                    type="button"
+                    className="am-language-button"
+                    onClick={() => toggleMenu("language")}
+                    aria-label={tr("changeLanguage")}
+                    aria-expanded={openMenu === "language"}
+                >
+                    <span>{language.toUpperCase()}</span>
+
+                    <Icon name="chevron" size={12} />
+                </button>
+
+                {openMenu === "language" && (
+                    <div className="am-language-dropdown">
+                        {languages.map((item) => (
+                            <button
+                                type="button"
+                                key={item.code}
+                                className={
+                                    item.code === language ? "selected" : ""
+                                }
+                                onClick={() => changeLanguage(item.code)}
+                            >
+                                <span>{item.flag}</span>
+                                <span>{item.label}</span>
+                            </button>
+                        ))}
+                    </div>
+                )}
             </div>
         );
     }
 
-    const languageMenu = (
-        <LanguageMenu
-            selected={selectedLanguage}
-            languages={languages}
-            open={languageOpen}
-            onToggle={toggleLanguageMenu}
-            onSelect={changeLanguage}
-            label={tr("changeLanguage")}
-        />
-    );
+    function menuContent() {
+        return (
+            <>
+                {mobile && (
+                    <>
+                        <Link to="/">
+                            <Icon name="home" />
+                            <span>{t("home")}</span>
+                        </Link>
+
+                        <Link to="/cars">
+                            <Icon name="cars" />
+                            <span>{t("listings")}</span>
+                        </Link>
+                    </>
+                )}
+
+                <Link
+                    to="/favorites"
+                    onClick={favoritesClick}
+                    className={isFavorites ? "active" : ""}
+                >
+                    <Icon name="heart" />
+                    <span>{t("favorites")}</span>
+                </Link>
+
+                <Link to="/compare">
+                    <Icon name="compare" />
+                    <span>{tr("compare")}</span>
+                </Link>
+
+                {loggedIn && (
+                    <Link to="/messages">
+                        <Icon name="message" />
+                        <span>{tr("messages")}</span>
+                    </Link>
+                )}
+
+                <button type="button" onClick={openSupport}>
+                    <Icon name="message" />
+                    <span>{tr("contactUs")}</span>
+                </button>
+
+                {loggedIn && (
+                    <div className="am-menu-notifications">
+                        <span>{tr("notifications")}</span>
+                        <NotificationBell />
+                    </div>
+                )}
+
+                <div className="am-menu-divider" />
+
+                <Link to={addListingUrl} className="am-menu-add-link">
+                    <Icon name="plus" />
+                    <span>{t("addListing")}</span>
+                </Link>
+
+                {loggedIn ? (
+                    <>
+                        <Link to="/account">
+                            <Icon name="user" />
+                            <span>{tr("account")}</span>
+                        </Link>
+
+                        {isAdmin && (
+                            <Link to="/admin">
+                                <Icon name="settings" />
+                                <span>{tr("administrator")}</span>
+                            </Link>
+                        )}
+
+                        <button
+                            type="button"
+                            onClick={logout}
+                            disabled={loggingOut}
+                        >
+                            <Icon name="logout" />
+
+                            <span>
+                                {loggingOut
+                                    ? tr("logoutProgress")
+                                    : t("logout")}
+                            </span>
+                        </button>
+                    </>
+                ) : (
+                    <Link to="/login">
+                        <Icon name="user" />
+                        <span>{t("login")}</span>
+                    </Link>
+                )}
+            </>
+        );
+    }
 
     return (
         <>
+            {mobileOpen && (
+                <button
+                    type="button"
+                    className="am-header-backdrop"
+                    aria-label={t("close")}
+                    onClick={() => setOpenMenu("")}
+                />
+            )}
+
             <header className="site-header" ref={headerRef}>
                 <div className="am-header-container">
                     <div className="am-header-top">
@@ -429,245 +443,127 @@ export default function Header() {
                         </Link>
 
                         <div className="am-header-actions">
-                            <Link
-                                to="/favorites"
-                                onClick={handleFavoritesClick}
-                                className={`am-icon-button ${
-                                    isFavorites ? "active" : ""
-                                }`}
-                                title={t("favorites")}
-                                aria-label={t("favorites")}
-                            >
-                                <Icon name="heart" />
-                            </Link>
-
-                            {isLoggedIn ? (
+                            {!mobile && (
                                 <Link
-                                    to="/account"
-                                    className={`am-icon-button am-account-button ${
-                                        isAccount ? "active" : ""
-                                    }`}
-                                    title={tr("account")}
-                                    aria-label={tr("account")}
+                                    to="/favorites"
+                                    onClick={favoritesClick}
+                                    className="am-icon-button"
+                                    aria-label={t("favorites")}
+                                    title={t("favorites")}
                                 >
-                                    <Icon name="user" />
-                                </Link>
-                            ) : (
-                                <Link to="/login" className="am-login-button">
-                                    {t("login")}
+                                    <Icon name="heart" />
                                 </Link>
                             )}
 
-                            <Link to={addListingUrl} className="am-add-button">
-                                <Icon name="plus" size={19} />
-                                <span>{t("addListing")}</span>
+                            {mobile && languageControl()}
+
+                            <Link
+                                to={loggedIn ? "/account" : "/login"}
+                                className={
+                                    mobile || loggedIn
+                                        ? "am-icon-button am-account-button"
+                                        : "am-login-button"
+                                }
+                                aria-label={
+                                    loggedIn ? tr("account") : t("login")
+                                }
+                                title={loggedIn ? tr("account") : t("login")}
+                            >
+                                {mobile || loggedIn ? (
+                                    <Icon name="user" />
+                                ) : (
+                                    t("login")
+                                )}
                             </Link>
 
-                            <button
-                                type="button"
-                                className="am-mobile-menu-button"
-                                aria-label={tr("openMenu")}
-                                aria-expanded={mobileOpen}
-                                onClick={toggleMobileMenu}
-                            >
-                                <Icon name="menu" />
-                            </button>
+                            {!mobile && (
+                                <Link
+                                    to={addListingUrl}
+                                    className="am-add-button"
+                                >
+                                    <Icon name="plus" size={18} />
+                                    <span>{t("addListing")}</span>
+                                </Link>
+                            )}
+
+                            {mobile && (
+                                <button
+                                    ref={mobileButtonRef}
+                                    type="button"
+                                    className={`am-mobile-menu-button ${
+                                        mobileOpen ? "is-open" : ""
+                                    }`}
+                                    aria-label={
+                                        mobileOpen ? t("close") : tr("openMenu")
+                                    }
+                                    aria-expanded={mobileOpen}
+                                    aria-controls={
+                                        mobileOpen
+                                            ? "am-mobile-menu"
+                                            : undefined
+                                    }
+                                    onClick={() => toggleMenu("mobile")}
+                                >
+                                    <Icon
+                                        name={mobileOpen ? "close" : "menu"}
+                                    />
+                                </button>
+                            )}
                         </div>
                     </div>
 
-                    <div className="am-header-bottom">
-                        <nav
-                            className="am-main-nav"
-                            aria-label={tr("mainMenu")}
-                        >
-                            <Link
-                                to="/"
-                                className={isHome ? "active" : ""}
-                                aria-current={isHome ? "page" : undefined}
+                    {!mobile && (
+                        <div className="am-header-bottom">
+                            <nav
+                                className="am-main-nav"
+                                aria-label={tr("mainMenu")}
                             >
-                                {t("home")}
-                            </Link>
+                                <Link to="/" className={isHome ? "active" : ""}>
+                                    {t("home")}
+                                </Link>
 
-                            <Link
-                                to="/cars"
-                                className={isCars ? "active" : ""}
-                                aria-current={isCars ? "page" : undefined}
-                            >
-                                {t("listings")}
-                            </Link>
-                        </nav>
-
-                        <div className="am-header-secondary">
-                            {languageMenu}
-
-                            <div className="am-more">
-                                <button
-                                    type="button"
-                                    className="am-more-trigger"
-                                    aria-expanded={moreOpen}
-                                    onClick={toggleMoreMenu}
+                                <Link
+                                    to="/cars"
+                                    className={isCars ? "active" : ""}
                                 >
-                                    {tr("more")}
-                                    <Icon name="chevron" size={14} />
-                                </button>
+                                    {t("listings")}
+                                </Link>
+                            </nav>
 
-                                {moreOpen && (
-                                    <div className="am-more-dropdown">
-                                        <Link
-                                            to="/compare"
-                                            onClick={() => setMoreOpen(false)}
+                            <div className="am-header-secondary">
+                                {languageControl()}
+
+                                <div className="am-more">
+                                    <button
+                                        type="button"
+                                        className="am-more-trigger"
+                                        aria-expanded={openMenu === "more"}
+                                        onClick={() => toggleMenu("more")}
+                                    >
+                                        {tr("more")}
+                                        <Icon name="chevron" size={13} />
+                                    </button>
+
+                                    {openMenu === "more" && (
+                                        <nav
+                                            className="am-more-dropdown"
+                                            aria-label={tr("mainMenu")}
                                         >
-                                            <Icon name="compare" size={18} />
-                                            {tr("compare")}
-                                        </Link>
-
-                                        {isLoggedIn && (
-                                            <Link
-                                                to="/messages"
-                                                onClick={() =>
-                                                    setMoreOpen(false)
-                                                }
-                                            >
-                                                <Icon
-                                                    name="message"
-                                                    size={18}
-                                                />
-                                                {tr("messages")}
-                                            </Link>
-                                        )}
-
-                                        <button
-                                            type="button"
-                                            onClick={openSupport}
-                                        >
-                                            <Icon name="message" size={18} />
-                                            {tr("contactUs")}
-                                        </button>
-
-                                        {isLoggedIn &&
-                                            !mobileViewport &&
-                                            renderNotifications()}
-
-                                        <div className="am-menu-divider" />
-
-                                        {isLoggedIn ? (
-                                            <>
-                                                <Link
-                                                    to="/account"
-                                                    onClick={() =>
-                                                        setMoreOpen(false)
-                                                    }
-                                                >
-                                                    <Icon
-                                                        name="user"
-                                                        size={18}
-                                                    />
-                                                    {tr("account")}
-                                                </Link>
-
-                                                {isAdmin && (
-                                                    <Link
-                                                        to="/admin"
-                                                        onClick={() =>
-                                                            setMoreOpen(false)
-                                                        }
-                                                    >
-                                                        <Icon
-                                                            name="settings"
-                                                            size={18}
-                                                        />
-                                                        {tr("administrator")}
-                                                    </Link>
-                                                )}
-
-                                                <button
-                                                    type="button"
-                                                    onClick={logout}
-                                                    disabled={loggingOut}
-                                                >
-                                                    <Icon
-                                                        name="logout"
-                                                        size={18}
-                                                    />
-                                                    {loggingOut
-                                                        ? tr("logoutProgress")
-                                                        : t("logout")}
-                                                </button>
-                                            </>
-                                        ) : (
-                                            <Link
-                                                to="/login"
-                                                onClick={() =>
-                                                    setMoreOpen(false)
-                                                }
-                                            >
-                                                <Icon name="user" size={18} />
-                                                {t("login")}
-                                            </Link>
-                                        )}
-                                    </div>
-                                )}
+                                            {menuContent()}
+                                        </nav>
+                                    )}
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    )}
 
                     {mobileOpen && (
                         <nav
+                            id="am-mobile-menu"
                             className="am-mobile-dropdown"
                             aria-label={tr("mobileMenu")}
                         >
-                            <Link to="/">{t("home")}</Link>
-
-                            <Link to="/cars">{t("listings")}</Link>
-
-                            <Link to="/compare">{tr("compare")}</Link>
-
-                            {isLoggedIn && (
-                                <Link to="/messages">{tr("messages")}</Link>
-                            )}
-
-                            <button type="button" onClick={openSupport}>
-                                {tr("contactUs")}
-                            </button>
-
-                            <div className="am-mobile-language">
-                                <LanguageMenu
-                                    selected={selectedLanguage}
-                                    languages={languages}
-                                    open={languageOpen}
-                                    onToggle={toggleLanguageMenu}
-                                    onSelect={changeLanguage}
-                                    label={tr("changeLanguage")}
-                                />
-                            </div>
-
-                            {isLoggedIn && mobileViewport && (
-                                <div className="am-mobile-notifications">
-                                    {renderNotifications()}
-                                </div>
-                            )}
-
-                            {isAdmin && (
-                                <Link to="/admin">{tr("administrator")}</Link>
-                            )}
-
-                            {isLoggedIn ? (
-                                <>
-                                    <Link to="/account">{tr("account")}</Link>
-
-                                    <button
-                                        type="button"
-                                        onClick={logout}
-                                        disabled={loggingOut}
-                                    >
-                                        {loggingOut
-                                            ? tr("logoutProgress")
-                                            : t("logout")}
-                                    </button>
-                                </>
-                            ) : (
-                                <Link to="/login">{t("login")}</Link>
-                            )}
+                            {menuContent()}
                         </nav>
                     )}
                 </div>
@@ -675,42 +571,38 @@ export default function Header() {
 
             <nav className="am-mobile-bottom-nav" aria-label={tr("quickLinks")}>
                 <Link to="/" className={isHome ? "active" : ""}>
-                    <Icon name="home" size={20} />
+                    <Icon name="home" />
                     <span>{t("homeNav")}</span>
                 </Link>
 
                 <Link
                     to="/favorites"
-                    onClick={handleFavoritesClick}
+                    onClick={favoritesClick}
                     className={isFavorites ? "active" : ""}
                 >
-                    <Icon name="heart" size={20} />
+                    <Icon name="heart" />
                     <span>{t("favoritesNav")}</span>
                 </Link>
 
                 <Link to={addListingUrl} className="am-bottom-add">
                     <span className="am-bottom-add-icon">
-                        <Icon name="plus" size={22} />
+                        <Icon name="plus" />
                     </span>
                     <span>{t("addNav")}</span>
                 </Link>
 
                 <button type="button" onClick={openSupport}>
-                    <Icon name="message" size={20} />
+                    <Icon name="message" />
                     <span>{t("chatNav")}</span>
                 </button>
 
-                {isLoggedIn ? (
-                    <Link to="/account" className={isAccount ? "active" : ""}>
-                        <Icon name="user" size={20} />
-                        <span>{t("accountNav")}</span>
-                    </Link>
-                ) : (
-                    <Link to="/login">
-                        <Icon name="user" size={20} />
-                        <span>{t("login")}</span>
-                    </Link>
-                )}
+                <Link
+                    to={loggedIn ? "/account" : "/login"}
+                    className={isAccount ? "active" : ""}
+                >
+                    <Icon name="user" />
+                    <span>{loggedIn ? t("accountNav") : t("login")}</span>
+                </Link>
             </nav>
         </>
     );
