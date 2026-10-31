@@ -3,58 +3,63 @@ import { useEffect, useState } from "react";
 import { apiRequest } from "../utils/api";
 import { useI18n } from "../utils/i18n";
 
-const LABELS = {
+const TEXTS = {
     hy: {
-        translating: "Նկարագրությունը թարգմանվում է...",
-        unavailable: "Նկարագրություն չկա։",
-        original: "Ցուցադրվում է բնօրինակ նկարագրությունը։",
+        loading: "Նկարագրությունը թարգմանվում է...",
+        empty: "Նկարագրություն չի ավելացվել։",
+        unavailable: "Թարգմանությունը հասանելի չէ։ Ցուցադրվում է բնօրինակը։",
+        retry: "Կրկին փորձել",
     },
-
-    en: {
-        translating: "Translating description...",
-        unavailable: "No description available.",
-        original: "Showing the original description.",
-    },
-
     ru: {
-        translating: "Перевод описания...",
-        unavailable: "Описание отсутствует.",
-        original: "Показано оригинальное описание.",
+        loading: "Перевод описания...",
+        empty: "Описание не добавлено.",
+        unavailable: "Перевод недоступен. Показан оригинал.",
+        retry: "Повторить",
+    },
+    en: {
+        loading: "Translating description...",
+        empty: "No description provided.",
+        unavailable: "Translation is unavailable. Showing the original.",
+        retry: "Try again",
     },
 };
 
 export default function TranslatedDescription({ productId, description = "" }) {
     const { language } = useI18n();
 
-    const labels = LABELS[language] || LABELS.hy;
+    const text = TEXTS[language] || TEXTS.hy;
+    const original = String(description || "").trim();
+
+    const [attempt, setAttempt] = useState(0);
 
     const [state, setState] = useState({
-        text: description,
-        loading: false,
-        failed: false,
+        key: "",
+        status: "loading",
+        description: "",
+        sourceLanguage: undefined,
     });
 
-    useEffect(() => {
-        let cancelled = false;
+    const requestKey = JSON.stringify([productId, language, original, attempt]);
 
+    useEffect(() => {
         const controller = new AbortController();
 
-        const original = String(description || "");
-
-        if (!original.trim() || !productId) {
+        if (!original || !productId) {
             setState({
-                text: original,
-                loading: false,
-                failed: false,
+                key: requestKey,
+                status: original ? "unavailable" : "empty",
+                description: original,
+                sourceLanguage: undefined,
             });
 
             return () => controller.abort();
         }
 
         setState({
-            text: original,
-            loading: true,
-            failed: false,
+            key: requestKey,
+            status: "loading",
+            description: "",
+            sourceLanguage: undefined,
         });
 
         async function loadTranslation() {
@@ -68,61 +73,115 @@ export default function TranslatedDescription({ productId, description = "" }) {
                     },
                 );
 
-                if (cancelled) return;
+                if (controller.signal.aborted) return;
+
+                const translatedDescription =
+                    typeof result?.description === "string"
+                        ? result.description.trim()
+                        : "";
+
+                const ready =
+                    result?.ready === true &&
+                    result?.fallback !== true &&
+                    result?.language === language &&
+                    Boolean(translatedDescription);
 
                 setState({
-                    text: result.description || original,
-                    loading: false,
-                    failed: false,
+                    key: requestKey,
+                    status: ready ? "ready" : "unavailable",
+                    description: ready ? translatedDescription : original,
+                    sourceLanguage: result?.sourceLanguage,
                 });
-            } catch (error) {
-                if (cancelled) return;
+            } catch {
+                if (controller.signal.aborted) return;
 
                 setState({
-                    text: original,
-                    loading: false,
-                    failed: true,
+                    key: requestKey,
+                    status: "unavailable",
+                    description: original,
+                    sourceLanguage: undefined,
                 });
             }
         }
 
         void loadTranslation();
 
-        return () => {
-            cancelled = true;
-            controller.abort();
-        };
-    }, [productId, description, language]);
+        return () => controller.abort();
+    }, [productId, language, original, requestKey]);
+
+    if (!original) {
+        return <p className="car-description">{text.empty}</p>;
+    }
+
+    const status = state.key === requestKey ? state.status : "loading";
+
+    const loading = status === "loading";
+    const unavailable = status === "unavailable";
+
+    const sourceLanguage = ["hy", "ru", "en"].includes(state.sourceLanguage)
+        ? state.sourceLanguage
+        : undefined;
 
     return (
-        <div>
-            {state.loading && (
+        <div className="translated-description" aria-busy={loading}>
+            {loading ? (
                 <p
                     role="status"
                     style={{
+                        color: "#607086",
                         fontSize: 13,
-                        color: "#888",
-                        marginBottom: 12,
+                        lineHeight: 1.6,
                     }}
                 >
-                    {labels.translating}
+                    {text.loading}
                 </p>
-            )}
+            ) : (
+                <>
+                    {unavailable && (
+                        <div style={{ marginBottom: 14 }}>
+                            <p
+                                role="status"
+                                style={{
+                                    color: "#607086",
+                                    fontSize: 13,
+                                    lineHeight: 1.6,
+                                }}
+                            >
+                                {text.unavailable}
+                            </p>
 
-            <p className="car-description" style={{ whiteSpace: "pre-line" }}>
-                {state.text || labels.unavailable}
-            </p>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setAttempt((current) => current + 1);
+                                }}
+                                style={{
+                                    padding: "8px 12px",
+                                    border: "1px solid #dce5ef",
+                                    borderRadius: 8,
+                                    background: "#ffffff",
+                                    color: "#244b77",
+                                    font: "inherit",
+                                    fontSize: 13,
+                                    cursor: "pointer",
+                                }}
+                            >
+                                {text.retry}
+                            </button>
+                        </div>
+                    )}
 
-            {state.failed && (
-                <small
-                    style={{
-                        display: "block",
-                        color: "#888",
-                        marginTop: 10,
-                    }}
-                >
-                    {labels.original}
-                </small>
+                    <p
+                        className="car-description"
+                        lang={unavailable ? sourceLanguage : language}
+                        style={{
+                            whiteSpace: "pre-wrap",
+                            overflowWrap: "anywhere",
+                        }}
+                    >
+                        {unavailable ? original : state.description}
+                    </p>
+                </>
             )}
         </div>
     );

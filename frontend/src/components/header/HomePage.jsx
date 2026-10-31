@@ -1,8 +1,10 @@
-import { useRef, useState, useEffect } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 import ProductCard from "../ProductCard/ProductCard";
 import Filter from "../filterCar/filter.jsx";
+import SmartSearch from "../SmartSearch/SmartSearch";
+
 import useProducts from "../../utils/useProducts";
 import { useI18n } from "../../utils/i18n";
 import { asset } from "../../utils/asset";
@@ -34,9 +36,9 @@ const CATEGORIES = [
     {
         id: 3,
         title: {
-            hy: "Նոր",
-            ru: "Новые",
-            en: "New",
+            hy: "Նոր մեքենաներ",
+            ru: "Новые автомобили",
+            en: "New cars",
         },
         value: "new",
         image: "/categories/new_cars.png",
@@ -51,16 +53,6 @@ const CATEGORIES = [
         value: "truck",
         image: "/categories/trucks.png",
     },
-    {
-        id: 5,
-        title: {
-            hy: "Պահեստամասեր",
-            ru: "Запчасти",
-            en: "Spare parts",
-        },
-        value: "part",
-        image: "/categories/spare_parts.png",
-    },
 ];
 
 const BRANDS = [
@@ -68,32 +60,145 @@ const BRANDS = [
     { id: 2, name: "Toyota", logo: "/toyota.png" },
     { id: 3, name: "BMW", logo: "/bmw.png" },
     { id: 4, name: "Tesla", logo: "/tesla.png" },
-    { id: 6, name: "Nissan", logo: "/nissan.png" },
-    { id: 7, name: "Kia", logo: "/kia.png" },
+    { id: 5, name: "Nissan", logo: "/nissan.png" },
+    { id: 6, name: "Kia", logo: "/kia.png" },
 ];
 
-function getSearchValues(product) {
-    return [product.title, product.brand, product.model, product.year]
-        .filter((value) => value !== undefined && value !== null)
-        .map((value) => String(value).toLowerCase());
+const COPY = {
+    hy: {
+        eyebrow: "ARMMOTORS · ԱՎՏՈՇՈՒԿԱ",
+        title: "Գտեք ձեր հաջորդ մեքենան",
+        description:
+            "Դիտեք ավտոմեքենաների հայտարարություններ, կապվեք վաճառողների հետ։",
+        categories: "Ընտրեք կատեգորիան",
+        categoriesSub: "Գտեք ձեզ հետաքրքրող ավտոմեքենան",
+        latest: "Վերջին հայտարարությունները",
+        brands: "Հանրաճանաչ մակնիշներ",
+        brandsSub: "Ընտրեք նախընտրած մակնիշը",
+        listings: "հայտարարություն",
+        all: "Բոլոր մեքենաները",
+        clear: "Մաքրել ֆիլտրերը",
+        empty: "Հայտարարություններ չեն գտնվել",
+        showAll: "Ցուցադրել բոլորը",
+        loading: "Բեռնվում է...",
+        adTitle: "Ձեր գովազդը՝ ArmMotors-ում",
+        adText: "Ներկայացրեք ձեր բիզնեսը մեր հարթակում։",
+        adButton: "Կապվել մեզ հետ",
+        previous: "Նախորդ մակնիշները",
+        next: "Հաջորդ մակնիշները",
+    },
+    ru: {
+        eyebrow: "ARMMOTORS · АВТОРЫНОК",
+        title: "Найдите свой следующий автомобиль",
+        description:
+            "Изучайте объявления, сравнивайте предложения и связывайтесь с продавцами.",
+        categories: "Выберите категорию",
+        categoriesSub: "Найдите подходящий автомобиль",
+        latest: "Последние объявления",
+        brands: "Популярные марки",
+        brandsSub: "Выберите любимую марку",
+        listings: "объявлений",
+        all: "Все автомобили",
+        clear: "Сбросить фильтры",
+        empty: "Объявления не найдены",
+        showAll: "Показать все",
+        loading: "Загрузка...",
+        adTitle: "Ваша реклама на ArmMotors",
+        adText: "Расскажите о своем бизнесе на нашей платформе.",
+        adButton: "Связаться с нами",
+        previous: "Предыдущие марки",
+        next: "Следующие марки",
+    },
+    en: {
+        eyebrow: "ARMMOTORS · CAR MARKETPLACE",
+        title: "Find your next car",
+        description:
+            "Explore car listings, compare offers and connect with sellers.",
+        categories: "Explore categories",
+        categoriesSub: "Find the right vehicle for you",
+        latest: "Latest listings",
+        brands: "Popular brands",
+        brandsSub: "Browse your favorite brands",
+        listings: "listings",
+        all: "All cars",
+        clear: "Clear filters",
+        empty: "No listings found",
+        showAll: "Show all",
+        loading: "Loading...",
+        adTitle: "Advertise on ArmMotors",
+        adText: "Promote your business on our marketplace.",
+        adButton: "Contact us",
+        previous: "Previous brands",
+        next: "Next brands",
+    },
+};
+
+function SearchIcon() {
+    return (
+        <svg
+            width="21"
+            height="21"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+        >
+            <circle cx="10.5" cy="10.5" r="6.5" />
+            <path d="m16 16 5 5" />
+        </svg>
+    );
+}
+
+function ArrowIcon() {
+    return (
+        <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+        >
+            <path d="M5 12h14m-6-6 6 6-6 6" />
+        </svg>
+    );
+}
+
+function getProductId(product) {
+    return String(product?._id || product?.id || "");
+}
+
+function isNewCar(product) {
+    const condition = String(product?.condition || "")
+        .trim()
+        .toLowerCase();
+
+    return condition === "new" || condition === "նոր" || condition === "новый";
 }
 
 export default function HomePage() {
-    const { language, t } = useI18n();
     const navigate = useNavigate();
+    const { language } = useI18n();
+
+    const text = COPY[language] || COPY.hy;
 
     const [searchParams, setSearchParams] = useSearchParams();
     const { products = [], loading, error } = useProducts();
 
     const brandsTrackRef = useRef(null);
 
-    const [search, setSearch] = useState("");
-    const [searchFocused, setSearchFocused] = useState(false);
-
     const [brandScroll, setBrandScroll] = useState({
         left: false,
         right: false,
     });
+
+    const allProducts = Array.isArray(products) ? products : [];
 
     const requestedCategory = searchParams.get("category") || "";
 
@@ -101,78 +206,66 @@ export default function HomePage() {
         ? requestedCategory
         : "";
 
-    const PRODUCTS = Array.isArray(products) ? products : [];
+    const filteredProducts = useMemo(() => {
+        const list = Array.isArray(products) ? products : [];
 
-    const normalizedSearch = search.trim().toLowerCase();
+        return list.filter((product) => {
+            if (category === "electric") {
+                return product.type === "car" && product.fuel === "electric";
+            }
 
-    const searchSuggestions = normalizedSearch
-        ? PRODUCTS.filter((product) =>
-              getSearchValues(product).some((value) =>
-                  value.includes(normalizedSearch),
-              ),
-          ).slice(0, 6)
-        : [];
+            if (category === "hybrid") {
+                return product.type === "car" && product.fuel === "hybrid";
+            }
 
-    // =========================================
-    // FILTER PRODUCTS
-    // =========================================
+            if (category === "new") {
+                return product.type === "car" && isNewCar(product);
+            }
 
-    const filteredProducts = PRODUCTS.filter((product) => {
-        const matchesSearch =
-            !normalizedSearch ||
-            getSearchValues(product).some((value) =>
-                value.includes(normalizedSearch),
-            );
+            if (category === "truck") {
+                return (
+                    product.type === "car" && product.vehicleType === "truck"
+                );
+            }
 
-        if (!matchesSearch) return false;
-
-        if (category === "electric") {
-            return product.type === "car" && product.fuel === "electric";
-        }
-
-        if (category === "hybrid") {
-            return product.type === "car" && product.fuel === "hybrid";
-        }
-
-        if (category === "new") {
-            return (
-                product.type === "car" &&
-                (product.condition === "Նոր" || product.condition === "new")
-            );
-        }
-
-        if (category === "truck") {
-            return product.type === "car" && product.vehicleType === "truck";
-        }
-
-        if (category === "part") {
-            return product.type === "part";
-        }
-
-        return true;
-    });
-
-    // Առաջին 8 հայտարարությունները՝ մակնիշներից առաջ
+            return true;
+        });
+    }, [products, category]);
 
     const firstProducts = filteredProducts.slice(0, 8);
     const restProducts = filteredProducts.slice(8);
 
     const selectedCategory = CATEGORIES.find((item) => item.value === category);
 
-    // =========================================
-    // CATEGORY FILTER
-    // =========================================
+    const brandCounts = useMemo(() => {
+        const counts = new Map();
+        const list = Array.isArray(products) ? products : [];
 
-    function updateCategory(value) {
-        const nextParams = new URLSearchParams(searchParams);
+        for (const product of list) {
+            if (product.type !== "car") continue;
 
-        if (value) {
-            nextParams.set("category", value);
-        } else {
-            nextParams.delete("category");
+            const name = String(product.brand || "")
+                .trim()
+                .toLowerCase();
+
+            if (!name) continue;
+
+            counts.set(name, (counts.get(name) || 0) + 1);
         }
 
-        setSearchParams(nextParams, {
+        return counts;
+    }, [products]);
+
+    function updateCategory(value) {
+        const params = new URLSearchParams(searchParams);
+
+        if (value) {
+            params.set("category", value);
+        } else {
+            params.delete("category");
+        }
+
+        setSearchParams(params, {
             replace: true,
             preventScrollReset: true,
         });
@@ -187,18 +280,13 @@ export default function HomePage() {
 
         document.getElementById("products")?.scrollIntoView({
             behavior: reducedMotion ? "auto" : "smooth",
+            block: "start",
         });
     }
 
     function resetFilters() {
-        setSearch("");
-        setSearchFocused(false);
         updateCategory("");
     }
-
-    // =========================================
-    // BUSINESS PROPOSAL
-    // =========================================
 
     function openBusinessProposal() {
         window.dispatchEvent(
@@ -211,16 +299,12 @@ export default function HomePage() {
         );
     }
 
-    // =========================================
-    // CAROUSEL
-    // =========================================
-
     function updateBrandArrows() {
         const track = brandsTrackRef.current;
 
         if (!track) return;
 
-        const maxScroll = track.scrollWidth - track.clientWidth;
+        const maxScroll = Math.max(0, track.scrollWidth - track.clientWidth);
 
         setBrandScroll({
             left: track.scrollLeft > 2,
@@ -239,8 +323,7 @@ export default function HomePage() {
 
         const gap = parseFloat(window.getComputedStyle(track).gap) || 0;
 
-        const cardWidth = card.getBoundingClientRect().width;
-        const distance = (cardWidth + gap) * 2;
+        const distance = (card.getBoundingClientRect().width + gap) * 2;
 
         const reducedMotion = window.matchMedia(
             "(prefers-reduced-motion: reduce)",
@@ -257,48 +340,39 @@ export default function HomePage() {
 
         if (!track) return;
 
-        const update = () => {
-            const maxScroll = track.scrollWidth - track.clientWidth;
-
-            setBrandScroll({
-                left: track.scrollLeft > 2,
-                right: track.scrollLeft < maxScroll - 2,
-            });
-        };
-
-        update();
-
         const observer =
             typeof ResizeObserver !== "undefined"
-                ? new ResizeObserver(update)
+                ? new ResizeObserver(updateBrandArrows)
                 : null;
 
         observer?.observe(track);
 
-        const cards = track.querySelectorAll(".brand-card");
+        track.querySelectorAll(".brand-card").forEach((card) => {
+            observer?.observe(card);
+        });
 
-        cards.forEach((card) => observer?.observe(card));
+        updateBrandArrows();
 
-        window.addEventListener("resize", update);
+        window.addEventListener("resize", updateBrandArrows);
 
         return () => {
             observer?.disconnect();
-            window.removeEventListener("resize", update);
+
+            window.removeEventListener("resize", updateBrandArrows);
         };
     }, [loading]);
-
-    // =========================================
-    // BRANDS AND ADVERTISEMENT
-    // =========================================
 
     function renderBrandsAndAd() {
         return (
             <section className="brands-ad-wrapper brands-ad-middle" id="brands">
                 <div className="brands-section">
                     <div className="section-header brands-carousel-header">
-                        <span className="section-label">
-                            {t("popularBrands")}
-                        </span>
+                        <div>
+                            <span className="section-label">ARMMOTORS</span>
+
+                            <h2>{text.brands}</h2>
+                            <p>{text.brandsSub}</p>
+                        </div>
 
                         <div className="brands-carousel-controls">
                             <button
@@ -306,7 +380,7 @@ export default function HomePage() {
                                 className="brands-carousel-arrow"
                                 onClick={() => scrollBrands(-1)}
                                 disabled={!brandScroll.left}
-                                aria-label="Նախորդ մակնիշները"
+                                aria-label={text.previous}
                             >
                                 ‹
                             </button>
@@ -316,7 +390,7 @@ export default function HomePage() {
                                 className="brands-carousel-arrow"
                                 onClick={() => scrollBrands(1)}
                                 disabled={!brandScroll.right}
-                                aria-label="Հաջորդ մակնիշները"
+                                aria-label={text.next}
                             >
                                 ›
                             </button>
@@ -329,14 +403,8 @@ export default function HomePage() {
                         onScroll={updateBrandArrows}
                     >
                         {BRANDS.map((brand) => {
-                            const count = PRODUCTS.filter(
-                                (product) =>
-                                    product.type === "car" &&
-                                    String(product.brand || "")
-                                        .trim()
-                                        .toLowerCase() ===
-                                        brand.name.toLowerCase(),
-                            ).length;
+                            const count =
+                                brandCounts.get(brand.name.toLowerCase()) || 0;
 
                             return (
                                 <button
@@ -351,20 +419,22 @@ export default function HomePage() {
                                         )
                                     }
                                 >
-                                    <img
-                                        src={asset(brand.logo)}
-                                        alt={brand.name}
-                                        className="brand-logo"
-                                        loading="lazy"
-                                        draggable={false}
-                                    />
+                                    <span className="brand-logo-wrap">
+                                        <img
+                                            src={asset(brand.logo)}
+                                            alt={brand.name}
+                                            className="brand-logo"
+                                            loading="lazy"
+                                            draggable={false}
+                                        />
+                                    </span>
 
                                     <span className="brand-name">
                                         {brand.name}
                                     </span>
 
                                     <small>
-                                        {count} {t("listingCount")}
+                                        {count} {text.listings}
                                     </small>
                                 </button>
                             );
@@ -372,178 +442,61 @@ export default function HomePage() {
                     </div>
                 </div>
 
-                <button
-                    type="button"
-                    className="ad-banner"
-                    onClick={openBusinessProposal}
-                    aria-label="Կապվել ադմինի հետ գովազդի կամ բիզնես առաջարկի համար"
-                    title="Գրել ադմինին՝ գովազդի վերաբերյալ"
-                    style={{
-                        display: "block",
-                        width: "100%",
-                        padding: 0,
-                        cursor: "pointer",
-                        textAlign: "left",
-                        font: "inherit",
-                    }}
-                >
-                    <img
-                        src={asset("/data/armmotors-banner.png")}
-                        alt="Ձեր գովազդը մեր հարթակում․ կապվեք մեզ հետ"
-                        className="ad-image"
-                        loading="lazy"
-                        style={{
-                            display: "block",
-                            width: "100%",
-                            height: "100%",
-                            objectFit: "cover",
-                        }}
-                    />
-                </button>
+                <div className="home-ad-section">
+                    <button
+                        type="button"
+                        className="ad-banner"
+                        onClick={openBusinessProposal}
+                        aria-label={text.adTitle}
+                    >
+                        <img
+                            src={asset("/data/armmotors-banner.png")}
+                            alt={text.adTitle}
+                            className="ad-image"
+                            loading="lazy"
+                        />
+                    </button>
+
+                    <div className="home-ad-bottom">
+                        <div>
+                            <strong>{text.adTitle}</strong>
+                            <span>{text.adText}</span>
+                        </div>
+
+                        <button
+                            type="button"
+                            onClick={openBusinessProposal}
+                            className="home-ad-contact"
+                        >
+                            {text.adButton}
+                            <ArrowIcon />
+                        </button>
+                    </div>
+                </div>
             </section>
         );
     }
 
-    // =========================================
-    // MAIN PAGE
-    // =========================================
-
     return (
         <div className="home-wrapper">
             <main className="main-content">
-                {/* SEARCH */}
+                {/* HERO + SMART SEARCH */}
 
                 <section className="intro-section">
-                    <div
-                        className="home-search-controls"
-                        style={{
-                            display: "flex",
-                            alignItems: "flex-start",
-                            gap: "10px",
-                            width: "100%",
-                            minWidth: 0,
-                        }}
-                    >
-                        <div
-                            className="search-area"
-                            style={{
-                                flex: "1 1 0",
-                                minWidth: 0,
-                            }}
-                            onFocus={() => setSearchFocused(true)}
-                            onBlur={(event) => {
-                                if (
-                                    !event.currentTarget.contains(
-                                        event.relatedTarget,
-                                    )
-                                ) {
-                                    setSearchFocused(false);
-                                }
-                            }}
-                        >
-                            <div className="search-box">
-                                <svg
-                                    width="20"
-                                    height="20"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="1.8"
-                                    aria-hidden="true"
-                                >
-                                    <circle cx="10.5" cy="10.5" r="6.5" />
-                                    <path d="m16 16 5 5" />
-                                </svg>
+                    <div className="home-hero-heading">
+                        <span className="home-hero-eyebrow">
+                            <span className="home-hero-dot" />
+                            {text.eyebrow}
+                        </span>
 
-                                <input
-                                    type="search"
-                                    value={search}
-                                    placeholder={t("searchPlaceholder")}
-                                    aria-label={t("searchPlaceholder")}
-                                    autoComplete="off"
-                                    onChange={(event) =>
-                                        setSearch(event.target.value)
-                                    }
-                                    onKeyDown={(event) => {
-                                        if (event.key === "Escape") {
-                                            setSearchFocused(false);
-                                        }
-                                    }}
-                                />
+                        <h1>{text.title}</h1>
 
-                                {search && (
-                                    <button
-                                        type="button"
-                                        className="search-clear"
-                                        aria-label={t("clearFilters")}
-                                        onClick={() => setSearch("")}
-                                    >
-                                        ×
-                                    </button>
-                                )}
-                            </div>
+                        <p>{text.description}</p>
+                    </div>
 
-                            {/* SEARCH SUGGESTIONS */}
-
-                            {searchFocused && normalizedSearch && (
-                                <div className="search-suggestions">
-                                    {searchSuggestions.length > 0 ? (
-                                        searchSuggestions.map((product) => (
-                                            <button
-                                                type="button"
-                                                className="search-suggestion"
-                                                key={product.id || product._id}
-                                                onMouseDown={(event) =>
-                                                    event.preventDefault()
-                                                }
-                                                onClick={() => {
-                                                    const value =
-                                                        product.title ||
-                                                        [
-                                                            product.brand,
-                                                            product.model,
-                                                        ]
-                                                            .filter(Boolean)
-                                                            .join(" ");
-
-                                                    setSearch(value);
-                                                    setSearchFocused(false);
-                                                }}
-                                            >
-                                                <span className="search-suggestion-main">
-                                                    <strong>
-                                                        {product.title ||
-                                                            [
-                                                                product.brand,
-                                                                product.model,
-                                                            ]
-                                                                .filter(Boolean)
-                                                                .join(" ")}
-                                                    </strong>
-
-                                                    <small>
-                                                        {[
-                                                            product.brand,
-                                                            product.model,
-                                                            product.year,
-                                                        ]
-                                                            .filter(Boolean)
-                                                            .join(" · ")}
-                                                    </small>
-                                                </span>
-
-                                                <span aria-hidden="true">
-                                                    ↗
-                                                </span>
-                                            </button>
-                                        ))
-                                    ) : (
-                                        <p className="search-suggestion-empty">
-                                            {t("noResults")}
-                                        </p>
-                                    )}
-                                </div>
-                            )}
+                    <div className="home-search-controls">
+                        <div className="search-area">
+                            <SmartSearch />
                         </div>
 
                         <Filter />
@@ -552,7 +505,16 @@ export default function HomePage() {
 
                 {/* CATEGORIES */}
 
-                <section className="categories-section" aria-label="Categories">
+                <section className="categories-section">
+                    <div className="section-header">
+                        <div>
+                            <span className="section-label">EXPLORE</span>
+
+                            <h2>{text.categories}</h2>
+                            <p>{text.categoriesSub}</p>
+                        </div>
+                    </div>
+
                     <div className="categories-grid">
                         {CATEGORIES.map((cat) => (
                             <button
@@ -571,10 +533,12 @@ export default function HomePage() {
                                         className="category-image"
                                         src={asset(cat.image)}
                                         alt=""
-                                        draggable={false}
                                         loading="lazy"
+                                        draggable={false}
                                     />
                                 </span>
+
+                                <span className="category-card-arrow">↗</span>
                             </button>
                         ))}
                     </div>
@@ -588,40 +552,60 @@ export default function HomePage() {
                     aria-busy={loading}
                 >
                     <div className="section-header products-heading">
-                        <h2>
-                            {search.trim()
-                                ? t("searchResults")
-                                : selectedCategory
-                                  ? selectedCategory.title[language] ||
-                                    selectedCategory.title.hy
-                                  : t("latestListings")}
-                        </h2>
-                    </div>
+                        <div>
+                            <span className="section-label">ARMMOTORS</span>
 
-                    {(search.trim() || category) && (
+                            <h2>
+                                {selectedCategory
+                                    ? selectedCategory.title[language] ||
+                                      selectedCategory.title.hy
+                                    : text.latest}
+                            </h2>
+                        </div>
+
                         <button
                             type="button"
-                            className="clear-filter-button"
-                            onClick={resetFilters}
+                            className="home-all-cars"
+                            onClick={() => navigate("/cars")}
                         >
-                            {t("clearFilters")}
+                            {text.all}
+                            <ArrowIcon />
                         </button>
+                    </div>
+
+                    {category && (
+                        <div className="home-filter-status">
+                            <span>
+                                {filteredProducts.length} {text.listings}
+                            </span>
+
+                            <button
+                                type="button"
+                                className="clear-filter-button"
+                                onClick={resetFilters}
+                            >
+                                {text.clear}
+                            </button>
+                        </div>
                     )}
 
                     {error && (
                         <p className="catalog-notice" role="alert">
-                            {error}
+                            {String(error)}
                         </p>
                     )}
 
                     {loading ? (
-                        <p role="status">{t("loading")}</p>
+                        <div className="home-loading" role="status">
+                            <span className="home-loading-spinner" />
+                            {text.loading}
+                        </div>
                     ) : filteredProducts.length > 0 ? (
                         <>
                             <div className="products-grid products-grid-leading">
                                 {firstProducts.map((product) => (
                                     <ProductCard
-                                        key={product.id || product._id}
+                                        key={getProductId(product)}
                                         item={product}
                                     />
                                 ))}
@@ -633,7 +617,7 @@ export default function HomePage() {
                                 <div className="products-grid products-grid-trailing">
                                     {restProducts.map((product) => (
                                         <ProductCard
-                                            key={product.id || product._id}
+                                            key={getProductId(product)}
                                             item={product}
                                         />
                                     ))}
@@ -643,10 +627,14 @@ export default function HomePage() {
                     ) : (
                         <>
                             <div className="empty-results">
-                                <p>{t("noResults")}</p>
+                                <div className="empty-results-icon">
+                                    <SearchIcon />
+                                </div>
+
+                                <h3>{text.empty}</h3>
 
                                 <button type="button" onClick={resetFilters}>
-                                    {t("showAll")}
+                                    {text.showAll}
                                 </button>
                             </div>
 
@@ -656,12 +644,13 @@ export default function HomePage() {
                 </section>
             </main>
 
-            {/* FOOTER */}
-
             <footer className="home-footer">
                 <div className="footer-container">
                     <strong>ArmMotors</strong>
-                    <span>{t("headerMarket")}</span>
+
+                    <span>
+                        © {new Date().getFullYear()} · {text.eyebrow}
+                    </span>
                 </div>
             </footer>
         </div>

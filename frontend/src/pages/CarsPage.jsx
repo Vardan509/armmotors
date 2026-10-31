@@ -7,8 +7,10 @@ import SearchableSelect from "../components/filterCar/SearchableSelect";
 import useProducts from "../utils/useProducts";
 import useCurrency from "../utils/useCurrency";
 import { useI18n } from "../utils/i18n";
+import { localizeListingValue } from "../utils/localizeListing";
 
 import { ALL_BRANDS, getModels } from "../data/vehicleCatalog";
+
 import {
     loadArmeniaLocations,
     getRegions,
@@ -18,6 +20,8 @@ import {
 
 import "./CarsPage.css";
 import "../components/filterCar/filter.css";
+
+const PAGE_SIZE = 12;
 
 const EMPTY = {
     brand: "",
@@ -49,227 +53,160 @@ const EMPTY = {
 
 const MULTIPLE = ["headlights", "comfort"];
 
+/*
+ * Հերթականությունը՝ հայերեն, ռուսերեն, անգլերեն։
+ */
 const WORDS = {
-    hy: {
-        title: "Գտեք Ձեր մեքենան",
-        subtitle: "Հայաստանի ավտոմեքենաների հայտարարություններ",
-        all: "Բոլորը",
-        passenger: "Մարդատար",
-        truck: "Բեռնատար",
-        brand: "Մակնիշ",
-        model: "Մոդել",
-        region: "Մարզ",
-        community: "Համայնք",
-        settlement: "Բնակավայր",
-        priceFrom: "Գին՝ սկսած",
-        priceTo: "Գին՝ մինչև",
-        yearFrom: "Տարեթիվ՝ սկսած",
-        yearTo: "Տարեթիվ՝ մինչև",
-        mileageFrom: "Վազք՝ սկսած",
-        mileageTo: "Վազք՝ մինչև",
-        fuel: "Վառելիք",
-        steering: "Ղեկ",
-        color: "Գույն",
-        condition: "Վիճակ",
-        customsCleared: "Մաքսազերծված",
-        paintCondition: "Ներկի վիճակ",
-        gasEquipment: "Գազի սարքավորում",
-        gasCylinderReplaced: "Գազի բալոնը փոխված է",
-        wheelSize: "Անվահեծի չափ",
-        interiorMaterial: "Սրահի նյութ",
-        sunroof: "Լյուկ",
-        headlights: "Լուսարձակներ",
-        comfort: "Հարմարություններ",
-        yes: "Այո",
-        no: "Ոչ",
-        new: "Նոր",
-        used: "Օգտագործված",
-        petrol: "Բենզին",
-        diesel: "Դիզել",
-        gas: "Գազ",
-        hybrid: "Հիբրիդ",
-        electric: "Էլեկտրական",
-        left: "Ձախ",
-        right: "Աջ",
-        apply: "Ցույց տալ արդյունքները",
-        clear: "Մաքրել",
-        found: "Գտնվել է",
-        results: "հայտարարություն",
-        loading: "Բեռնվում է…",
-        empty: "Այս ֆիլտրերով մեքենա չի գտնվել։",
-        any: "Ցանկացած",
-        select: "Ընտրել",
-        filters: "Ֆիլտրեր",
-        retry: "Կրկին փորձել",
-        allOptions: "Բոլոր տարբերակները",
-        close: "Փակել",
-        advanced: "Ընդլայնված ֆիլտրեր",
-        mainFilters: "Հիմնական տվյալներ",
-        priceYear: "Գին, տարեթիվ և վազք",
-        specifications: "Տեխնիկական տվյալներ",
-        extras: "Լրացուցիչ տվյալներ",
-        sort: "Դասավորել",
-        newest: "Նորերը սկզբում",
-        oldest: "Հները սկզբում",
-        cheap: "Էժանները սկզբում",
-        expensive: "Թանկերը սկզբում",
-        active: "Ակտիվ ֆիլտրեր",
-    },
-    ru: {
-        title: "Найдите свой автомобиль",
-        subtitle: "Объявления об автомобилях в Армении",
-        all: "Все",
-        passenger: "Легковые",
-        truck: "Грузовые",
-        brand: "Марка",
-        model: "Модель",
-        region: "Область",
-        community: "Община",
-        settlement: "Населённый пункт",
-        priceFrom: "Цена от",
-        priceTo: "Цена до",
-        yearFrom: "Год от",
-        yearTo: "Год до",
-        mileageFrom: "Пробег от",
-        mileageTo: "Пробег до",
-        fuel: "Топливо",
-        steering: "Руль",
-        color: "Цвет",
-        condition: "Состояние",
-        customsCleared: "Растаможен",
-        paintCondition: "Состояние краски",
-        gasEquipment: "Газовое оборудование",
-        gasCylinderReplaced: "Газовый баллон заменён",
-        wheelSize: "Размер дисков",
-        interiorMaterial: "Материал салона",
-        sunroof: "Люк",
-        headlights: "Фары",
-        comfort: "Комфорт",
-        yes: "Да",
-        no: "Нет",
-        new: "Новый",
-        used: "Б/у",
-        petrol: "Бензин",
-        diesel: "Дизель",
-        gas: "Газ",
-        hybrid: "Гибрид",
-        electric: "Электро",
-        left: "Левый",
-        right: "Правый",
-        apply: "Показать результаты",
-        clear: "Сбросить",
-        found: "Найдено",
-        results: "объявлений",
-        loading: "Загрузка…",
-        empty: "Автомобили не найдены.",
-        any: "Любой",
-        select: "Выбрать",
-        filters: "Фильтры",
-        retry: "Повторить",
-        allOptions: "Все варианты",
-        close: "Закрыть",
-        advanced: "Расширенные фильтры",
-        mainFilters: "Основные данные",
-        priceYear: "Цена, год и пробег",
-        specifications: "Характеристики",
-        extras: "Дополнительно",
-        sort: "Сортировка",
-        newest: "Сначала новые",
-        oldest: "Сначала старые",
-        cheap: "Сначала дешёвые",
-        expensive: "Сначала дорогие",
-        active: "Активные фильтры",
-    },
-    en: {
-        title: "Find your next car",
-        subtitle: "Car listings across Armenia",
-        all: "All",
-        passenger: "Passenger",
-        truck: "Trucks",
-        brand: "Brand",
-        model: "Model",
-        region: "Region",
-        community: "Community",
-        settlement: "Settlement",
-        priceFrom: "Price from",
-        priceTo: "Price to",
-        yearFrom: "Year from",
-        yearTo: "Year to",
-        mileageFrom: "Mileage from",
-        mileageTo: "Mileage to",
-        fuel: "Fuel",
-        steering: "Steering",
-        color: "Color",
-        condition: "Condition",
-        customsCleared: "Customs cleared",
-        paintCondition: "Paint condition",
-        gasEquipment: "Gas equipment",
-        gasCylinderReplaced: "Gas cylinder replaced",
-        wheelSize: "Wheel size",
-        interiorMaterial: "Interior material",
-        sunroof: "Sunroof",
-        headlights: "Headlights",
-        comfort: "Comfort",
-        yes: "Yes",
-        no: "No",
-        new: "New",
-        used: "Used",
-        petrol: "Petrol",
-        diesel: "Diesel",
-        gas: "Gas",
-        hybrid: "Hybrid",
-        electric: "Electric",
-        left: "Left",
-        right: "Right",
-        apply: "Show results",
-        clear: "Clear",
-        found: "Found",
-        results: "listings",
-        loading: "Loading…",
-        empty: "No cars match these filters.",
-        any: "Any",
-        select: "Select",
-        filters: "Filters",
-        retry: "Try again",
-        allOptions: "All options",
-        close: "Close",
-        advanced: "Advanced filters",
-        mainFilters: "Basic information",
-        priceYear: "Price, year and mileage",
-        specifications: "Specifications",
-        extras: "Additional features",
-        sort: "Sort by",
-        newest: "Newest first",
-        oldest: "Oldest first",
-        cheap: "Price: low to high",
-        expensive: "Price: high to low",
-        active: "Active filters",
-    },
-};
-
-const COMFORT_LABELS = {
+    all: ["Բոլորը", "Все", "All"],
+    passenger: ["Մարդատար", "Легковые", "Passenger cars"],
+    truck: ["Բեռնատար", "Грузовые", "Trucks"],
+    vehicleType: ["Տրանսպորտի տեսակ", "Тип транспорта", "Vehicle type"],
+    brand: ["Մակնիշ", "Марка", "Brand"],
+    model: ["Մոդել", "Модель", "Model"],
+    region: ["Մարզ", "Область", "Region"],
+    community: ["Համայնք", "Община", "Community"],
+    settlement: ["Բնակավայր", "Населённый пункт", "Settlement"],
+    priceFrom: ["Գին՝ սկսած", "Цена от", "Price from"],
+    priceTo: ["Գին՝ մինչև", "Цена до", "Price to"],
+    yearFrom: ["Տարեթիվ՝ սկսած", "Год от", "Year from"],
+    yearTo: ["Տարեթիվ՝ մինչև", "Год до", "Year to"],
+    mileageFrom: ["Վազք՝ սկսած", "Пробег от", "Mileage from"],
+    mileageTo: ["Վազք՝ մինչև", "Пробег до", "Mileage to"],
+    fuel: ["Վառելիք", "Топливо", "Fuel"],
+    steering: ["Ղեկ", "Руль", "Steering"],
+    color: ["Գույն", "Цвет", "Color"],
+    condition: ["Վիճակ", "Состояние", "Condition"],
+    vin: ["VIN-ի առկայություն", "Наличие VIN", "VIN available"],
+    customsCleared: ["Մաքսազերծված", "Растаможен", "Customs cleared"],
+    paintCondition: ["Ներկի վիճակ", "Состояние краски", "Paint condition"],
+    gasEquipment: ["Գազի սարքավորում", "Газовое оборудование", "Gas equipment"],
+    gasCylinderReplaced: [
+        "Գազի բալոնը փոխված է",
+        "Газовый баллон заменён",
+        "Gas cylinder replaced",
+    ],
+    wheelSize: ["Անվահեծի չափ", "Размер дисков", "Wheel size"],
+    interiorMaterial: ["Սրահի նյութ", "Материал салона", "Interior material"],
+    sunroof: ["Լյուկ", "Люк", "Sunroof"],
+    headlights: ["Լուսարձակներ", "Фары", "Headlights"],
+    comfort: ["Հարմարություններ", "Комфорт", "Comfort"],
+    yes: ["Այո", "Да", "Yes"],
+    no: ["Ոչ", "Нет", "No"],
+    new: ["Նոր", "Новый", "New"],
+    used: ["Օգտագործված", "Б/у", "Used"],
+    petrol: ["Բենզին", "Бензин", "Petrol"],
+    diesel: ["Դիզել", "Дизель", "Diesel"],
+    gas: ["Գազ", "Газ", "Gas"],
+    hybrid: ["Հիբրիդ", "Гибрид", "Hybrid"],
+    electric: ["Էլեկտրական", "Электрический", "Electric"],
+    left: ["Ձախ", "Левый", "Left"],
+    right: ["Աջ", "Правый", "Right"],
+    apply: ["Ցույց տալ արդյունքները", "Показать результаты", "Show results"],
+    clear: ["Մաքրել", "Сбросить", "Clear"],
+    found: ["Գտնվել է", "Найдено", "Found"],
+    results: ["հայտարարություն", "объявлений", "listings"],
+    loading: ["Բեռնվում է…", "Загрузка…", "Loading…"],
+    empty: [
+        "Այս ֆիլտրերով մեքենա չի գտնվել։",
+        "Автомобили не найдены.",
+        "No cars match these filters.",
+    ],
+    any: ["Ցանկացած", "Любой", "Any"],
+    select: ["Ընտրել", "Выбрать", "Select"],
+    filters: ["Ֆիլտրեր", "Фильтры", "Filters"],
+    retry: ["Կրկին փորձել", "Повторить", "Try again"],
+    allOptions: ["Բոլոր տարբերակները", "Все варианты", "All options"],
+    close: ["Փակել", "Закрыть", "Close"],
+    advanced: ["Ընդլայնված ֆիլտրեր", "Расширенные фильтры", "Advanced filters"],
+    mainFilters: ["Հիմնական տվյալներ", "Основные данные", "Basic information"],
+    priceYear: [
+        "Գին, տարեթիվ և վազք",
+        "Цена, год и пробег",
+        "Price, year and mileage",
+    ],
+    specifications: ["Տեխնիկական տվյալներ", "Характеристики", "Specifications"],
+    sort: ["Դասավորել", "Сортировка", "Sort by"],
+    newest: ["Նորերը սկզբում", "Сначала новые", "Newest first"],
+    oldest: ["Հները սկզբում", "Сначала старые", "Oldest first"],
+    cheap: ["Էժանները սկզբում", "Сначала дешёвые", "Price: low to high"],
+    expensive: ["Թանկերը սկզբում", "Сначала дорогие", "Price: high to low"],
+    pagination: ["Էջավորում", "Страницы", "Pagination"],
+    previous: ["Նախորդ էջ", "Предыдущая страница", "Previous page"],
+    next: ["Հաջորդ էջ", "Следующая страница", "Next page"],
+    error: [
+        "Հայտարարությունները բեռնել չհաջողվեց։",
+        "Не удалось загрузить объявления.",
+        "Could not load listings.",
+    ],
+    locationError: [
+        "Տեղանունների ցանկը բեռնել չհաջողվեց։",
+        "Не удалось загрузить список населённых пунктов.",
+        "Could not load the location list.",
+    ],
+    original: ["Գործարանային ներկ", "Заводская краска", "Original paint"],
+    repainted: ["Վերաներկված", "Перекрашен", "Repainted"],
+    installed: ["Տեղադրված է", "Установлено", "Installed"],
+    notInstalled: ["Տեղադրված չէ", "Не установлено", "Not installed"],
+    fabric: ["Կտոր", "Ткань", "Fabric"],
+    leather: ["Կաշի", "Кожа", "Leather"],
+    artificial: ["Արհեստական կաշի", "Искусственная кожа", "Artificial leather"],
+    alcantara: ["Ալկանտարա", "Алькантара", "Alcantara"],
+    other: ["Այլ", "Другое", "Other"],
+    standard: ["Սովորական լյուկ", "Обычный люк", "Standard sunroof"],
+    panoramic: ["Պանորամային լյուկ", "Панорамный люк", "Panoramic sunroof"],
+    none: ["Չկա", "Отсутствует", "None"],
+    halogen: ["Հալոգեն", "Галогенные", "Halogen"],
+    xenon: ["Քսենոն", "Ксеноновые", "Xenon"],
+    led: ["LED", "Светодиодные", "LED"],
+    black: ["Սև", "Чёрный", "Black"],
+    white: ["Սպիտակ", "Белый", "White"],
+    silver: ["Արծաթագույն", "Серебристый", "Silver"],
+    gray: ["Մոխրագույն", "Серый", "Gray"],
+    red: ["Կարմիր", "Красный", "Red"],
+    blue: ["Կապույտ", "Синий", "Blue"],
+    green: ["Կանաչ", "Зелёный", "Green"],
+    yellow: ["Դեղին", "Жёлтый", "Yellow"],
+    brown: ["Շագանակագույն", "Коричневый", "Brown"],
+    gold: ["Ոսկեգույն", "Золотой", "Gold"],
+    beige: ["Բեժ", "Бежевый", "Beige"],
     airConditioning: ["Օդորակիչ", "Кондиционер", "Air conditioning"],
-    climateControl: ["Կլիմատ կոնտրոլ", "Климат-контроль", "Climate control"],
-    heatedSeats: ["Տաքացվող նստատեղեր", "Подогрев сидений", "Heated seats"],
+    climateControl: ["Կլիմատ-կոնտրոլ", "Климат-контроль", "Climate control"],
+    heatedSeats: ["Նստատեղերի տաքացում", "Подогрев сидений", "Heated seats"],
     ventilatedSeats: [
-        "Օդափոխվող նստատեղեր",
+        "Նստատեղերի օդափոխություն",
         "Вентиляция сидений",
         "Ventilated seats",
     ],
-    heatedSteering: ["Տաքացվող ղեկ", "Подогрев руля", "Heated steering"],
+    heatedSteering: ["Ղեկի տաքացում", "Подогрев руля", "Heated steering wheel"],
     heatedWindshield: [
-        "Տաքացվող դիմապակի",
-        "Обогрев стекла",
+        "Դիմապակու տաքացում",
+        "Обогрев лобового стекла",
         "Heated windshield",
     ],
-    cruiseControl: ["Կրուիզ կոնտրոլ", "Круиз-контроль", "Cruise control"],
-    adaptiveCruise: ["Ադապտիվ կրուիզ", "Адаптивный круиз", "Adaptive cruise"],
-    parkingSensors: ["Պարկտրոնիկ", "Парктроники", "Parking sensors"],
+    cruiseControl: ["Կրուիզ-կոնտրոլ", "Круиз-контроль", "Cruise control"],
+    adaptiveCruise: [
+        "Ադապտիվ կրուիզ-կոնտրոլ",
+        "Адаптивный круиз-контроль",
+        "Adaptive cruise control",
+    ],
+    parkingSensors: ["Կայանման սենսորներ", "Парктроники", "Parking sensors"],
     rearCamera: ["Հետևի տեսախցիկ", "Камера заднего вида", "Rear camera"],
     camera360: ["360° տեսախցիկ", "Камера 360°", "360° camera"],
-    keylessEntry: ["Առանց բանալի մուտք", "Бесключевой доступ", "Keyless entry"],
-    startStop: ["Start / Stop", "Start / Stop", "Start / Stop"],
-    electricSeats: ["Էլեկտրական նստատեղեր", "Электросиденья", "Power seats"],
+    keylessEntry: [
+        "Առանց բանալիի մուտք",
+        "Бесключевой доступ",
+        "Keyless entry",
+    ],
+    startStop: [
+        "Start/Stop համակարգ",
+        "Система Start/Stop",
+        "Start/Stop system",
+    ],
+    electricSeats: [
+        "Էլեկտրական նստատեղեր",
+        "Электрорегулировка сидений",
+        "Power seats",
+    ],
     memorySeats: ["Նստատեղերի հիշողություն", "Память сидений", "Memory seats"],
     navigation: ["Նավիգացիա", "Навигация", "Navigation"],
     bluetooth: ["Bluetooth", "Bluetooth", "Bluetooth"],
@@ -277,14 +214,44 @@ const COMFORT_LABELS = {
     androidAuto: ["Android Auto", "Android Auto", "Android Auto"],
 };
 
-const COMFORT = Object.keys(COMFORT_LABELS);
+const COMFORT = [
+    "airConditioning",
+    "climateControl",
+    "heatedSeats",
+    "ventilatedSeats",
+    "heatedSteering",
+    "heatedWindshield",
+    "cruiseControl",
+    "adaptiveCruise",
+    "parkingSensors",
+    "rearCamera",
+    "camera360",
+    "keylessEntry",
+    "startStop",
+    "electricSeats",
+    "memorySeats",
+    "navigation",
+    "bluetooth",
+    "appleCarplay",
+    "androidAuto",
+];
+
+const REGION_NAMES = {
+    Երևան: ["Երևան", "Ереван", "Yerevan"],
+    Արագածոտն: ["Արագածոտն", "Арагацотн", "Aragatsotn"],
+    Արարատ: ["Արարատ", "Арарат", "Ararat"],
+    Արմավիր: ["Արմավիր", "Армавир", "Armavir"],
+    Գեղարքունիք: ["Գեղարքունիք", "Гегаркуник", "Gegharkunik"],
+    Կոտայք: ["Կոտայք", "Котайк", "Kotayk"],
+    Լոռի: ["Լոռի", "Лори", "Lori"],
+    Շիրակ: ["Շիրակ", "Ширак", "Shirak"],
+    Սյունիք: ["Սյունիք", "Сюник", "Syunik"],
+    Տավուշ: ["Տավուշ", "Тавуш", "Tavush"],
+    "Վայոց ձոր": ["Վայոց ձոր", "Вайоц Дзор", "Vayots Dzor"],
+};
 
 function emptyFilters() {
-    return {
-        ...EMPTY,
-        headlights: [],
-        comfort: [],
-    };
+    return { ...EMPTY, headlights: [], comfort: [] };
 }
 
 function fromQuery(params) {
@@ -299,15 +266,26 @@ function fromQuery(params) {
     return result;
 }
 
-function same(a, b) {
-    return (
-        String(a ?? "")
-            .trim()
-            .toLowerCase() ===
-        String(b ?? "")
-            .trim()
-            .toLowerCase()
-    );
+function normalize(value) {
+    return String(value ?? "")
+        .trim()
+        .toLocaleLowerCase()
+        .replace(/և/g, "եւ");
+}
+
+function canonical(value) {
+    const normalized = normalize(value);
+
+    for (const [key, labels] of Object.entries(WORDS)) {
+        if (
+            normalize(key) === normalized ||
+            labels.some((label) => normalize(label) === normalized)
+        ) {
+            return key;
+        }
+    }
+
+    return normalized;
 }
 
 function inRange(value, from, to) {
@@ -319,9 +297,8 @@ function inRange(value, from, to) {
 
     const number = Number(value);
 
-    if (!Number.isFinite(number)) return false;
-
     return (
+        Number.isFinite(number) &&
         (from === "" || number >= Number(from)) &&
         (to === "" || number <= Number(to))
     );
@@ -336,8 +313,9 @@ function matches(car, filters, convert, currency) {
 
     if (!inRange(price, filters.priceFrom, filters.priceTo)) return false;
     if (!inRange(car.year, filters.yearFrom, filters.yearTo)) return false;
-    if (!inRange(car.mileage, filters.mileageFrom, filters.mileageTo))
+    if (!inRange(car.mileage, filters.mileageFrom, filters.mileageTo)) {
         return false;
+    }
 
     const exact = [
         "brand",
@@ -349,17 +327,41 @@ function matches(car, filters, convert, currency) {
         "steering",
         "color",
         "customsCleared",
+        "condition",
         "paintCondition",
         "gasEquipment",
         "gasCylinderReplaced",
         "wheelSize",
         "interiorMaterial",
         "sunroof",
-        "condition",
     ];
 
+    const translatedFields = new Set([
+        "fuel",
+        "steering",
+        "color",
+        "customsCleared",
+        "condition",
+        "paintCondition",
+        "gasEquipment",
+        "gasCylinderReplaced",
+        "interiorMaterial",
+        "sunroof",
+    ]);
+
     for (const key of exact) {
-        if (filters[key] && !same(car[key], filters[key])) {
+        if (!filters[key]) continue;
+
+        let actual = car[key];
+
+        if (actual === true) actual = "yes";
+        if (actual === false) actual = "no";
+
+        const normalizeField = translatedFields.has(key)
+            ? canonical
+            : normalize;
+
+        if (normalizeField(actual) !== normalizeField(filters[key])) {
             return false;
         }
     }
@@ -372,9 +374,21 @@ function matches(car, filters, convert, currency) {
     }
 
     for (const key of MULTIPLE) {
-        const available = Array.isArray(car[key]) ? car[key] : [];
+        const values =
+            key === "comfort"
+                ? [
+                      ...(Array.isArray(car.comfort) ? car.comfort : []),
+                      ...(Array.isArray(car.comfortOptions)
+                          ? car.comfortOptions
+                          : []),
+                  ]
+                : Array.isArray(car[key])
+                  ? car[key]
+                  : [];
 
-        if (!filters[key].every((value) => available.includes(value))) {
+        const available = new Set(values.map(canonical));
+
+        if (!filters[key].every((value) => available.has(canonical(value)))) {
             return false;
         }
     }
@@ -384,16 +398,14 @@ function matches(car, filters, convert, currency) {
 
 function Field({ label, children }) {
     return (
-        <label className="am-catalog-field">
+        <div className="am-catalog-field">
             <span>{label}</span>
             {children}
-        </label>
+        </div>
     );
 }
 
 function Pills({ label, value, options, onChange, multiple = false }) {
-    const selected = multiple ? value || [] : value;
-
     return (
         <div className="am-pill-field">
             <span className="am-pill-label">{label}</span>
@@ -401,8 +413,8 @@ function Pills({ label, value, options, onChange, multiple = false }) {
             <div className="am-pill-list">
                 {options.map(([key, text]) => {
                     const active = multiple
-                        ? selected.includes(key)
-                        : selected === key;
+                        ? value.includes(key)
+                        : value === key;
 
                     return (
                         <button
@@ -411,17 +423,17 @@ function Pills({ label, value, options, onChange, multiple = false }) {
                             className={`am-pill ${active ? "active" : ""}`}
                             aria-pressed={active}
                             onClick={() => {
-                                if (multiple) {
-                                    onChange(
-                                        active
-                                            ? selected.filter(
+                                onChange(
+                                    multiple
+                                        ? active
+                                            ? value.filter(
                                                   (item) => item !== key,
                                               )
-                                            : [...selected, key],
-                                    );
-                                } else {
-                                    onChange(active ? "" : key);
-                                }
+                                            : [...value, key]
+                                        : active
+                                          ? ""
+                                          : key,
+                                );
                             }}
                         >
                             {text}
@@ -435,20 +447,24 @@ function Pills({ label, value, options, onChange, multiple = false }) {
 
 export default function CarsPage() {
     const { language } = useI18n();
-    const w = WORDS[language] || WORDS.hy;
+    const languageIndex = language === "ru" ? 1 : language === "en" ? 2 : 0;
+    const word = (key) => WORDS[key]?.[languageIndex] || key;
 
     const [params, setParams] = useSearchParams();
+
     const [filters, setFilters] = useState(() => fromQuery(params));
+
     const [vehicleType, setVehicleType] = useState(
         params.get("vehicleType") || "all",
     );
 
-    const [locationsReady, setLocationsReady] = useState(false);
+    const [locations, setLocations] = useState(null);
+    const [locationError, setLocationError] = useState(false);
+
     const [mobileOpen, setMobileOpen] = useState(false);
     const [advancedOpen, setAdvancedOpen] = useState(false);
     const [sort, setSort] = useState("newest");
     const [page, setPage] = useState(1);
-    const PAGE_SIZE = 12;
 
     const { products = [], loading, error, retry } = useProducts();
     const { convert, currency } = useCurrency();
@@ -459,17 +475,25 @@ export default function CarsPage() {
     }, [params]);
 
     useEffect(() => {
-        let active = true;
+        let cancelled = false;
 
-        Promise.resolve()
-            .then(() => loadArmeniaLocations())
-            .catch(() => null)
-            .finally(() => {
-                if (active) setLocationsReady(true);
-            });
+        async function loadLocations() {
+            try {
+                const data = await loadArmeniaLocations();
+
+                if (!cancelled) {
+                    setLocations(data);
+                    setLocationError(false);
+                }
+            } catch {
+                if (!cancelled) setLocationError(true);
+            }
+        }
+
+        void loadLocations();
 
         return () => {
-            active = false;
+            cancelled = true;
         };
     }, []);
 
@@ -480,9 +504,7 @@ export default function CarsPage() {
         document.body.style.overflow = "hidden";
 
         function onEscape(event) {
-            if (event.key === "Escape") {
-                setMobileOpen(false);
-            }
+            if (event.key === "Escape") setMobileOpen(false);
         }
 
         document.addEventListener("keydown", onEscape);
@@ -493,34 +515,34 @@ export default function CarsPage() {
         };
     }, [mobileOpen]);
 
-    const regions = locationsReady ? getRegions() : [];
+    useEffect(() => {
+        setPage(1);
+    }, [filters, vehicleType, sort]);
 
-    const communities =
-        locationsReady && filters.region ? getCommunities(filters.region) : [];
+    const filtered = useMemo(
+        () =>
+            products.filter((product) => {
+                if (product.type !== "car") return false;
+                if (product.status === "draft") return false;
 
-    const settlements =
-        locationsReady && filters.region && filters.community
-            ? getSettlements(filters.region, filters.community)
-            : [];
+                if (
+                    vehicleType &&
+                    vehicleType !== "all" &&
+                    product.vehicleType !== vehicleType
+                ) {
+                    return false;
+                }
 
-    const filtered = useMemo(() => {
-        return products.filter((product) => {
-            if (product.type !== "car") return false;
-            if (product.status === "draft") return false;
-
-            if (vehicleType !== "all" && product.vehicleType !== vehicleType) {
-                return false;
-            }
-
-            return matches(product, filters, convert, currency);
-        });
-    }, [products, filters, vehicleType, convert, currency]);
+                return matches(product, filters, convert, currency);
+            }),
+        [products, filters, vehicleType, convert, currency],
+    );
 
     const sorted = useMemo(() => {
         const list = [...filtered];
 
         const price = (item) => {
-            const converted = Number(
+            const value = Number(
                 convert(
                     Number(item.price || 0),
                     currency,
@@ -528,41 +550,38 @@ export default function CarsPage() {
                 ),
             );
 
-            return Number.isFinite(converted) ? converted : 0;
+            return Number.isFinite(value) ? value : 0;
         };
 
         const date = (item) => new Date(item.createdAt || 0).getTime() || 0;
 
-        switch (sort) {
-            case "oldest":
-                return list.sort((a, b) => date(a) - date(b));
-
-            case "cheap":
-                return list.sort((a, b) => price(a) - price(b));
-
-            case "expensive":
-                return list.sort((a, b) => price(b) - price(a));
-
-            default:
-                return list.sort((a, b) => date(b) - date(a));
+        if (sort === "oldest") {
+            return list.sort((a, b) => date(a) - date(b));
         }
+
+        if (sort === "cheap") {
+            return list.sort((a, b) => price(a) - price(b));
+        }
+
+        if (sort === "expensive") {
+            return list.sort((a, b) => price(b) - price(a));
+        }
+
+        return list.sort((a, b) => date(b) - date(a));
     }, [filtered, sort, convert, currency]);
 
     const totalPages = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE));
     const currentPage = Math.min(page, totalPages);
+
     const paginated = sorted.slice(
         (currentPage - 1) * PAGE_SIZE,
         currentPage * PAGE_SIZE,
     );
 
-    useEffect(() => {
-        setPage(1);
-    }, [filters, vehicleType, sort]);
-
     const activeCount =
         Object.values(filters).filter((value) =>
             Array.isArray(value) ? value.length > 0 : value !== "",
-        ).length + (vehicleType !== "all" ? 1 : 0);
+        ).length + (vehicleType !== "all" && vehicleType ? 1 : 0);
 
     function change(key, value) {
         setFilters((previous) => {
@@ -575,9 +594,7 @@ export default function CarsPage() {
                 next.settlement = "";
             }
 
-            if (key === "community") {
-                next.settlement = "";
-            }
+            if (key === "community") next.settlement = "";
 
             return next;
         });
@@ -588,7 +605,7 @@ export default function CarsPage() {
 
         const next = new URLSearchParams();
 
-        if (vehicleType !== "all") {
+        if (vehicleType && vehicleType !== "all") {
             next.set("vehicleType", vehicleType);
         }
 
@@ -607,16 +624,18 @@ export default function CarsPage() {
     function clear() {
         setFilters(emptyFilters());
         setVehicleType("all");
+        setPage(1);
         setParams(new URLSearchParams());
     }
 
     function numberField(key) {
         return (
-            <Field key={key} label={w[key]}>
+            <Field key={key} label={word(key)}>
                 <input
                     type="number"
                     min="0"
-                    placeholder={w.any}
+                    aria-label={word(key)}
+                    placeholder={word("any")}
                     value={filters[key]}
                     onChange={(event) => change(key, event.target.value)}
                 />
@@ -624,14 +643,16 @@ export default function CarsPage() {
         );
     }
 
-    function selectField(key, options) {
+    function selectField(key, options, disabled = false) {
         return (
-            <Field key={key} label={w[key]}>
+            <Field key={key} label={word(key)}>
                 <select
+                    aria-label={word(key)}
                     value={filters[key]}
+                    disabled={disabled}
                     onChange={(event) => change(key, event.target.value)}
                 >
-                    <option value="">{w.allOptions}</option>
+                    <option value="">{word("allOptions")}</option>
 
                     {options.map(([value, label]) => (
                         <option key={value} value={value}>
@@ -643,19 +664,63 @@ export default function CarsPage() {
         );
     }
 
-    function locationOptions(items) {
-        return items.map((item) => [
-            typeof item === "string" ? item : item.value || item.name,
-            typeof item === "string" ? item : item.label || item.name,
-        ]);
+    function optionList(keys) {
+        return keys.map((key) => [key, word(key)]);
     }
 
-    const booleanOptions = [
-        ["yes", w.yes],
-        ["no", w.no],
-    ];
+    function locationOptions(options, rawItems = []) {
+        return options.map((option) => {
+            const value = option.value;
+            const raw = rawItems.find(
+                (item) =>
+                    (option.id && item.id === option.id) ||
+                    (item.name?.local || item.name?.en) === value,
+            );
 
-    const localeIndex = language === "ru" ? 1 : language === "en" ? 2 : 0;
+            const regional = REGION_NAMES[value]?.[languageIndex];
+
+            const translated =
+                language === "hy" ? raw?.name?.local : raw?.name?.[language];
+
+            return [
+                value,
+                translated ||
+                    regional ||
+                    localizeListingValue(option.label || value, language),
+            ];
+        });
+    }
+
+    const regions = locationOptions(getRegions(locations), locations?.regions);
+
+    const communities = locationOptions(
+        getCommunities(locations, filters.region),
+        locations?.communities,
+    );
+
+    const settlements = locationOptions(
+        getSettlements(locations, filters.region, filters.community),
+        locations?.settlements,
+    );
+
+    const booleanOptions = optionList(["yes", "no"]);
+
+    function sortSelect(className) {
+        return (
+            <select
+                aria-label={word("sort")}
+                className={className}
+                value={sort}
+                onChange={(event) => setSort(event.target.value)}
+            >
+                {["newest", "oldest", "cheap", "expensive"].map((key) => (
+                    <option key={key} value={key}>
+                        {word(key)}
+                    </option>
+                ))}
+            </select>
+        );
+    }
 
     return (
         <main className="cars-page">
@@ -667,32 +732,25 @@ export default function CarsPage() {
                     aria-expanded={mobileOpen}
                     aria-controls="cars-filter-panel"
                 >
-                    <span className="cars-filter-symbol">☷</span>
-                    {w.filters}
+                    <span className="cars-filter-symbol" aria-hidden="true">
+                        ☷
+                    </span>
+
+                    {word("filters")}
 
                     {activeCount > 0 && (
                         <span className="cars-filter-count">{activeCount}</span>
                     )}
                 </button>
 
-                <select
-                    aria-label={w.sort}
-                    className="cars-mobile-sort"
-                    value={sort}
-                    onChange={(event) => setSort(event.target.value)}
-                >
-                    <option value="newest">{w.newest}</option>
-                    <option value="oldest">{w.oldest}</option>
-                    <option value="cheap">{w.cheap}</option>
-                    <option value="expensive">{w.expensive}</option>
-                </select>
+                {sortSelect("cars-mobile-sort")}
             </div>
 
             {mobileOpen && (
                 <button
                     type="button"
                     className="cars-filter-backdrop"
-                    aria-label={w.close}
+                    aria-label={word("close")}
                     onClick={() => setMobileOpen(false)}
                 />
             )}
@@ -701,18 +759,18 @@ export default function CarsPage() {
                 <aside
                     id="cars-filter-panel"
                     className={`cars-filters ${mobileOpen ? "is-open" : ""}`}
-                    aria-label={w.filters}
+                    aria-label={word("filters")}
                 >
                     <div className="cars-filter-top">
                         <div>
-                            <h2>{w.filters}</h2>
+                            <h2>{word("filters")}</h2>
                         </div>
 
                         <button
                             type="button"
                             className="cars-filter-close"
                             onClick={() => setMobileOpen(false)}
-                            aria-label={w.close}
+                            aria-label={word("close")}
                         >
                             ×
                         </button>
@@ -721,94 +779,107 @@ export default function CarsPage() {
                     <form onSubmit={apply}>
                         <div className="cars-filter-scroll">
                             <div className="cars-filter-section">
-                                <h3>{w.mainFilters}</h3>
+                                <h3>{word("mainFilters")}</h3>
 
                                 <Pills
-                                    label={w.all}
+                                    label={word("vehicleType")}
                                     value={vehicleType}
-                                    options={[
-                                        ["all", w.all],
-                                        ["passenger", w.passenger],
-                                        ["truck", w.truck],
-                                    ]}
-                                    onChange={setVehicleType}
+                                    options={optionList([
+                                        "all",
+                                        "passenger",
+                                        "truck",
+                                    ])}
+                                    onChange={(value) =>
+                                        setVehicleType(value || "all")
+                                    }
                                 />
 
-                                <Field label={w.brand}>
+                                <Field label={word("brand")}>
                                     <SearchableSelect
+                                        label={word("brand")}
                                         value={filters.brand}
                                         options={ALL_BRANDS}
                                         onChange={(value) =>
                                             change("brand", value)
                                         }
-                                        placeholder={w.select}
+                                        placeholder={word("select")}
                                     />
                                 </Field>
 
-                                <Field label={w.model}>
+                                <Field label={word("model")}>
                                     <SearchableSelect
+                                        label={word("model")}
                                         value={filters.model}
                                         options={
                                             filters.brand
                                                 ? getModels(filters.brand)
                                                 : []
                                         }
+                                        disabled={!filters.brand}
                                         onChange={(value) =>
                                             change("model", value)
                                         }
-                                        placeholder={w.select}
+                                        placeholder={word("select")}
                                     />
                                 </Field>
 
-                                {selectField(
-                                    "region",
-                                    locationOptions(regions),
+                                {locationError && (
+                                    <p role="status">{word("locationError")}</p>
                                 )}
+
+                                {selectField("region", regions, !locations)}
 
                                 {selectField(
                                     "community",
-                                    locationOptions(communities),
+                                    communities,
+                                    !filters.region || !locations,
                                 )}
 
                                 {selectField(
                                     "settlement",
-                                    locationOptions(settlements),
+                                    settlements,
+                                    !filters.community || !locations,
                                 )}
                             </div>
 
                             <div className="cars-filter-section">
-                                <h3>{w.priceYear}</h3>
+                                <h3>{word("priceYear")}</h3>
 
                                 <div className="am-filter-grid">
-                                    {numberField("priceFrom")}
-                                    {numberField("priceTo")}
-                                    {numberField("yearFrom")}
-                                    {numberField("yearTo")}
-                                    {numberField("mileageFrom")}
-                                    {numberField("mileageTo")}
+                                    {[
+                                        "priceFrom",
+                                        "priceTo",
+                                        "yearFrom",
+                                        "yearTo",
+                                        "mileageFrom",
+                                        "mileageTo",
+                                    ].map(numberField)}
                                 </div>
                             </div>
 
                             <div className="cars-filter-section">
-                                <h3>{w.specifications}</h3>
+                                <h3>{word("specifications")}</h3>
 
-                                {selectField("fuel", [
-                                    ["petrol", w.petrol],
-                                    ["diesel", w.diesel],
-                                    ["gas", w.gas],
-                                    ["hybrid", w.hybrid],
-                                    ["electric", w.electric],
-                                ])}
+                                {selectField(
+                                    "fuel",
+                                    optionList([
+                                        "petrol",
+                                        "diesel",
+                                        "gas",
+                                        "hybrid",
+                                        "electric",
+                                    ]),
+                                )}
 
-                                {selectField("steering", [
-                                    ["left", w.left],
-                                    ["right", w.right],
-                                ])}
+                                {selectField(
+                                    "steering",
+                                    optionList(["left", "right"]),
+                                )}
 
-                                {selectField("condition", [
-                                    ["new", w.new],
-                                    ["used", w.used],
-                                ])}
+                                {selectField(
+                                    "condition",
+                                    optionList(["new", "used"]),
+                                )}
                             </div>
 
                             <div className="cars-filter-section">
@@ -820,72 +891,109 @@ export default function CarsPage() {
                                     }
                                     aria-expanded={advancedOpen}
                                 >
-                                    <span>{w.advanced}</span>
-                                    <span>{advancedOpen ? "−" : "+"}</span>
+                                    <span>{word("advanced")}</span>
+                                    <span aria-hidden="true">
+                                        {advancedOpen ? "−" : "+"}
+                                    </span>
                                 </button>
 
                                 {advancedOpen && (
                                     <div className="cars-advanced-content">
                                         {selectField("vin", booleanOptions)}
+
                                         {selectField(
                                             "customsCleared",
                                             booleanOptions,
                                         )}
+
                                         {selectField(
                                             "gasEquipment",
-                                            booleanOptions,
+                                            optionList([
+                                                "installed",
+                                                "notInstalled",
+                                            ]),
                                         )}
+
                                         {selectField(
                                             "gasCylinderReplaced",
                                             booleanOptions,
                                         )}
-                                        {selectField("sunroof", booleanOptions)}
 
-                                        {[
-                                            "color",
+                                        {selectField(
+                                            "sunroof",
+                                            optionList([
+                                                "standard",
+                                                "panoramic",
+                                                "none",
+                                            ]),
+                                        )}
+
+                                        {selectField(
                                             "paintCondition",
-                                            "wheelSize",
+                                            optionList([
+                                                "original",
+                                                "repainted",
+                                            ]),
+                                        )}
+
+                                        {selectField(
                                             "interiorMaterial",
-                                        ].map((key) => (
-                                            <Field key={key} label={w[key]}>
-                                                <input
-                                                    type="text"
-                                                    value={filters[key]}
-                                                    placeholder={w.any}
-                                                    onChange={(event) =>
-                                                        change(
-                                                            key,
-                                                            event.target.value,
-                                                        )
-                                                    }
-                                                />
-                                            </Field>
-                                        ))}
+                                            optionList([
+                                                "fabric",
+                                                "leather",
+                                                "artificial",
+                                                "alcantara",
+                                                "other",
+                                            ]),
+                                        )}
+
+                                        {selectField(
+                                            "color",
+                                            optionList([
+                                                "black",
+                                                "white",
+                                                "silver",
+                                                "gray",
+                                                "red",
+                                                "blue",
+                                                "green",
+                                                "yellow",
+                                                "brown",
+                                                "gold",
+                                                "beige",
+                                            ]),
+                                        )}
+
+                                        {selectField(
+                                            "wheelSize",
+                                            Array.from(
+                                                { length: 12 },
+                                                (_, index) => {
+                                                    const size = `R${index + 13}`;
+                                                    return [size, size];
+                                                },
+                                            ),
+                                        )}
 
                                         <Pills
-                                            label={w.headlights}
+                                            label={word("headlights")}
                                             value={filters.headlights}
                                             multiple
-                                            options={[
-                                                ["halogen", "Halogen"],
-                                                ["xenon", "Xenon"],
-                                                ["led", "LED"],
-                                            ]}
+                                            options={optionList([
+                                                "halogen",
+                                                "xenon",
+                                                "led",
+                                            ])}
                                             onChange={(value) =>
                                                 change("headlights", value)
                                             }
                                         />
 
                                         <Pills
-                                            label={w.comfort}
+                                            label={word("comfort")}
                                             value={filters.comfort}
                                             multiple
-                                            options={COMFORT.map((key) => [
-                                                key,
-                                                COMFORT_LABELS[key][
-                                                    localeIndex
-                                                ],
-                                            ])}
+                                            options={optionList(COMFORT)}
                                             onChange={(value) =>
                                                 change("comfort", value)
                                             }
@@ -901,11 +1009,11 @@ export default function CarsPage() {
                                 className="am-filter-reset"
                                 onClick={clear}
                             >
-                                {w.clear}
+                                {word("clear")}
                             </button>
 
                             <button type="submit" className="am-filter-submit">
-                                {w.apply}
+                                {word("apply")}
                             </button>
                         </div>
                     </form>
@@ -915,41 +1023,32 @@ export default function CarsPage() {
                     <div className="cars-results-heading">
                         <div>
                             <h2>
-                                {w.found}: {filtered.length} {w.results}
+                                {word("found")}: {filtered.length}{" "}
+                                {word("results")}
                             </h2>
                         </div>
 
-                        <select
-                            aria-label={w.sort}
-                            className="cars-desktop-sort"
-                            value={sort}
-                            onChange={(event) => setSort(event.target.value)}
-                        >
-                            <option value="newest">{w.newest}</option>
-                            <option value="oldest">{w.oldest}</option>
-                            <option value="cheap">{w.cheap}</option>
-                            <option value="expensive">{w.expensive}</option>
-                        </select>
+                        {sortSelect("cars-desktop-sort")}
                     </div>
 
                     {loading ? (
                         <div className="cars-status" role="status">
-                            {w.loading}
+                            {word("loading")}
                         </div>
                     ) : error ? (
                         <div className="cars-status" role="alert">
-                            <p>{error}</p>
+                            <p>{word("error")}</p>
 
                             <button type="button" onClick={retry}>
-                                {w.retry}
+                                {word("retry")}
                             </button>
                         </div>
                     ) : sorted.length === 0 ? (
                         <div className="cars-status cars-empty">
-                            <h3>{w.empty}</h3>
+                            <h3>{word("empty")}</h3>
 
                             <button type="button" onClick={clear}>
-                                {w.clear}
+                                {word("clear")}
                             </button>
                         </div>
                     ) : (
@@ -962,20 +1061,28 @@ export default function CarsPage() {
                             ))}
                         </div>
                     )}
+
                     {!loading && !error && totalPages > 1 && (
-                        <nav className="am-pagination" aria-label="Էջավորում">
+                        <nav
+                            className="am-pagination"
+                            aria-label={word("pagination")}
+                        >
                             <button
                                 type="button"
+                                aria-label={word("previous")}
                                 disabled={currentPage === 1}
                                 onClick={() => setPage(currentPage - 1)}
                             >
                                 ‹
                             </button>
+
                             <span>
                                 {currentPage} / {totalPages}
                             </span>
+
                             <button
                                 type="button"
+                                aria-label={word("next")}
                                 disabled={currentPage === totalPages}
                                 onClick={() => setPage(currentPage + 1)}
                             >

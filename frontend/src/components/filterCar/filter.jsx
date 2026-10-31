@@ -4,13 +4,14 @@ import { useNavigate } from "react-router-dom";
 
 import { ALL_BRANDS, getModels } from "../../data/vehicleCatalog";
 import { useI18n } from "../../utils/i18n";
+import SearchableSelect from "../common/SearchableSelect";
 
 import "./filter.css";
 
 const LABELS = {
     hy: {
         title: "Գտեք Ձեր մեքենան",
-        subtitle: "Ընտրեք Ձեր նախընտրած մեքենայի տվյալները",
+        subtitle: "Ընտրեք մեքենայի նախընտրած տվյալները",
         brand: "Մակնիշ",
         model: "Մոդել",
         priceFrom: "Գին՝ սկսած",
@@ -29,8 +30,8 @@ const LABELS = {
         filters: "Որոնման ֆիլտրեր",
         open: "Բացել ֆիլտրերը",
         close: "Փակել ֆիլտրերը",
-        selectBrand: "Ընտրեք մակնիշը",
-        selectModel: "Ընտրեք մոդելը",
+        selectBrand: "Որոնել մակնիշ...",
+        selectModel: "Որոնել մոդել...",
         enterPrice: "Նշեք գինը",
         enterYear: "Նշեք տարին",
     },
@@ -55,8 +56,8 @@ const LABELS = {
         filters: "Фильтры поиска",
         open: "Открыть фильтры",
         close: "Закрыть фильтры",
-        selectBrand: "Выберите марку",
-        selectModel: "Выберите модель",
+        selectBrand: "Поиск марки...",
+        selectModel: "Поиск модели...",
         enterPrice: "Укажите цену",
         enterYear: "Укажите год",
     },
@@ -81,8 +82,8 @@ const LABELS = {
         filters: "Search filters",
         open: "Open filters",
         close: "Close filters",
-        selectBrand: "Select brand",
-        selectModel: "Select model",
+        selectBrand: "Search brand...",
+        selectModel: "Search model...",
         enterPrice: "Enter price",
         enterYear: "Enter year",
     },
@@ -260,6 +261,12 @@ export default function Filter() {
         },
     ];
 
+    const brandOptions = ALL_BRANDS.map(optionValue);
+
+    const modelOptions = filters.brand
+        ? getModels(filters.brand).map(optionValue)
+        : [];
+
     const modal = open ? (
         <div
             className="am-filter-overlay"
@@ -308,57 +315,23 @@ export default function Filter() {
                         </div>
 
                         <div className="am-filter-grid">
-                            <label className="am-catalog-field">
-                                <span>{w.brand}</span>
+                            <SearchableSelect
+                                label={w.brand}
+                                value={filters.brand}
+                                onChange={(value) => update("brand", value)}
+                                options={brandOptions}
+                                placeholder={w.selectBrand}
+                            />
 
-                                <select
-                                    value={filters.brand}
-                                    onChange={(event) =>
-                                        update("brand", event.target.value)
-                                    }
-                                >
-                                    <option value="">{w.selectBrand}</option>
-
-                                    {ALL_BRANDS.map((item) => {
-                                        const [value, label] =
-                                            optionValue(item);
-
-                                        return (
-                                            <option key={value} value={value}>
-                                                {label}
-                                            </option>
-                                        );
-                                    })}
-                                </select>
-                            </label>
-
-                            <label className="am-catalog-field">
-                                <span>{w.model}</span>
-
-                                <select
-                                    value={filters.model}
-                                    disabled={!filters.brand}
-                                    onChange={(event) =>
-                                        update("model", event.target.value)
-                                    }
-                                >
-                                    <option value="">{w.selectModel}</option>
-
-                                    {(filters.brand
-                                        ? getModels(filters.brand)
-                                        : []
-                                    ).map((item) => {
-                                        const [value, label] =
-                                            optionValue(item);
-
-                                        return (
-                                            <option key={value} value={value}>
-                                                {label}
-                                            </option>
-                                        );
-                                    })}
-                                </select>
-                            </label>
+                            <SearchableSelect
+                                key={filters.brand || "no-brand"}
+                                label={w.model}
+                                value={filters.model}
+                                onChange={(value) => update("model", value)}
+                                options={modelOptions}
+                                placeholder={w.selectModel}
+                                disabled={!filters.brand}
+                            />
 
                             {numericFields.map((field) => (
                                 <label

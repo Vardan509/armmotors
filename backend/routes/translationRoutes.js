@@ -7,43 +7,100 @@ import ProductTranslation from "../models/ProductTranslation.js";
 
 const router = express.Router();
 
-const SUPPORTED_LANGUAGES = ["hy", "en", "ru"];
-const SOURCE_LANGUAGE = "hy";
+const SUPPORTED_LANGUAGES = new Set(["hy", "ru", "en"]);
 
-function getTextHash(text) {
-    return crypto.createHash("sha256").update(text).digest("hex");
-}
+/*
+ * Նույն նկարագրության միաժամանակյա հարցումները
+ * օգտագործում են մեկ թարգմանության գործողություն։
+ */
+const pendingTranslations = new Map();
 
-function splitText(text, maxLength = 450) {
-    const chunks = [];
-    const paragraphs = text.match(/.{1,450}(?:\s|$)/gs);
+function detectLanguage(text) {
+    const armenian = (text.match(/[\u0531-\u0556\u0561-\u0587]/g) || []).length;
 
-    if (paragraphs) {
-        return paragraphs.map((part) => part.trim()).filter(Boolean);
+    const cyrillic = (text.match(/[\u0400-\u04FF]/g) || []).length;
+
+    const latin = (text.match(/[a-z]/gi) || []).length;
+
+    if (!armenian && !cyrillic && !latin) {
+        return null;
     }
 
-    for (let i = 0; i < text.length; i += maxLength) {
-        chunks.push(text.slice(i, i + maxLength));
+    if (armenian >= cyrillic && armenian >= latin) {
+        return "hy";
+    }
+
+    if (cyrillic >= latin) {
+        return "ru";
+    }
+
+    return "en";
+}
+
+function getTextHash(text, sourceLanguage) {
+    return crypto
+        .createHash("sha256")
+        .update(
+            JSON.stringify({
+                version: 2,
+                sourceLanguage,
+                text,
+            }),
+        )
+        .digest("hex");
+}
+
+/*
+ * Բաժանում ենք UTF-8 բայթերի չափով։
+ * Ոչ մի բառ կամ տառ չի կորչում։
+ */
+function splitText(text, maxBytes = 450) {
+    const chunks = [];
+
+    let current = "";
+    let currentBytes = 0;
+
+    for (const character of text) {
+        const size = Buffer.byteLength(character, "utf8");
+
+        if (current && currentBytes + size > maxBytes) {
+            chunks.push(current);
+            current = "";
+            currentBytes = 0;
+        }
+
+        current += character;
+        currentBytes += size;
+    }
+
+    if (current) {
+        chunks.push(current);
     }
 
     return chunks;
 }
 
-async function translateChunk(text, targetLanguage) {
+async function translateChunk(text, sourceLanguage, targetLanguage, signal) {
+    if (!text.trim()) {
+        return text;
+    }
+
+    const leadingWhitespace = text.match(/^\s*/u)?.[0] || "";
+    const trailingWhitespace = text.match(/\s*$/u)?.[0] || "";
+
     const params = new URLSearchParams({
-        q: text,
-        langpair: `${SOURCE_LANGUAGE}|${targetLanguage}`,
+        q: text.trim(),
+        langpair: `${sourceLanguage}|${targetLanguage}`,
         mt: "1",
     });
 
     const response = await fetch(
         `https://api.mymemory.translated.net/get?${params}`,
         {
-            method: "GET",
             headers: {
                 Accept: "application/json",
             },
-            signal: AbortSignal.timeout(12000),
+            signal,
         },
     );
 
@@ -51,61 +108,143 @@ async function translateChunk(text, targetLanguage) {
         throw new Error(`TRANSLATION_HTTP_${response.status}`);
     }
 
-    const data = await response.json();
+    const result = await response.json();
 
-    if (Number(data.responseStatus) !== 200) {
+    if (Number(result.responseStatus) !== 200) {
         throw new Error("TRANSLATION_PROVIDER_ERROR");
     }
 
-    const translated = data.responseData?.translatedText;
+    const translated = result.responseData?.translatedText;
 
-    if (!translated || typeof translated !== "string") {
+    if (typeof translated !== "string" || !translated.trim()) {
         throw new Error("TRANSLATION_EMPTY");
     }
 
     if (
-        /MYMEMORY WARNING|QUERY LENGTH LIMIT|INVALID LANGUAGE PAIR/i.test(
+        /MYMEMORY WARNING|QUERY LENGTH LIMIT|INVALID LANGUAGE PAIR|QUOTA EXCEEDED/i.test(
             translated,
         )
     ) {
-        throw new Error("TRANSLATION_LIMIT_REACHED");
+        throw new Error("TRANSLATION_PROVIDER_LIMIT");
     }
 
-    return translated.trim();
+    return leadingWhitespace + translated.trim() + trailingWhitespace;
 }
 
-async function translateDescription(text, language) {
-    if (language === SOURCE_LANGUAGE) {
-        return text;
+async function translateDescription(text, sourceLanguage, targetLanguage) {
+    /*
+     * Ամբողջ գործողության ընդհանուր ժամկետը։
+     */
+    const signal = AbortSignal.timeout(45000);
+    const paragraphs = text.split(/(\r?\n+)/);
+
+    const translatedParts = [];
+
+    for (const paragraph of paragraphs) {
+        if (!paragraph.trim()) {
+            translatedParts.push(paragraph);
+            continue;
+        }
+
+        const chunks = splitText(paragraph);
+        const results = [];
+
+        for (const chunk of chunks) {
+            signal.throwIfAborted();
+
+            const translated = await translateChunk(
+                chunk,
+                sourceLanguage,
+                targetLanguage,
+                signal,
+            );
+
+            results.push(translated);
+        }
+
+        translatedParts.push(results.join(""));
     }
 
-    const chunks = splitText(text);
-    const results = [];
+    return translatedParts.join("");
+}
 
-    for (const chunk of chunks) {
-        const translated = await translateChunk(chunk, language);
-        results.push(translated);
+async function getTranslation({
+    productId,
+    language,
+    sourceLanguage,
+    sourceHash,
+    original,
+}) {
+    const cached = await ProductTranslation.findOne({
+        product: productId,
+        language,
+        sourceHash,
+    }).lean();
+
+    if (cached?.translatedDescription) {
+        return {
+            description: cached.translatedDescription,
+            cached: true,
+        };
     }
 
-    return results.join(" ");
+    const description = await translateDescription(
+        original,
+        sourceLanguage,
+        language,
+    );
+
+    /*
+     * Պահպանման սխալի պատճառով պատրաստ թարգմանությունը
+     * չենք կորցնում։
+     */
+    try {
+        await ProductTranslation.findOneAndUpdate(
+            {
+                product: productId,
+                language,
+            },
+            {
+                $set: {
+                    sourceHash,
+                    translatedDescription: description,
+                },
+            },
+            {
+                upsert: true,
+                new: true,
+                runValidators: true,
+            },
+        );
+    } catch {
+        console.error("[ArmMotors Translation] Could not cache translation.");
+    }
+
+    return {
+        description,
+        cached: false,
+    };
 }
 
 router.get("/:id/description", async (req, res) => {
+    const language = String(req.query.lang || "hy")
+        .trim()
+        .toLowerCase();
+
+    res.set("Cache-Control", "no-store");
+
     try {
         const { id } = req.params;
-        const language = String(
-            req.query.lang || SOURCE_LANGUAGE,
-        ).toLowerCase();
 
         if (!mongoose.isValidObjectId(id)) {
             return res.status(400).json({
-                message: "Սխալ հայտարարության ID։",
+                code: "INVALID_PRODUCT_ID",
             });
         }
 
-        if (!SUPPORTED_LANGUAGES.includes(language)) {
+        if (!SUPPORTED_LANGUAGES.has(language)) {
             return res.status(400).json({
-                message: "Չաջակցվող լեզու։",
+                code: "UNSUPPORTED_LANGUAGE",
             });
         }
 
@@ -115,92 +254,95 @@ router.get("/:id/description", async (req, res) => {
 
         if (!product || product.status !== "active") {
             return res.status(404).json({
-                message: "Հայտարարությունը չի գտնվել։",
+                code: "PRODUCT_NOT_FOUND",
             });
         }
 
         const original = String(product.description || "").trim();
 
+        const sourceLanguage = detectLanguage(original);
+
         if (!original) {
             return res.json({
                 language,
+                sourceLanguage,
                 description: "",
                 translated: false,
                 cached: false,
+                fallback: false,
+                ready: true,
             });
         }
 
-        if (language === SOURCE_LANGUAGE) {
+        /*
+         * Նկարագրությունն արդեն ընտրված լեզվով է,
+         * կամ ընդհանրապես տառեր չի պարունակում։
+         */
+        if (!sourceLanguage || sourceLanguage === language) {
             return res.json({
                 language,
+                sourceLanguage,
                 description: original,
                 translated: false,
                 cached: false,
+                fallback: false,
+                ready: true,
             });
         }
 
-        const sourceHash = getTextHash(original);
+        const sourceHash = getTextHash(original, sourceLanguage);
 
-        const cached = await ProductTranslation.findOne({
-            product: id,
-            language,
-            sourceHash,
-        }).lean();
+        const requestKey = [id, language, sourceHash].join(":");
 
-        if (cached) {
-            return res.json({
+        let pending = pendingTranslations.get(requestKey);
+
+        if (!pending) {
+            pending = getTranslation({
+                productId: id,
                 language,
-                description: cached.translatedDescription,
-                translated: true,
-                cached: true,
+                sourceLanguage,
+                sourceHash,
+                original,
             });
-        }
 
-        let translated;
+            pendingTranslations.set(requestKey, pending);
+        }
 
         try {
-            translated = await translateDescription(original, language);
-        } catch (error) {
-            console.error("[ArmMotors Translation Provider]", error.message);
+            const result = await pending;
 
             return res.json({
                 language,
+                sourceLanguage,
+                description: result.description,
+                translated: true,
+                cached: result.cached,
+                fallback: false,
+                ready: true,
+            });
+        } catch {
+            console.error("[ArmMotors Translation] Translation unavailable.");
+
+            return res.json({
+                language,
+                sourceLanguage,
                 description: original,
                 translated: false,
                 cached: false,
                 fallback: true,
+                ready: false,
             });
+        } finally {
+            if (pendingTranslations.get(requestKey) === pending) {
+                pendingTranslations.delete(requestKey);
+            }
         }
-
-        await ProductTranslation.findOneAndUpdate(
-            {
-                product: id,
-                language,
-            },
-            {
-                $set: {
-                    sourceHash,
-                    translatedDescription: translated,
-                },
-            },
-            {
-                upsert: true,
-                new: true,
-                runValidators: true,
-            },
-        );
-
-        return res.json({
-            language,
-            description: translated,
-            translated: true,
-            cached: false,
-        });
-    } catch (error) {
-        console.error("[ArmMotors Translation Error]", error.message);
+    } catch {
+        console.error("[ArmMotors Translation] Request failed.");
 
         return res.status(500).json({
-            message: "Թարգմանության համակարգի սխալ։",
+            code: "TRANSLATION_ERROR",
+            ready: false,
         });
     }
 });

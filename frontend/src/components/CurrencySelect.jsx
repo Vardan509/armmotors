@@ -1,15 +1,69 @@
 import { useEffect, useId, useRef, useState } from "react";
+
 import useCurrency, { CURRENCIES } from "../utils/useCurrency";
+
+import { useI18n } from "../utils/i18n";
+
 import "./CurrencySelector.css";
 
-const CURRENCY_INFO = {
-    AMD: { name: "Հայկական դրամ", symbol: "֏" },
-    USD: { name: "ԱՄՆ դոլար", symbol: "$" },
-    EUR: { name: "Եվրո", symbol: "€" },
-    RUB: { name: "Ռուսական ռուբլի", symbol: "₽" },
+const TEXTS = {
+    hy: {
+        label: "Արժույթ",
+        choose: "Ընտրեք արժույթը",
+        priceCurrency: "Ընտրեք գների արժույթը",
+        updated: "Փոխարժեքը թարմացվել է՝",
+        source: "Փոխարժեքների աղբյուր՝",
+        locale: "hy-AM",
+        currencies: {
+            AMD: "Հայկական դրամ",
+            USD: "ԱՄՆ դոլար",
+            EUR: "Եվրո",
+            RUB: "Ռուսական ռուբլի",
+        },
+    },
+
+    ru: {
+        label: "Валюта",
+        choose: "Выберите валюту",
+        priceCurrency: "Выберите валюту цен",
+        updated: "Курс обновлён:",
+        source: "Источник курсов:",
+        locale: "ru-RU",
+        currencies: {
+            AMD: "Армянский драм",
+            USD: "Доллар США",
+            EUR: "Евро",
+            RUB: "Российский рубль",
+        },
+    },
+
+    en: {
+        label: "Currency",
+        choose: "Choose a currency",
+        priceCurrency: "Choose the currency for prices",
+        updated: "Exchange rate updated:",
+        source: "Exchange rate source:",
+        locale: "en-US",
+        currencies: {
+            AMD: "Armenian dram",
+            USD: "US dollar",
+            EUR: "Euro",
+            RUB: "Russian ruble",
+        },
+    },
+};
+
+const SYMBOLS = {
+    AMD: "֏",
+    USD: "$",
+    EUR: "€",
+    RUB: "₽",
 };
 
 export default function CurrencySelect() {
+    const { language } = useI18n();
+    const text = TEXTS[language] || TEXTS.hy;
+
     const { currency, setCurrency, updatedAt } = useCurrency();
 
     const [isOpen, setIsOpen] = useState(false);
@@ -20,10 +74,9 @@ export default function CurrencySelect() {
 
     const menuId = useId();
 
-    const selectedCurrency = CURRENCY_INFO[currency] || {
-        name: currency,
-        symbol: currency,
-    };
+    const selectedName = text.currencies[currency] || currency;
+
+    const selectedSymbol = SYMBOLS[currency] || currency;
 
     const selectedIndex = Math.max(0, CURRENCIES.indexOf(currency));
 
@@ -31,8 +84,8 @@ export default function CurrencySelect() {
 
     const updateTitle =
         date && !Number.isNaN(date.getTime())
-            ? `Փոխարժեքը թարմացվել է՝ ${date.toLocaleDateString("hy-AM")}`
-            : "Ընտրեք գների արժույթը";
+            ? `${text.updated} ${date.toLocaleDateString(text.locale)}`
+            : text.priceCurrency;
 
     useEffect(() => {
         if (!isOpen) return;
@@ -44,10 +97,12 @@ export default function CurrencySelect() {
         }
 
         document.addEventListener("pointerdown", handleOutside);
+
         document.addEventListener("focusin", handleOutside);
 
         return () => {
             document.removeEventListener("pointerdown", handleOutside);
+
             document.removeEventListener("focusin", handleOutside);
         };
     }, [isOpen]);
@@ -80,8 +135,7 @@ export default function CurrencySelect() {
         if (event.key === "ArrowDown") {
             nextIndex = (index + 1) % CURRENCIES.length;
         } else if (event.key === "ArrowUp") {
-            nextIndex =
-                (index - 1 + CURRENCIES.length) % CURRENCIES.length;
+            nextIndex = (index - 1 + CURRENCIES.length) % CURRENCIES.length;
         } else if (event.key === "Home") {
             nextIndex = 0;
         } else if (event.key === "End") {
@@ -97,20 +151,20 @@ export default function CurrencySelect() {
     return (
         <div className="currency-control" title={updateTitle}>
             <div className="currency-selector" ref={wrapperRef}>
-                <span className="currency-label">Արժույթ</span>
+                <span className="currency-label">{text.label}</span>
 
                 <button
                     ref={buttonRef}
                     type="button"
-                    className={`currency-button ${
-                        isOpen ? "is-open" : ""
-                    }`}
-                    aria-label={`Արժույթ՝ ${selectedCurrency.name}`}
+                    className={`currency-button ${isOpen ? "is-open" : ""}`}
+                    aria-label={`${text.label}: ${selectedName}`}
                     aria-haspopup="menu"
                     aria-expanded={isOpen}
                     aria-controls={isOpen ? menuId : undefined}
-                    onClick={() => setIsOpen(previous => !previous)}
-                    onKeyDown={event => {
+                    onClick={() => {
+                        setIsOpen((previous) => !previous);
+                    }}
+                    onKeyDown={(event) => {
                         if (
                             event.key === "ArrowDown" ||
                             event.key === "ArrowUp"
@@ -123,7 +177,7 @@ export default function CurrencySelect() {
                     }}
                 >
                     <span className="currency-symbol" aria-hidden="true">
-                        {selectedCurrency.symbol}
+                        {selectedSymbol}
                     </span>
 
                     <span className="currency-code">{currency}</span>
@@ -151,27 +205,26 @@ export default function CurrencySelect() {
                         id={menuId}
                         className="currency-menu"
                         role="menu"
-                        aria-label="Ընտրել արժույթը"
+                        aria-label={text.choose}
                     >
                         <div
                             className="currency-menu-heading"
                             role="presentation"
                         >
-                            Ընտրեք արժույթը
+                            {text.choose}
                         </div>
 
                         {CURRENCIES.map((code, index) => {
-                            const info = CURRENCY_INFO[code] || {
-                                name: code,
-                                symbol: code,
-                            };
-
                             const isSelected = currency === code;
+
+                            const name = text.currencies[code] || code;
+
+                            const symbol = SYMBOLS[code] || code;
 
                             return (
                                 <button
                                     key={code}
-                                    ref={element => {
+                                    ref={(element) => {
                                         optionRefs.current[index] = element;
                                     }}
                                     type="button"
@@ -181,21 +234,24 @@ export default function CurrencySelect() {
                                     className={`currency-option ${
                                         isSelected ? "is-selected" : ""
                                     }`}
-                                    onClick={() => selectCurrency(code)}
-                                    onKeyDown={event =>
-                                        handleOptionKeyDown(event, index)
-                                    }
+                                    onClick={() => {
+                                        selectCurrency(code);
+                                    }}
+                                    onKeyDown={(event) => {
+                                        handleOptionKeyDown(event, index);
+                                    }}
                                 >
                                     <span
                                         className="currency-option-symbol"
                                         aria-hidden="true"
                                     >
-                                        {info.symbol}
+                                        {symbol}
                                     </span>
 
                                     <span className="currency-option-info">
                                         <strong>{code}</strong>
-                                        <span>{info.name}</span>
+
+                                        <span>{name}</span>
                                     </span>
 
                                     {isSelected && (
@@ -226,7 +282,7 @@ export default function CurrencySelect() {
                             target="_blank"
                             rel="noopener noreferrer"
                         >
-                            Փոխարժեքների աղբյուր՝ ExchangeRate-API
+                            {text.source} ExchangeRate-API
                         </a>
                     </div>
                 )}

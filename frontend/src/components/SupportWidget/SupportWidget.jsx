@@ -1,13 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 
 import { apiRequest } from "../../utils/api";
+import useInterfaceText from "../../utils/interfaceText";
 
 import "./SupportWidget.css";
 
 const BUSINESS_PREFIX = "[ԲԻԶՆԵՍ ԱՌԱՋԱՐԿ / ԳՈՎԱԶԴ]";
-
-const BUSINESS_TEMPLATE =
-    "Բարև Ձեզ։ Ցանկանում եմ գովազդ տեղադրել ArmMotors կայքում։ Խնդրում եմ տեղեկացնել գովազդի տեղադրման պայմանները և արժեքները։";
 
 const INITIAL_FORM = {
     name: "",
@@ -16,42 +14,45 @@ const INITIAL_FORM = {
 };
 
 export default function SupportWidget() {
+    const { tr } = useInterfaceText();
+
     const dialogRef = useRef(null);
     const triggerRef = useRef(null);
 
     const [form, setForm] = useState(INITIAL_FORM);
-
     const [listing, setListing] = useState(null);
     const [businessMode, setBusinessMode] = useState(false);
-
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState("");
-    const [success, setSuccess] = useState("");
+    const [errorKey, setErrorKey] = useState("");
+    const [successKey, setSuccessKey] = useState("");
 
-    // =====================================
-    // OPEN SUPPORT DIALOG
-    // =====================================
+    /*
+     * null-ը նշանակում է՝ դեռ չխմբագրված բիզնես ձևանմուշ։
+     * Այն լեզուն փոխելիս նույնպես թարգմանվում է։
+     */
+    const message = form.text === null ? tr("businessTemplate") : form.text;
+
+    const maximumLength = businessMode
+        ? 2000 - BUSINESS_PREFIX.length - 2
+        : 2000;
 
     useEffect(() => {
         function open(event) {
             const detail = event.detail || {};
+            const business = detail.type === "business";
 
-            const isBusiness = detail.type === "business";
-
-            setBusinessMode(isBusiness);
-
+            setBusinessMode(business);
             setListing(detail.listingId ? detail : null);
+            setErrorKey("");
+            setSuccessKey("");
 
-            setSuccess("");
-            setError("");
-
-            setForm((previous) => ({
-                ...previous,
-                text: isBusiness ? BUSINESS_TEMPLATE : "",
+            setForm((current) => ({
+                ...current,
+                text: business ? null : "",
             }));
 
-            if (dialogRef.current && !dialogRef.current.open) {
-                dialogRef.current.showModal();
+            if (!dialogRef.current?.open) {
+                dialogRef.current?.showModal();
             }
         }
 
@@ -62,86 +63,68 @@ export default function SupportWidget() {
         };
     }, []);
 
-    // =====================================
-    // INPUT CHANGES
-    // =====================================
-
     function changeField(event) {
         const { name, value } = event.target;
 
-        setForm((previous) => ({
-            ...previous,
+        setForm((current) => ({
+            ...current,
             [name]: value,
         }));
     }
-
-    // =====================================
-    // SEND MESSAGE
-    // =====================================
 
     async function submit(event) {
         event.preventDefault();
 
         if (loading) return;
 
+        const text = businessMode
+            ? `${BUSINESS_PREFIX}\n\n${message.trim()}`
+            : message.trim();
+
+        if (text.length > 2000) {
+            setErrorKey("tooLong");
+            return;
+        }
+
         setLoading(true);
-        setError("");
-        setSuccess("");
+        setErrorKey("");
+        setSuccessKey("");
 
         try {
-            const messageText = businessMode
-                ? `${BUSINESS_PREFIX}\n\n${form.text.trim()}`
-                : form.text.trim();
-
-            if (messageText.length > 2000) {
-                throw new Error("Հաղորդագրությունը չափազանց երկար է։");
-            }
-
             await apiRequest("/messages", {
                 method: "POST",
-
                 body: JSON.stringify({
                     name: form.name.trim(),
                     email: form.email.trim(),
-                    text: messageText,
+                    text,
                     listingId: listing?.listingId || "",
                 }),
             });
 
-            setSuccess(
-                businessMode
-                    ? "Ձեր բիզնես առաջարկն ուղարկված է ադմինին։ Մենք կարող ենք պատասխանել Ձեր նշած email-ով։"
-                    : "Հաղորդագրությունն ուղարկված է ադմինին։ Պատասխանի համար նշված է Ձեր email-ը։",
-            );
+            setSuccessKey(businessMode ? "businessSuccess" : "supportSuccess");
 
-            setForm((previous) => ({
-                ...previous,
+            setForm((current) => ({
+                ...current,
                 text: "",
             }));
-        } catch (err) {
-            setError(err.message || "Հաղորդագրությունը ուղարկել չհաջողվեց։");
+        } catch {
+            setErrorKey("sendError");
         } finally {
             setLoading(false);
         }
     }
 
-    // =====================================
-    // COMPONENT
-    // =====================================
-
     return (
         <>
-            {/* FLOATING SUPPORT BUTTON */}
-
             <button
                 type="button"
                 className="support-trigger"
                 ref={triggerRef}
-                aria-label="Գրել ադմինին"
+                aria-label={tr("writeAdmin")}
                 aria-haspopup="dialog"
-                onClick={() => {
-                    window.dispatchEvent(new CustomEvent("open-support"));
-                }}
+                onClick={() =>
+                    window.dispatchEvent(new CustomEvent("open-support"))
+                }
             >
                 <svg
                     viewBox="0 0 24 24"
@@ -157,103 +140,90 @@ export default function SupportWidget() {
                 </svg>
             </button>
 
-            {/* DIALOG */}
-
             <dialog
                 ref={dialogRef}
                 className="support-dialog"
                 aria-labelledby="support-title"
                 onClose={() => triggerRef.current?.focus()}
+                onCancel={(event) => {
+                    if (loading) event.preventDefault();
+                }}
             >
-                {/* HEADER */}
-
                 <div className="support-heading">
                     <div>
                         <small>
-                            {businessMode
-                                ? "  BUSINESS"
-                                : "  ՕԳՆՈՒԹՅՈՒՆ"}
+                            {tr(businessMode ? "business" : "support")}
                         </small>
 
                         <h2 id="support-title">
-                            {businessMode ? "Բիզնես առաջարկ" : "Ինչո՞վ օգնենք"}
+                            {tr(businessMode ? "business" : "supportTitle")}
                         </h2>
                     </div>
 
                     <button
                         type="button"
-                        aria-label="Փակել"
+                        aria-label={tr("close")}
+                        disabled={loading}
                         onClick={() => dialogRef.current?.close()}
                     >
                         ×
                     </button>
                 </div>
 
-                {/* INTRODUCTION */}
-
-                <p>
-                    {businessMode
-                        ? "Ցանկանո՞ւմ եք գովազդ տեղադրել ArmMotors կայքում։ Նշեք Ձեր անունը, email-ը և ուղարկեք առաջարկը։"
-                        : ""}
-                </p>
-
-                {/* BUSINESS BADGE */}
-
                 {businessMode && (
-                    <p
-                        className="support-listing"
-                        style={{
-                            padding: "11px 13px",
-                            borderRadius: "9px",
-                            background: "#fff7e8",
-                            color: "#98712e",
-                            border: "1px solid #ead6aa",
-                            fontSize: "12px",
-                            fontWeight: 700,
-                        }}
-                    >
-                        Գովազդի և համագործակցության հարցում
-                    </p>
-                )}
+                    <>
+                        <p>{tr("businessIntro")}</p>
 
-                {/* LISTING CONTEXT */}
+                        <p
+                            className="support-listing"
+                            style={{
+                                padding: "11px 13px",
+                                borderRadius: 9,
+                                background: "#f3f7fc",
+                                color: "#244b77",
+                                border: "1px solid #dce5ef",
+                                fontSize: 12,
+                                fontWeight: 700,
+                            }}
+                        >
+                            {tr("businessBadge")}
+                        </p>
+                    </>
+                )}
 
                 {listing && (
                     <p className="support-listing">
-                        Հայտարարություն՝ {listing.title || listing.listingId}
+                        {tr("listing")}: {listing.title || listing.listingId}
                     </p>
                 )}
 
-                {/* SUCCESS MESSAGE */}
-
-                {success ? (
+                {successKey ? (
                     <div className="support-success" role="status">
-                        <strong>Ուղարկված է</strong>
-
-                        <p>{success}</p>
+                        <strong>{tr("sent")}</strong>
+                        <p>{tr(successKey)}</p>
 
                         <button
                             type="button"
                             className="detail-secondary"
                             onClick={() => {
-                                setSuccess("");
+                                setSuccessKey("");
+                                setErrorKey("");
 
-                                setForm((previous) => ({
-                                    ...previous,
-                                    text: businessMode ? BUSINESS_TEMPLATE : "",
+                                setForm((current) => ({
+                                    ...current,
+                                    text: businessMode ? null : "",
                                 }));
                             }}
                         >
-                            Նոր հաղորդագրություն
+                            {tr("newMessage")}
                         </button>
                     </div>
                 ) : (
                     <form onSubmit={submit}>
                         <fieldset disabled={loading}>
-                            {/* NAME */}
-
                             <label>
-                                Անուն
+                                {tr("name")}
+
                                 <input
                                     name="name"
                                     autoComplete="name"
@@ -265,10 +235,9 @@ export default function SupportWidget() {
                                 />
                             </label>
 
-                            {/* EMAIL */}
-
                             <label>
-                                Email
+                                {tr("email")}
+
                                 <input
                                     name="email"
                                     type="email"
@@ -280,52 +249,47 @@ export default function SupportWidget() {
                                 />
                             </label>
 
-                            {/* MESSAGE */}
-
                             <label>
-                                {businessMode
-                                    ? "Ձեր բիզնես առաջարկը"
-                                    : "Ձեր հարցը"}
+                                {tr(
+                                    businessMode
+                                        ? "yourProposal"
+                                        : "yourQuestion",
+                                )}
 
                                 <textarea
                                     name="text"
                                     required
                                     minLength={5}
-                                    maxLength={businessMode ? 1950 : 2000}
+                                    maxLength={maximumLength}
                                     rows={5}
-                                    value={form.text}
+                                    value={message}
                                     onChange={changeField}
-                                    placeholder={
+                                    placeholder={tr(
                                         businessMode
-                                            ? "Նկարագրեք Ձեր գովազդային առաջարկը..."
-                                            : "Գրեք Ձեր հաղորդագրությունը..."
-                                    }
+                                            ? "proposalPlaceholder"
+                                            : "messagePlaceholder",
+                                    )}
                                 />
                             </label>
 
-                            {/* CHARACTER COUNTER */}
-
                             <small>
-                                {form.text.length} /{" "}
-                                {businessMode ? 1950 : 2000}
+                                {message.length} / {maximumLength}
                             </small>
 
-                            {/* ERROR */}
-
-                            {error && (
+                            {errorKey && (
                                 <p className="form-error" role="alert">
-                                    {error}
+                                    {tr(errorKey)}
                                 </p>
                             )}
 
-                            {/* SUBMIT */}
-
                             <button className="support-submit" type="submit">
                                 {loading
-                                    ? "Ուղարկվում է…"
-                                    : businessMode
-                                      ? "Ուղարկել բիզնես առաջարկը →"
-                                      : "Ուղարկել հաղորդագրությունը →"}
+                                    ? tr("sending")
+                                    : `${tr(
+                                          businessMode
+                                              ? "sendBusiness"
+                                              : "sendMessage",
+                                      )} →`}
                             </button>
                         </fieldset>
                     </form>

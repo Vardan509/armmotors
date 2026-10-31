@@ -19,175 +19,255 @@ import "./CarDetailsPage.css";
 import "./SellerContact.css";
 import "./CarDetailsExtra.css";
 
-/* =========================================
-   TRANSLATIONS
-========================================= */
-
-const TRANSLATIONS = {
-    hy: {
-        technical: "Լրացուցիչ տեխնիկական տվյալներ",
-        interior: "Սրահ և հարմարավետություն",
-        exterior: "Արտաքին տվյալներ",
-        comfort: "Կոմֆորտ և հնարավորություններ",
-        customsCleared: "Մաքսազերծված է",
-        paintCondition: "Ներկի վիճակ",
-        gasEquipment: "Գազի սարքավորում",
-        gasCylinderReplaced: "Գազի բալոնը փոխված է",
-        wheelSize: "Անվահեծերի չափ",
-        interiorMaterial: "Սրահի նյութ",
-        sunroof: "Լյուկ",
-        headlights: "Լուսարձակներ",
-        yes: "Այո",
-        no: "Ոչ",
-        original: "Գործարանային ներկ",
-        repainted: "Վերաներկված",
-        installed: "Տեղադրված է",
-        notInstalled: "Տեղադրված չէ",
-        fabric: "Կտոր",
-        leather: "Կաշի",
-        artificial: "Արհեստական կաշի",
-        alcantara: "Ալկանտարա",
-        other: "Այլ",
-        standard: "Սովորական լյուկ",
-        panoramic: "Պանորամային լյուկ",
-        none: "Չկա",
-        halogen: "Հալոգեն",
-        xenon: "Քսենոն",
-        led: "LED",
-        airConditioning: "Օդորակիչ",
-        climateControl: "Կլիմատ-կոնտրոլ",
-        heatedSeats: "Նստատեղերի տաքացում",
-        ventilatedSeats: "Նստատեղերի օդափոխություն",
-        heatedSteering: "Ղեկի տաքացում",
-        heatedWindshield: "Դիմապակու տաքացում",
-        cruiseControl: "Կրուիզ-կոնտրոլ",
-        adaptiveCruise: "Ադապտիվ կրուիզ-կոնտրոլ",
-        parkingSensors: "Կայանման սենսորներ",
-        rearCamera: "Հետևի տեսախցիկ",
-        camera360: "360° տեսախցիկ",
-        keylessEntry: "Առանց բանալիի մուտք",
-        startStop: "Start/Stop համակարգ",
-        electricSeats: "Էլեկտրական նստատեղեր",
-        memorySeats: "Նստատեղերի հիշողություն",
-        navigation: "Նավիգացիա",
-        bluetooth: "Bluetooth",
-        appleCarplay: "Apple CarPlay",
-        androidAuto: "Android Auto",
-        purchaseSuccess: "Հայտն ուղարկված է։ Հետևեք դրան «Իմ հաշիվը» բաժնում։",
-        purchaseError: "Հայտը ուղարկել չհաջողվեց։",
-    },
-
-    ru: {
-        technical: "Дополнительные характеристики",
-        interior: "Салон и комфорт",
-        exterior: "Внешние характеристики",
-        comfort: "Комфорт и оснащение",
-        customsCleared: "Растаможен",
-        paintCondition: "Состояние краски",
-        gasEquipment: "Газовое оборудование",
-        gasCylinderReplaced: "Газовый баллон заменён",
-        wheelSize: "Размер дисков",
-        interiorMaterial: "Материал салона",
-        sunroof: "Люк",
-        headlights: "Фары",
-        yes: "Да",
-        no: "Нет",
-        original: "Заводская краска",
-        repainted: "Перекрашен",
-        installed: "Установлено",
-        notInstalled: "Не установлено",
-        fabric: "Ткань",
-        leather: "Кожа",
-        artificial: "Искусственная кожа",
-        alcantara: "Алькантара",
-        other: "Другое",
-        standard: "Обычный люк",
-        panoramic: "Панорамный люк",
-        none: "Нет",
-        halogen: "Галогенные",
-        xenon: "Ксеноновые",
-        led: "Светодиодные",
-        airConditioning: "Кондиционер",
-        climateControl: "Климат-контроль",
-        heatedSeats: "Подогрев сидений",
-        ventilatedSeats: "Вентиляция сидений",
-        heatedSteering: "Подогрев руля",
-        heatedWindshield: "Обогрев лобового стекла",
-        cruiseControl: "Круиз-контроль",
-        adaptiveCruise: "Адаптивный круиз-контроль",
-        parkingSensors: "Парктроники",
-        rearCamera: "Камера заднего вида",
-        camera360: "Камера 360°",
-        keylessEntry: "Бесключевой доступ",
-        startStop: "Система Start/Stop",
-        electricSeats: "Электрорегулировка сидений",
-        memorySeats: "Память сидений",
-        navigation: "Навигация",
-        bluetooth: "Bluetooth",
-        appleCarplay: "Apple CarPlay",
-        androidAuto: "Android Auto",
-        purchaseSuccess:
-            "Заявка отправлена. Вы можете отслеживать её в своём аккаунте.",
-        purchaseError: "Не удалось отправить заявку.",
-    },
-
-    en: {
-        technical: "Additional specifications",
-        interior: "Interior and comfort",
-        exterior: "Exterior features",
-        comfort: "Comfort and features",
-        customsCleared: "Customs cleared",
-        paintCondition: "Paint condition",
-        gasEquipment: "Gas equipment",
-        gasCylinderReplaced: "Gas cylinder replaced",
-        wheelSize: "Wheel size",
-        interiorMaterial: "Interior material",
-        sunroof: "Sunroof",
-        headlights: "Headlights",
-        yes: "Yes",
-        no: "No",
-        original: "Original paint",
-        repainted: "Repainted",
-        installed: "Installed",
-        notInstalled: "Not installed",
-        fabric: "Fabric",
-        leather: "Leather",
-        artificial: "Artificial leather",
-        alcantara: "Alcantara",
-        other: "Other",
-        standard: "Standard sunroof",
-        panoramic: "Panoramic sunroof",
-        none: "None",
-        halogen: "Halogen",
-        xenon: "Xenon",
-        led: "LED",
-        airConditioning: "Air conditioning",
-        climateControl: "Climate control",
-        heatedSeats: "Heated seats",
-        ventilatedSeats: "Ventilated seats",
-        heatedSteering: "Heated steering wheel",
-        heatedWindshield: "Heated windshield",
-        cruiseControl: "Cruise control",
-        adaptiveCruise: "Adaptive cruise",
-        parkingSensors: "Parking sensors",
-        rearCamera: "Rear camera",
-        camera360: "360° camera",
-        keylessEntry: "Keyless entry",
-        startStop: "Start/Stop system",
-        electricSeats: "Electric seats",
-        memorySeats: "Memory seats",
-        navigation: "Navigation",
-        bluetooth: "Bluetooth",
-        appleCarplay: "Apple CarPlay",
-        androidAuto: "Android Auto",
-        purchaseSuccess: "Request sent. You can track it in your account.",
-        purchaseError: "Could not send the request.",
-    },
+const LANGUAGE_INDEX = {
+    hy: 0,
+    ru: 1,
+    en: 2,
 };
 
-/* =========================================
-   HELPERS
-========================================= */
+/*
+ * Յուրաքանչյուր տողի հերթականությունը՝
+ * հայերեն, ռուսերեն, անգլերեն։
+ */
+const TEXTS = {
+    technical: [
+        "Լրացուցիչ տեխնիկական տվյալներ",
+        "Дополнительные характеристики",
+        "Additional specifications",
+    ],
+    interior: [
+        "Սրահ և հարմարավետություն",
+        "Салон и комфорт",
+        "Interior and comfort",
+    ],
+    exterior: [
+        "Արտաքին տվյալներ",
+        "Внешние характеристики",
+        "Exterior features",
+    ],
+    comfort: [
+        "Կոմֆորտ և հնարավորություններ",
+        "Комфорт и оснащение",
+        "Comfort and features",
+    ],
+    customsCleared: ["Մաքսազերծված է", "Растаможен", "Customs cleared"],
+    paintCondition: ["Ներկի վիճակ", "Состояние краски", "Paint condition"],
+    gasEquipment: ["Գազի սարքավորում", "Газовое оборудование", "Gas equipment"],
+    gasCylinderReplaced: [
+        "Գազի բալոնը փոխված է",
+        "Газовый баллон заменён",
+        "Gas cylinder replaced",
+    ],
+    wheelSize: ["Անվահեծերի չափ", "Размер дисков", "Wheel size"],
+    interiorMaterial: ["Սրահի նյութ", "Материал салона", "Interior material"],
+    sunroof: ["Լյուկ", "Люк", "Sunroof"],
+    headlights: ["Լուսարձակներ", "Фары", "Headlights"],
+    yes: ["Այո", "Да", "Yes"],
+    no: ["Ոչ", "Нет", "No"],
+    original: ["Գործարանային ներկ", "Заводская краска", "Original paint"],
+    repainted: ["Վերաներկված", "Перекрашен", "Repainted"],
+    installed: ["Տեղադրված է", "Установлено", "Installed"],
+    notInstalled: ["Տեղադրված չէ", "Не установлено", "Not installed"],
+    fabric: ["Կտոր", "Ткань", "Fabric"],
+    leather: ["Կաշի", "Кожа", "Leather"],
+    artificial: ["Արհեստական կաշի", "Искусственная кожа", "Artificial leather"],
+    alcantara: ["Ալկանտարա", "Алькантара", "Alcantara"],
+    other: ["Այլ", "Другое", "Other"],
+    standard: ["Սովորական լյուկ", "Обычный люк", "Standard sunroof"],
+    panoramic: ["Պանորամային լյուկ", "Панорамный люк", "Panoramic sunroof"],
+    none: ["Չկա", "Отсутствует", "None"],
+    halogen: ["Հալոգեն", "Галогенные", "Halogen"],
+    xenon: ["Քսենոն", "Ксеноновые", "Xenon"],
+    led: ["LED", "Светодиодные", "LED"],
+
+    airConditioning: ["Օդորակիչ", "Кондиционер", "Air conditioning"],
+    climateControl: ["Կլիմատ-կոնտրոլ", "Климат-контроль", "Climate control"],
+    heatedSeats: ["Նստատեղերի տաքացում", "Подогрев сидений", "Heated seats"],
+    ventilatedSeats: [
+        "Նստատեղերի օդափոխություն",
+        "Вентиляция сидений",
+        "Ventilated seats",
+    ],
+    heatedSteering: ["Ղեկի տաքացում", "Подогрев руля", "Heated steering wheel"],
+    heatedWindshield: [
+        "Դիմապակու տաքացում",
+        "Обогрев лобового стекла",
+        "Heated windshield",
+    ],
+    cruiseControl: ["Կրուիզ-կոնտրոլ", "Круиз-контроль", "Cruise control"],
+    adaptiveCruise: [
+        "Ադապտիվ կրուիզ-կոնտրոլ",
+        "Адаптивный круиз-контроль",
+        "Adaptive cruise control",
+    ],
+    parkingSensors: ["Կայանման սենսորներ", "Парктроники", "Parking sensors"],
+    rearCamera: ["Հետևի տեսախցիկ", "Камера заднего вида", "Rear camera"],
+    camera360: ["360° տեսախցիկ", "Камера 360°", "360° camera"],
+    keylessEntry: [
+        "Առանց բանալիի մուտք",
+        "Бесключевой доступ",
+        "Keyless entry",
+    ],
+    startStop: [
+        "Start/Stop համակարգ",
+        "Система Start/Stop",
+        "Start/Stop system",
+    ],
+    electricSeats: [
+        "Էլեկտրական նստատեղեր",
+        "Электрорегулировка сидений",
+        "Electric seats",
+    ],
+    memorySeats: ["Նստատեղերի հիշողություն", "Память сидений", "Memory seats"],
+    navigation: ["Նավիգացիա", "Навигация", "Navigation"],
+    bluetooth: ["Bluetooth", "Bluetooth", "Bluetooth"],
+    appleCarplay: ["Apple CarPlay", "Apple CarPlay", "Apple CarPlay"],
+    androidAuto: ["Android Auto", "Android Auto", "Android Auto"],
+
+    petrol: ["Բենզին", "Бензин", "Petrol"],
+    diesel: ["Դիզել", "Дизель", "Diesel"],
+    gas: ["Գազ", "Газ", "Gas"],
+    electric: ["Էլեկտրական", "Электрический", "Electric"],
+    hybrid: ["Հիբրիդ", "Гибрид", "Hybrid"],
+    left: ["Ձախ", "Левый", "Left"],
+    right: ["Աջ", "Правый", "Right"],
+    new: ["Նոր", "Новый", "New"],
+    used: ["Օգտագործված", "Б/у", "Used"],
+
+    black: ["Սև", "Чёрный", "Black"],
+    white: ["Սպիտակ", "Белый", "White"],
+    silver: ["Արծաթագույն", "Серебристый", "Silver"],
+    gray: ["Մոխրագույն", "Серый", "Gray"],
+    red: ["Կարմիր", "Красный", "Red"],
+    blue: ["Կապույտ", "Синий", "Blue"],
+    green: ["Կանաչ", "Зелёный", "Green"],
+    yellow: ["Դեղին", "Жёлтый", "Yellow"],
+    brown: ["Շագանակագույն", "Коричневый", "Brown"],
+    gold: ["Ոսկեգույն", "Золотой", "Gold"],
+    beige: ["Բեժ", "Бежевый", "Beige"],
+    orange: ["Նարնջագույն", "Оранжевый", "Orange"],
+    purple: ["Մանուշակագույն", "Фиолетовый", "Purple"],
+
+    yerevan: ["Երևան", "Ереван", "Yerevan"],
+    aragatsotn: ["Արագածոտն", "Арагацотн", "Aragatsotn"],
+    ararat: ["Արարատ", "Арарат", "Ararat"],
+    armavir: ["Արմավիր", "Армавир", "Armavir"],
+    gegharkunik: ["Գեղարքունիք", "Гегаркуник", "Gegharkunik"],
+    kotayk: ["Կոտայք", "Котайк", "Kotayk"],
+    lori: ["Լոռի", "Лори", "Lori"],
+    shirak: ["Շիրակ", "Ширак", "Shirak"],
+    syunik: ["Սյունիք", "Сюник", "Syunik"],
+    tavush: ["Տավուշ", "Тавуш", "Tavush"],
+    vayotsDzor: ["Վայոց ձոր", "Вайоц Дзор", "Vayots Dzor"],
+
+    purchaseSuccess: [
+        "Հայտն ուղարկված է։ Հետևեք դրան «Իմ հաշիվը» բաժնում։",
+        "Заявка отправлена. Вы можете отслеживать её в своём аккаунте.",
+        "Request sent. You can track it in your account.",
+    ],
+    purchaseError: [
+        "Հայտը ուղարկել չհաջողվեց։ Կրկին փորձեք։",
+        "Не удалось отправить заявку. Попробуйте ещё раз.",
+        "Could not send the request. Please try again.",
+    ],
+    breadcrumb: ["Էջի ուղի", "Навигация по страницам", "Breadcrumb"],
+};
+
+function normalize(value) {
+    return String(value)
+        .normalize("NFKC")
+        .trim()
+        .toLocaleLowerCase()
+        .replace(/և/g, "եւ")
+        .replace(/[‐‑–—]/g, "-")
+        .replace(/\s+/g, " ");
+}
+
+const VALUE_KEYS = new Map();
+
+for (const [key, values] of Object.entries(TEXTS)) {
+    VALUE_KEYS.set(normalize(key), key);
+
+    for (const value of values) {
+        if (!VALUE_KEYS.has(normalize(value))) {
+            VALUE_KEYS.set(normalize(value), key);
+        }
+    }
+}
+
+const ALIASES = {
+    gasoline: "petrol",
+    benzine: "petrol",
+    benzin: "petrol",
+    gaz: "gas",
+    grey: "gray",
+    черный: "black",
+    зеленый: "green",
+    желтый: "yellow",
+    "б/у": "used",
+    "բ/ու": "used",
+    արհեստական: "artificial",
+    искусственная: "artificial",
+    էկոկաշի: "artificial",
+    экокожа: "artificial",
+    "eco leather": "artificial",
+    սովորական: "standard",
+    обычный: "standard",
+    панорамный: "panoramic",
+    պանորամային: "panoramic",
+    հալոգենային: "halogen",
+    ксенон: "xenon",
+    галоген: "halogen",
+    "ադապտիվ կրուիզ": "adaptiveCruise",
+    "adaptive cruise": "adaptiveCruise",
+    "360 տեսախցիկ": "camera360",
+    "360 camera": "camera360",
+    ереван: "yerevan",
+    երեվան: "yerevan",
+};
+
+for (const [alias, key] of Object.entries(ALIASES)) {
+    VALUE_KEYS.set(normalize(alias), key);
+}
+
+function textFor(key, language) {
+    const index = LANGUAGE_INDEX[language] ?? 0;
+
+    return TEXTS[key]?.[index] ?? key;
+}
+
+function translateValue(value, language) {
+    if (value === true) return textFor("yes", language);
+    if (value === false) return textFor("no", language);
+
+    if (value === undefined || value === null || value === "") {
+        return "—";
+    }
+
+    if (typeof value === "number") {
+        return value;
+    }
+
+    const normalized = normalize(value);
+
+    if (normalized === "true") {
+        return textFor("yes", language);
+    }
+
+    if (normalized === "false") {
+        return textFor("no", language);
+    }
+
+    const key = VALUE_KEYS.get(normalized);
+
+    if (key) {
+        return textFor(key, language);
+    }
+
+    // Նախկին ընդհանուր բառարանը պահում ենք՝
+    // այնտեղ ներառված քաղաքներն էլ թարգմանելու համար։
+    return localizeListingValue(value, language);
+}
 
 function getProductId(product) {
     return String(product?._id || product?.id || "");
@@ -203,12 +283,12 @@ function getSellerId(car) {
         : String(owner._id || owner.id || "");
 }
 
-function normalizePhone(value) {
-    if (typeof value !== "string" && typeof value !== "number") {
-        return "";
-    }
+function hasValue(value) {
+    return value !== undefined && value !== null && value !== "";
+}
 
-    const digits = String(value).replace(/\D/g, "");
+function normalizePhone(value) {
+    const digits = String(value ?? "").replace(/\D/g, "");
 
     if (!digits) return "";
 
@@ -229,32 +309,11 @@ function normalizePhone(value) {
     return number;
 }
 
-function getContactLinks(phone) {
-    const number = normalizePhone(phone);
-
-    if (!number) return null;
-
-    return {
-        call: `tel:+${number}`,
-        whatsapp: `https://wa.me/${number}`,
-        viber: `viber://chat?number=%2B${number}`,
-    };
-}
-
-function hasValue(value) {
-    return value !== undefined && value !== null && value !== "";
-}
-
-/* =========================================
-   CONTACT ICONS
-========================================= */
-
 function ContactIcon({ type }) {
     const paths = {
         phone: (
             <path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.79 19.79 0 0 1 11.19 18a19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.09 3.18 2 2 0 0 1 4.08 1h3a2 2 0 0 1 2 1.72c.13.96.37 1.9.71 2.79a2 2 0 0 1-.45 2.11L8.07 8.89a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.89.34 1.83.58 2.79.71A2 2 0 0 1 22 16.92Z" />
         ),
-
         whatsapp: (
             <>
                 <path d="M12 2a10 10 0 0 0-8.7 14.9L2 22l5.3-1.3A10 10 0 1 0 12 2Z" />
@@ -262,7 +321,6 @@ function ContactIcon({ type }) {
                 <path d="m9 8 1.5 2-1 1m5 2 1.5 1-1 2" />
             </>
         ),
-
         viber: (
             <>
                 <path d="M7 3.5h10a4 4 0 0 1 4 4v7a4 4 0 0 1-4 4h-5l-4.5 3v-3H7a4 4 0 0 1-4-4v-7a4 4 0 0 1 4-4Z" />
@@ -289,16 +347,11 @@ function ContactIcon({ type }) {
     );
 }
 
-/* =========================================
-   SELLER CONTACT
-========================================= */
-
 function SellerContact({ car }) {
     const { t } = useI18n();
+    const number = normalizePhone(car?.phone);
 
-    const links = getContactLinks(car?.phone);
-
-    if (!links || car?.isDemo) {
+    if (!number || car?.isDemo) {
         return (
             <p className="seller-contact-empty">{t("contactUnavailable")}</p>
         );
@@ -307,7 +360,7 @@ function SellerContact({ car }) {
     return (
         <div className="seller-contact">
             <a
-                href={links.call}
+                href={`tel:+${number}`}
                 className="seller-contact-call"
                 aria-label={`${t("callSeller")}: ${car.phone}`}
             >
@@ -325,7 +378,7 @@ function SellerContact({ car }) {
 
             <div className="seller-contact-messengers">
                 <a
-                    href={links.whatsapp}
+                    href={`https://wa.me/${number}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="seller-contact-whatsapp"
@@ -336,7 +389,7 @@ function SellerContact({ car }) {
                 </a>
 
                 <a
-                    href={links.viber}
+                    href={`viber://chat?number=%2B${number}`}
                     className="seller-contact-viber"
                     aria-label="Viber"
                 >
@@ -348,16 +401,9 @@ function SellerContact({ car }) {
     );
 }
 
-/* =========================================
-   EXTRA SPECIFICATIONS
-========================================= */
-
 function ExtraSpecs({ car, language }) {
-    const labels = TRANSLATIONS[language] || TRANSLATIONS.hy;
-
-    function translate(value) {
-        return labels[value] || value;
-    }
+    const label = (key) => textFor(key, language);
+    const valueText = (value) => translateValue(value, language);
 
     const technical = [
         ["customsCleared", car.customsCleared],
@@ -372,17 +418,34 @@ function ExtraSpecs({ car, language }) {
         ["sunroof", car.sunroof],
     ].filter(([, value]) => hasValue(value));
 
-    const headlights = Array.isArray(car.headlights) ? car.headlights : [];
+    const headlights = Array.isArray(car.headlights)
+        ? car.headlights.filter(hasValue)
+        : hasValue(car.headlights)
+          ? [car.headlights]
+          : [];
 
-    const comfort = Array.isArray(car.comfort) ? car.comfort : [];
+    const comfort = [
+        ...new Set(
+            [
+                ...(Array.isArray(car.comfort) ? car.comfort : []),
+                ...(Array.isArray(car.comfortOptions)
+                    ? car.comfortOptions
+                    : []),
+            ]
+                .filter(hasValue)
+                .map((value) => String(value)),
+        ),
+    ];
 
-    const hasExtra =
-        technical.length > 0 ||
-        interior.length > 0 ||
-        headlights.length > 0 ||
-        comfort.length > 0;
-
-    if (!hasExtra || car.type === "part") {
+    if (
+        car.type === "part" ||
+        !(
+            technical.length ||
+            interior.length ||
+            headlights.length ||
+            comfort.length
+        )
+    ) {
         return null;
     }
 
@@ -391,18 +454,34 @@ function ExtraSpecs({ car, language }) {
             <dl className="ap-detail-extra-grid">
                 {items.map(([key, value]) => (
                     <div key={key} className="ap-detail-extra-row">
-                        <dt>{translate(key)}</dt>
-                        <dd>{translate(value)}</dd>
+                        <dt>{label(key)}</dt>
+                        <dd>{valueText(value)}</dd>
                     </div>
                 ))}
             </dl>
         );
     }
 
+    function renderFeatures(items) {
+        return (
+            <div className="ap-detail-features">
+                {items.map((item, index) => (
+                    <span
+                        key={`${item}-${index}`}
+                        className="ap-detail-feature"
+                    >
+                        <span aria-hidden="true">✓</span>
+                        {valueText(item)}
+                    </span>
+                ))}
+            </div>
+        );
+    }
+
     return (
         <section className="detail-panel ap-detail-extras">
             <div className="ap-detail-extra-title">
-                <span className="ap-detail-extra-title-icon">
+                <span className="ap-detail-extra-title-icon" aria-hidden="true">
                     <svg
                         width="22"
                         height="22"
@@ -412,7 +491,6 @@ function ExtraSpecs({ car, language }) {
                         strokeWidth="1.8"
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        aria-hidden="true"
                     >
                         <path d="M12 3 3 7.5 12 12l9-4.5L12 3Z" />
                         <path d="m3 12 9 4.5 9-4.5" />
@@ -420,7 +498,7 @@ function ExtraSpecs({ car, language }) {
                     </svg>
                 </span>
 
-                <h2>{labels.technical}</h2>
+                <h2>{label("technical")}</h2>
             </div>
 
             {technical.length > 0 && (
@@ -431,102 +509,70 @@ function ExtraSpecs({ car, language }) {
 
             {interior.length > 0 && (
                 <div className="ap-detail-extra-section">
-                    <h3>{labels.interior}</h3>
+                    <h3>{label("interior")}</h3>
                     {renderRows(interior)}
                 </div>
             )}
 
             {headlights.length > 0 && (
                 <div className="ap-detail-extra-section">
-                    <h3>{labels.exterior}</h3>
-
-                    <div className="ap-detail-feature-list">
-                        {headlights.map((item) => (
-                            <span key={item} className="ap-detail-feature">
-                                <span aria-hidden="true">✓</span>
-                                {translate(item)}
-                            </span>
-                        ))}
-                    </div>
+                    <h3>{label("headlights")}</h3>
+                    {renderFeatures(headlights)}
                 </div>
             )}
 
             {comfort.length > 0 && (
                 <div className="ap-detail-extra-section">
-                    <h3>{labels.comfort}</h3>
-
-                    <div className="ap-detail-feature-list">
-                        {comfort.map((item) => (
-                            <span key={item} className="ap-detail-feature">
-                                <span aria-hidden="true">✓</span>
-                                {translate(item)}
-                            </span>
-                        ))}
-                    </div>
+                    <h3>{label("comfort")}</h3>
+                    {renderFeatures(comfort)}
                 </div>
             )}
         </section>
     );
 }
 
-/* =========================================
-   CAR DETAILS PAGE
-========================================= */
-
 export default function CarDetailsPage({ id }) {
     const navigate = useNavigate();
-
     const { t, language } = useI18n();
-
-    const labels = TRANSLATIONS[language] || TRANSLATIONS.hy;
 
     const [state, setState] = useState({
         car: null,
         loading: true,
-        error: "",
+        failed: false,
     });
 
     const [copied, setCopied] = useState(false);
-
-    const [purchase, setPurchase] = useState({
-        busy: false,
-        message: "",
-        error: "",
-    });
+    const [purchaseStatus, setPurchaseStatus] = useState("idle");
 
     const { products = [] } = useProducts();
     const { format } = useCurrency();
-
     const [favorite, toggleFavorite] = useFavorite(id);
 
     const locale =
         language === "ru" ? "ru-RU" : language === "en" ? "en-US" : "hy-AM";
 
-    function translateValue(value) {
-        return localizeListingValue(value, language);
-    }
-
-    /* =====================================
-       LOAD PRODUCT
-    ===================================== */
-
     useEffect(() => {
         const controller = new AbortController();
 
+        setState({
+            car: null,
+            loading: true,
+            failed: false,
+        });
+
+        setCopied(false);
+        setPurchaseStatus("idle");
+
         async function loadProduct() {
-            setState({
-                car: null,
-                loading: true,
-                error: "",
-            });
+            if (!id) {
+                setState({
+                    car: null,
+                    loading: false,
+                    failed: true,
+                });
 
-            setCopied(false);
-
-            setPurchase({
-                busy: false,
-                message: "",
-                error: "",
-            });
+                return;
+            }
 
             try {
                 const result = await apiRequest(
@@ -541,52 +587,45 @@ export default function CarDetailsPage({ id }) {
                 setState({
                     car: result?.product || result,
                     loading: false,
-                    error: "",
+                    failed: false,
                 });
-            } catch (err) {
+            } catch {
                 if (controller.signal.aborted) return;
 
                 setState({
                     car: null,
                     loading: false,
-                    error: err.message || "LOAD_ERROR",
+                    failed: true,
                 });
             }
         }
 
-        if (id) {
-            void loadProduct();
-        } else {
-            setState({
-                car: null,
-                loading: false,
-                error: "INVALID_ID",
-            });
-        }
+        void loadProduct();
 
         return () => controller.abort();
     }, [id]);
 
-    /* =====================================
-       SEO
-    ===================================== */
+    const { car, loading, failed } = state;
+
+    /*
+     * Եթե backend-ը տրամադրում է թարգմանված վերնագրեր,
+     * օգտագործվում է ընտրված լեզվի տարբերակը։
+     */
+    const translatedTitle =
+        car?.translations?.[language]?.title ||
+        car?.titleTranslations?.[language];
+
+    const title =
+        (typeof translatedTitle === "string" && translatedTitle.trim()) ||
+        car?.title ||
+        [car?.brand, car?.model].filter(Boolean).join(" ") ||
+        "ArmMotors";
 
     useEffect(() => {
-        if (!state.car) return;
+        if (!car) return;
 
-        const oldTitle = document.title;
-
-        document.title = `${state.car.title || "ArmMotors"} — ArmMotors`;
-
-        const description = String(
-            state.car.description ||
-                `${state.car.brand || ""} ${state.car.model || ""} ${
-                    state.car.year || ""
-                } — ArmMotors`,
-        )
-            .replace(/\s+/g, " ")
-            .trim()
-            .slice(0, 160);
+        const previousTitle = document.title;
+        document.title = `${title} — ArmMotors`;
 
         let meta = document.querySelector('meta[name="description"]');
 
@@ -600,10 +639,22 @@ export default function CarDetailsPage({ id }) {
 
         const previousDescription = meta.getAttribute("content");
 
+        const localizedDescription = car.translations?.[language]?.description;
+
+        const description = String(
+            (typeof localizedDescription === "string" &&
+                localizedDescription) ||
+                car.description ||
+                `${title} — ArmMotors`,
+        )
+            .replace(/\s+/g, " ")
+            .trim()
+            .slice(0, 160);
+
         meta.setAttribute("content", description);
 
         return () => {
-            document.title = oldTitle;
+            document.title = previousTitle;
 
             if (createdMeta) {
                 meta.remove();
@@ -613,11 +664,7 @@ export default function CarDetailsPage({ id }) {
                 meta.setAttribute("content", previousDescription);
             }
         };
-    }, [state.car]);
-
-    /* =====================================
-       ACTIONS
-    ===================================== */
+    }, [car, title, language]);
 
     async function share() {
         try {
@@ -629,43 +676,32 @@ export default function CarDetailsPage({ id }) {
         }
     }
 
-    function openSupport() {
-        window.dispatchEvent(
-            new CustomEvent("open-support", {
-                detail: {
-                    listingId: id,
-                    title: state.car?.title || "",
-                },
-            }),
-        );
+    function requireLogin() {
+        if (localStorage.getItem("token")) return false;
+
+        navigate(`/login?next=${encodeURIComponent(`/cars/${id}`)}`);
+
+        return true;
     }
 
     function handleFavorite() {
-        const token = localStorage.getItem("token");
-
-        if (!token) {
-            navigate(`/login?next=${encodeURIComponent(`/cars/${id}`)}`);
-
-            return;
-        }
+        if (requireLogin()) return;
 
         void toggleFavorite();
     }
 
     async function sendPurchaseRequest() {
-        const token = localStorage.getItem("token");
-
-        if (!token) {
-            navigate(`/login?next=${encodeURIComponent(`/cars/${id}`)}`);
-
+        if (
+            purchaseStatus === "loading" ||
+            purchaseStatus === "success" ||
+            car?.status === "sold"
+        ) {
             return;
         }
 
-        setPurchase({
-            busy: true,
-            message: "",
-            error: "",
-        });
+        if (requireLogin()) return;
+
+        setPurchaseStatus("loading");
 
         try {
             await apiRequest("/orders", {
@@ -675,25 +711,11 @@ export default function CarDetailsPage({ id }) {
                 }),
             });
 
-            setPurchase({
-                busy: false,
-                message: "SUCCESS",
-                error: "",
-            });
-        } catch (err) {
-            setPurchase({
-                busy: false,
-                message: "",
-                error: err.message || "REQUEST_ERROR",
-            });
+            setPurchaseStatus("success");
+        } catch {
+            setPurchaseStatus("error");
         }
     }
-
-    /* =====================================
-       DATA
-    ===================================== */
-
-    const { car, loading, error } = state;
 
     const images =
         Array.isArray(car?.images) && car.images.length > 0
@@ -711,45 +733,66 @@ export default function CarDetailsPage({ id }) {
               [t("year"), car.year],
               [
                   t("mileage"),
-                  car.mileage != null
-                      ? `${Number(car.mileage).toLocaleString(locale)} ${t(
-                            "mileageUnit",
-                        )}`
+                  hasValue(car.mileage)
+                      ? `${Number(car.mileage).toLocaleString(
+                            locale,
+                        )} ${t("mileageUnit")}`
                       : null,
               ],
-              [t("fuel"), translateValue(car.fuel)],
-              [t("steering"), translateValue(car.steering)],
-              [t("color"), translateValue(car.color)],
-              [t("region"), translateValue(car.region)],
-              [t("condition"), translateValue(car.condition)],
+              [
+                  t("fuel"),
+                  hasValue(car.fuel)
+                      ? translateValue(car.fuel, language)
+                      : null,
+              ],
+              [
+                  t("steering"),
+                  hasValue(car.steering)
+                      ? translateValue(car.steering, language)
+                      : null,
+              ],
+              [
+                  t("color"),
+                  hasValue(car.color)
+                      ? translateValue(car.color, language)
+                      : null,
+              ],
+              [
+                  t("region"),
+                  hasValue(car.region)
+                      ? translateValue(car.region, language)
+                      : null,
+              ],
+              [
+                  t("condition"),
+                  hasValue(car.condition)
+                      ? translateValue(car.condition, language)
+                      : null,
+              ],
               ["VIN", car.vin || "—"],
           ]
         : [];
 
     const relatedCars = car
         ? (Array.isArray(products) ? products : [])
-              .filter((item) => {
-                  return (
+              .filter(
+                  (item) =>
                       getProductId(item) !== getProductId(car) &&
                       item.type === "car" &&
                       item.status !== "sold" &&
-                      item.status !== "draft"
-                  );
-              })
+                      item.status !== "draft",
+              )
               .map((item) => {
                   let score = 0;
 
-                  // Նույն մակնիշը
                   if (item.brand === car.brand) {
                       score += 50;
                   }
 
-                  // Նույն մոդելը՝ նույն մակնիշի դեպքում
                   if (item.brand === car.brand && item.model === car.model) {
                       score += 40;
                   }
 
-                  // Մոտ տարեթիվ
                   const yearDifference = Math.abs(
                       Number(item.year) - Number(car.year),
                   );
@@ -759,11 +802,13 @@ export default function CarDetailsPage({ id }) {
                       item.year &&
                       car.year
                   ) {
-                      if (yearDifference <= 2) score += 20;
-                      else if (yearDifference <= 5) score += 10;
+                      if (yearDifference <= 2) {
+                          score += 20;
+                      } else if (yearDifference <= 5) {
+                          score += 10;
+                      }
                   }
 
-                  // Մոտ գին՝ նույն արժույթի դեպքում
                   const itemPrice = Number(item.price);
                   const carPrice = Number(car.price);
 
@@ -775,11 +820,13 @@ export default function CarDetailsPage({ id }) {
                       const difference =
                           Math.abs(itemPrice - carPrice) / carPrice;
 
-                      if (difference <= 0.15) score += 20;
-                      else if (difference <= 0.3) score += 10;
+                      if (difference <= 0.15) {
+                          score += 20;
+                      } else if (difference <= 0.3) {
+                          score += 10;
+                      }
                   }
 
-                  // Նույն տրանսպորտային տեսակը
                   if (
                       item.vehicleType &&
                       item.vehicleType === car.vehicleType
@@ -794,40 +841,29 @@ export default function CarDetailsPage({ id }) {
               .map(({ item }) => item)
         : [];
 
-    /* =====================================
-       RENDER
-    ===================================== */
-
     return (
         <main className="details-page">
-            {/* BREADCRUMB */}
-
-            <nav className="detail-breadcrumb" aria-label="Breadcrumb">
+            <nav
+                className="detail-breadcrumb"
+                aria-label={textFor("breadcrumb", language)}
+            >
                 <Link to="/">{t("home")}</Link>
-
                 <span>/</span>
-
                 <Link to="/cars">{t("listings")}</Link>
             </nav>
 
             {loading ? (
                 <p role="status">{t("loading")}</p>
-            ) : error ? (
+            ) : failed || !car ? (
                 <section className="detail-panel">
                     <h1>{t("listingUnavailable")}</h1>
 
-                    <p role="alert">
-                        {error === "INVALID_ID" || error === "LOAD_ERROR"
-                            ? t("error")
-                            : error}
-                    </p>
+                    {failed && <p role="alert">{t("error")}</p>}
 
                     <Link to="/cars">{t("listings")} →</Link>
                 </section>
-            ) : car ? (
+            ) : (
                 <>
-                    {/* SHARE */}
-
                     <div className="detail-heading">
                         <div />
 
@@ -844,15 +880,11 @@ export default function CarDetailsPage({ id }) {
 
                     <div className="detail-layout">
                         <div>
-                            {/* IMAGE GALLERY */}
-
                             <CarImageGallery
                                 key={id}
                                 images={images}
-                                title={car.title}
+                                title={title}
                             />
-
-                            {/* BASIC SPECS */}
 
                             <section className="detail-panel">
                                 <h2>{t("details")}</h2>
@@ -863,18 +895,13 @@ export default function CarDetailsPage({ id }) {
                                         .map(([label, value]) => (
                                             <div key={label}>
                                                 <dt>{label}</dt>
-
                                                 <dd>{value}</dd>
                                             </div>
                                         ))}
                                 </dl>
                             </section>
 
-                            {/* EXTRA SPECS */}
-
                             <ExtraSpecs car={car} language={language} />
-
-                            {/* DESCRIPTION */}
 
                             <section className="detail-panel">
                                 <h2>{t("description")}</h2>
@@ -886,13 +913,10 @@ export default function CarDetailsPage({ id }) {
                             </section>
                         </div>
 
-                        {/* SELLER PANEL */}
-
                         <aside className="seller-panel">
                             <div className="listing-heading">
                                 <h1>
-                                    {car.title}
-
+                                    {title}
                                     {car.year ? `, ${car.year}` : ""}
                                 </h1>
 
@@ -925,23 +949,21 @@ export default function CarDetailsPage({ id }) {
                                 </button>
                             </div>
 
-                            {/* PRICE */}
-
                             <strong className="detail-price">
                                 {format(car.price, car.currency || "AMD")}
                             </strong>
 
                             <CurrencySelect />
 
-                            {car.region && <p>{translateValue(car.region)}</p>}
+                            {car.region && (
+                                <p>{translateValue(car.region, language)}</p>
+                            )}
 
                             {car.status === "sold" && (
                                 <p className="detail-sold-label">{t("sold")}</p>
                             )}
 
                             <hr />
-
-                            {/* SELLER IDENTITY */}
 
                             <div className="seller-identity">
                                 <span
@@ -969,54 +991,45 @@ export default function CarDetailsPage({ id }) {
                                 </div>
                             </div>
 
-                            {/* CONTACT BUTTONS */}
-
                             <SellerContact car={car} />
-
-                            {/* PURCHASE REQUEST */}
 
                             <button
                                 type="button"
                                 className="detail-primary"
                                 disabled={
-                                    purchase.busy ||
-                                    Boolean(purchase.message) ||
+                                    purchaseStatus === "loading" ||
+                                    purchaseStatus === "success" ||
                                     car.status === "sold"
                                 }
                                 onClick={sendPurchaseRequest}
                             >
                                 {car.status === "sold"
                                     ? t("sold")
-                                    : purchase.busy
+                                    : purchaseStatus === "loading"
                                       ? t("processing")
                                       : t("writeSeller")}
                             </button>
 
-                            {purchase.message && (
-                                <p role="status">{labels.purchaseSuccess}</p>
-                            )}
-
-                            {purchase.error && (
-                                <p role="alert" className="form-error">
-                                    {purchase.error === "REQUEST_ERROR"
-                                        ? labels.purchaseError
-                                        : purchase.error}
+                            {purchaseStatus === "success" && (
+                                <p role="status">
+                                    {textFor("purchaseSuccess", language)}
                                 </p>
                             )}
 
-                            {/* SUPPORT */}
+                            {purchaseStatus === "error" && (
+                                <p role="alert" className="form-error">
+                                    {textFor("purchaseError", language)}
+                                </p>
+                            )}
 
-                            {/* REPORT */}
-
-                            <ReportProduct productId={getProductId(car)} />
+                            <ReportProduct
+                                key={getProductId(car)}
+                                productId={getProductId(car)}
+                            />
                         </aside>
                     </div>
 
-                    {/* ADVERTISEMENT */}
-
                     <CarDetailsAd />
-
-                    {/* RELATED CARS */}
 
                     {relatedCars.length > 0 && (
                         <section className="related-cars">
@@ -1033,12 +1046,6 @@ export default function CarDetailsPage({ id }) {
                         </section>
                     )}
                 </>
-            ) : (
-                <section className="detail-panel">
-                    <h1>{t("listingUnavailable")}</h1>
-
-                    <Link to="/cars">{t("listings")}</Link>
-                </section>
             )}
         </main>
     );

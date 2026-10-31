@@ -1,40 +1,46 @@
 import useRemote from "../../utils/useRemote";
+import useInterfaceText from "../../utils/interfaceText";
+
 import "./PublicationNotice.css";
 
 export default function PublicationNotice() {
+    const { tr, locale } = useInterfaceText();
+
     const { data, loading, error } = useRemote("/monetization/plans");
 
     if (loading) {
         return (
-            <div className="publication-notice">
-                Հրապարակման պայմանների ստուգում...
+            <div className="publication-notice" role="status">
+                {tr("loading")}
             </div>
         );
     }
 
     if (error) {
         return (
-            <div className="publication-notice">
-                Սահմանաչափի տվյալներն անհասանելի են։
-                {error}
+            <div className="publication-notice" role="alert">
+                {tr("loadError")}
             </div>
         );
     }
 
-    const remaining = Math.max(0, (data?.freeLimit || 5) - (data?.used || 0));
+    const limit = Number(data?.freeLimit ?? 5);
+    const used = Number(data?.used ?? 0);
+    const remaining = Math.max(0, limit - used);
+    const price = `${Number(100).toLocaleString(locale)} ֏`;
 
     return (
         <div className="publication-notice">
             <b>
                 {remaining > 0
-                    ? `Մնացել է ${remaining} անվճար հայտարարություն`
-                    : "Նոր հայտարարություն՝ 100 ֏"}
+                    ? tr("remaining", { count: remaining })
+                    : tr("publicationPaid", { price })}
             </b>
 
             <p>
                 {remaining > 0
-                    ? "Առաջին 5 հրապարակումներն անվճար են։ Հաջորդ յուրաքանչյուրի համար՝ 100 դրամ։"
-                    : "Հրապարակելիս կստեղծվի 100 դրամի վճարման հայտ։ Հայտարարությունը կհրապարակվի միայն վճարման հաստատումից հետո։"}
+                    ? tr("publicationRules", { limit, price })
+                    : tr("publicationPending")}
             </p>
         </div>
     );

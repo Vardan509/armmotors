@@ -1,0 +1,144 @@
+.am-search-select {
+    position: relative;
+    min-width: 0;
+}
+
+.am-search-select-control {
+    position: relative;
+    width: 100%;
+}
+
+.am-search-select-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+
+    width: 100%;
+    min-height: 49px;
+    padding: 11px 14px;
+
+    border: 1px solid #dce5ef;
+    border-radius: 10px;
+
+    background: #f8fafd;
+    color: #14263f;
+
+    font-family: inherit;
+    font-size: 13px;
+    text-align: left;
+    cursor: pointer;
+}
+
+.am-search-select-trigger:hover,
+.am-search-select-trigger[aria-expanded="true"] {
+    border-color: #527fae;
+    background: #ffffff;
+}
+
+.am-search-select-trigger > span:first-child {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.am-search-select-trigger .is-placeholder {
+    color: #94a3b8;
+}
+
+.am-search-select-trigger:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.am-search-select-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    z-index: 200;
+
+    width: 100%;
+    min-width: 0;
+    padding: 8px;
+
+    border: 1px solid #dce5ef;
+    border-radius: 11px;
+
+    background: #ffffff;
+    box-shadow: 0 15px 35px rgba(20, 38, 63, 0.15);
+}
+
+.am-search-select-menu > input {
+    display: block;
+    width: 100%;
+    height: 39px;
+    padding: 0 11px;
+
+    border: 1px solid #dce5ef;
+    border-radius: 8px;
+    outline: none;
+
+    background: #f8fafd;
+    color: #14263f;
+    font-size: 12px;
+}
+
+.am-search-select-menu > input:focus {
+    border-color: #527fae;
+    box-shadow: 0 0 0 3px rgba(50, 104, 170, 0.1);
+}
+
+.am-search-select-list {
+    max-height: 230px;
+    margin-top: 7px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+}
+
+.am-search-select-list button {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+
+    width: 100%;
+    min-height: 39px;
+    padding: 9px 10px;
+
+    border: 0;
+    border-radius: 7px;
+
+    background: transparent;
+    color: #475569;
+
+    font-family: inherit;
+    font-size: 12px;
+    text-align: left;
+    cursor: pointer;
+}
+
+.am-search-select-list button:hover,
+.am-search-select-list button.is-selected {
+    background: #edf4fc;
+    color: #244b77;
+}
+
+.am-search-select-empty {
+    margin: 0;
+    padding: 14px 9px;
+    color: #94a3b8;
+    font-size: 12px;
+    text-align: center;
+}
+
+.am-search-select-validation {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    border: 0;
+    opacity: 0;
+    pointer-events: none;
+}

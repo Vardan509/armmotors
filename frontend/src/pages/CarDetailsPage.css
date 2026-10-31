@@ -1,21 +1,19 @@
 /* =========================================
-   ARMMOTORS — CAR DETAILS PAGE
-   PREMIUM NAVY / WHITE
+   ARMMOTORS — PREMIUM CAR DETAILS
+   NAVY / BLUE / WHITE
 ========================================= */
 
 .details-page {
     --detail-navy: #14263f;
-    --detail-blue: #285a91;
-    --detail-muted: #718096;
-    --detail-border: #e2e9f2;
-    --detail-bg: #f5f7fb;
+    --detail-blue: #244b77;
+    --detail-muted: #64748b;
+    --detail-border: #e1e8f1;
+    --detail-bg: #f7f9fc;
 
     min-height: 100vh;
-    padding: 30px 24px 90px;
-
+    padding: 30px 24px 95px;
     background: var(--detail-bg);
     color: var(--detail-navy);
-
     font-family: Arial, "Noto Sans Armenian", sans-serif;
 }
 
@@ -26,62 +24,47 @@
 }
 
 .details-page > * {
+    width: 100%;
     max-width: 1380px;
     margin-left: auto;
     margin-right: auto;
 }
 
-.details-page a,
-.details-page button {
+.details-page button,
+.details-page a {
     -webkit-tap-highlight-color: transparent;
 }
 
-/* =========================================
-   BREADCRUMB
-========================================= */
+/* BREADCRUMB */
 
 .detail-breadcrumb {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
     gap: 10px;
-
-    margin-bottom: 22px;
-
-    color: var(--detail-muted);
+    margin-bottom: 23px;
+    color: #8290a3;
     font-size: 12px;
 }
 
 .detail-breadcrumb a {
     color: #526780;
     text-decoration: none;
-    transition: color 0.2s;
+    transition: color 0.2s ease;
 }
 
 .detail-breadcrumb a:hover {
     color: var(--detail-blue);
 }
 
-/* =========================================
-   PAGE HEADING
-========================================= */
+/* PAGE TOP */
 
 .detail-heading {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-
-    margin-bottom: 20px;
-}
-
-.detail-heading h1 {
-    margin: 0;
-
-    color: var(--detail-navy);
-    font-size: clamp(24px, 3vw, 35px);
-    font-weight: 800;
-    line-height: 1.35;
+    justify-content: flex-end;
+    gap: 15px;
+    margin-bottom: 17px;
 }
 
 .detail-heading > .detail-secondary {
@@ -90,15 +73,13 @@
     margin: 0;
 }
 
-/* =========================================
-   TWO COLUMN LAYOUT
-========================================= */
+/* MAIN LAYOUT */
 
 .detail-layout {
     display: grid;
-    grid-template-columns: minmax(0, 1.7fr) minmax(290px, 1fr);
+    grid-template-columns: minmax(0, 1.7fr) minmax(310px, 1fr);
     align-items: start;
-    gap: 24px;
+    gap: 23px;
 }
 
 .detail-layout > *,
@@ -107,26 +88,23 @@
     min-width: 0;
 }
 
-/* =========================================
-   GALLERY
-========================================= */
+/* IMAGE GALLERY */
 
 .gallery-main {
     position: relative;
-
     display: flex;
     align-items: center;
     justify-content: center;
 
     width: 100%;
     aspect-ratio: 16 / 10;
-
     overflow: hidden;
 
     border: 1px solid var(--detail-border);
-    border-radius: 18px;
+    border-radius: 17px;
 
-    background: #e9eef5;
+    background: #e9eff6;
+    box-shadow: 0 7px 24px rgba(20, 38, 63, 0.05);
 }
 
 .gallery-main img {
@@ -134,17 +112,15 @@
     width: 100%;
     height: 100%;
     object-fit: contain;
+    object-position: center;
 }
 
 .gallery-empty {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
+    display: grid;
+    place-items: center;
     width: 100%;
     height: 100%;
-
-    color: var(--detail-muted);
+    color: #8b9caf;
     font-size: 13px;
 }
 
@@ -157,24 +133,24 @@
     display: grid;
     place-items: center;
 
-    width: 40px;
-    height: 40px;
+    width: 42px;
+    height: 42px;
     padding: 0;
 
     transform: translateY(-50%);
 
-    border: 1px solid rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.75);
     border-radius: 50%;
 
     background: rgba(255, 255, 255, 0.96);
-    color: var(--detail-navy);
+    color: #14263f;
 
     box-shadow: 0 5px 15px rgba(20, 38, 63, 0.12);
     cursor: pointer;
 
     transition:
-        background 0.2s,
-        color 0.2s;
+        background 0.2s ease,
+        color 0.2s ease;
 }
 
 .gallery-prev {
@@ -187,7 +163,7 @@
 
 .gallery-prev:hover,
 .gallery-next:hover {
-    background: var(--detail-navy);
+    background: #14263f;
     color: #ffffff;
 }
 
@@ -197,48 +173,57 @@
     bottom: 14px;
     z-index: 2;
 
-    padding: 7px 11px;
-
+    padding: 8px 12px;
     border-radius: 8px;
 
-    background: rgba(20, 38, 63, 0.85);
+    background: rgba(20, 38, 63, 0.86);
     color: #ffffff;
 
     font-size: 11px;
-    font-weight: 700;
+    font-weight: 800;
 }
+
+/* RECTANGULAR THUMBNAILS */
 
 .gallery-thumbs {
     display: flex;
     gap: 10px;
 
+    width: 100%;
     margin-top: 12px;
-    padding-bottom: 5px;
+    padding-bottom: 6px;
 
     overflow-x: auto;
     scrollbar-width: thin;
+    scroll-snap-type: x proximity;
 }
 
 .gallery-thumbs button {
-    flex: 0 0 88px;
-
-    width: 88px;
-    height: 66px;
+    flex: 0 0 104px;
+    width: 104px;
+    height: 75px;
     padding: 0;
 
     overflow: hidden;
+    scroll-snap-align: start;
 
     border: 2px solid transparent;
     border-radius: 9px;
 
-    background: #edf2f8;
+    background: #eaf0f7;
     cursor: pointer;
+    opacity: 0.75;
+
+    transition:
+        border-color 0.2s ease,
+        opacity 0.2s ease;
 }
 
 .gallery-thumbs button:hover,
 .gallery-thumbs button.active,
 .gallery-thumbs button[aria-pressed="true"] {
-    border-color: var(--detail-blue);
+    border-color: #244b77;
+    opacity: 1;
 }
 
 .gallery-thumbs img {
@@ -248,53 +233,44 @@
     object-fit: cover;
 }
 
-/* =========================================
-   PANELS
-========================================= */
+/* WHITE PANELS */
 
 .detail-panel,
 .seller-panel,
 .car-description {
     min-width: 0;
-
-    padding: 26px;
+    padding: 25px;
 
     border: 1px solid var(--detail-border);
-    border-radius: 19px;
+    border-radius: 16px;
 
     background: #ffffff;
-
-    box-shadow: 0 7px 25px rgba(20, 38, 63, 0.035);
+    box-shadow: 0 6px 24px rgba(20, 38, 63, 0.035);
 }
-
-/* Space between left-column sections */
 
 .detail-layout > div > .detail-panel,
 .detail-layout > div > .car-description {
-    margin-top: 20px;
+    margin-top: 19px;
 }
 
 .detail-panel h2,
 .seller-panel h2,
 .car-description h2 {
     margin: 0 0 20px;
+    color: #14263f;
 
-    color: var(--detail-navy);
     font-size: 19px;
-    font-weight: 800;
-    line-height: 1.45;
+    font-weight: 850;
+    line-height: 1.4;
     overflow-wrap: anywhere;
 }
 
-/* =========================================
-   BASIC SPECIFICATIONS
-========================================= */
+/* BASIC SPECIFICATIONS */
 
 .spec-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 11px;
-
+    gap: 10px;
     margin: 0;
 }
 
@@ -305,57 +281,47 @@
     gap: 7px;
 
     min-width: 0;
-    min-height: 73px;
-
+    min-height: 75px;
     margin: 0;
-    padding: 13px 16px;
+    padding: 13px 15px;
 
     border: 1px solid #e5ebf3;
-    border-radius: 11px;
+    border-radius: 10px;
 
     background: #f8fafd;
 
     transition:
         border-color 0.2s ease,
-        background 0.2s ease,
-        transform 0.2s ease;
+        background 0.2s ease;
 }
 
 .spec-grid > div:hover {
-    border-color: #c5d7ec;
-    background: #f1f6fc;
-    transform: translateY(-1px);
+    border-color: #bed3ea;
+    background: #f0f6fd;
 }
 
 .spec-grid dt {
     margin: 0;
-
     color: #77869b;
     font-size: 11px;
-    font-weight: 500;
     line-height: 1.45;
-
     overflow-wrap: anywhere;
 }
 
 .spec-grid dd {
     margin: 0;
+    color: #14263f;
 
-    color: var(--detail-navy);
     font-size: 13px;
-    font-weight: 800;
+    font-weight: 850;
     line-height: 1.5;
-
     overflow-wrap: anywhere;
-    word-break: normal;
 }
 
-/* =========================================
-   EXTRA SPECIFICATIONS
-========================================= */
+/* EXTRA SPECIFICATIONS */
 
 .details-page .ap-detail-extras {
-    padding: 26px;
+    padding: 25px;
 }
 
 .details-page .ap-detail-extra-title {
@@ -364,9 +330,9 @@
     gap: 13px;
 
     margin-bottom: 20px;
-    padding-bottom: 18px;
+    padding-bottom: 17px;
 
-    border-bottom: 1px solid #e8edf4;
+    border-bottom: 1px solid #e6ecf3;
 }
 
 .details-page .ap-detail-extra-title-icon {
@@ -377,20 +343,18 @@
     width: 43px;
     height: 43px;
 
-    border: 1px solid #dce7f3;
-    border-radius: 12px;
+    border: 1px solid #d9e6f4;
+    border-radius: 11px;
 
     background: #edf4fc;
-    color: var(--detail-navy);
+    color: #244b77;
 }
 
 .details-page .ap-detail-extra-title h2 {
     margin: 0;
-
-    color: var(--detail-navy);
+    color: #14263f;
     font-size: 18px;
-    font-weight: 800;
-    line-height: 1.5;
+    font-weight: 850;
 }
 
 .details-page .ap-detail-extra-section {
@@ -404,17 +368,15 @@
 
 .details-page .ap-detail-extra-section h3 {
     margin: 0 0 13px;
-
-    color: var(--detail-navy);
+    color: #14263f;
     font-size: 14px;
-    font-weight: 800;
+    font-weight: 850;
 }
 
 .details-page .ap-detail-extra-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px;
-
     margin: 0;
 }
 
@@ -426,53 +388,44 @@
 
     min-width: 0;
     min-height: 73px;
-
     margin: 0;
     padding: 13px 15px;
 
     border: 1px solid #e5ebf3;
-    border-radius: 11px;
+    border-radius: 10px;
 
     background: #f8fafd;
-
-    transition:
-        background 0.2s,
-        border-color 0.2s;
 }
 
 .details-page .ap-detail-extra-row:hover {
-    background: #f1f6fc;
-    border-color: #c5d7ec;
+    border-color: #bed3ea;
+    background: #f0f6fd;
 }
 
 .details-page .ap-detail-extra-row dt {
     margin: 0;
-
     color: #77869b;
     font-size: 11px;
-    font-weight: 500;
     line-height: 1.5;
-
     overflow-wrap: anywhere;
 }
 
 .details-page .ap-detail-extra-row dd {
     margin: 0;
+    color: #14263f;
 
-    color: var(--detail-navy);
     font-size: 13px;
-    font-weight: 800;
+    font-weight: 850;
     line-height: 1.5;
-
     overflow-wrap: anywhere;
 }
 
-/* Feature chips */
+/* FEATURE CHIPS */
 
 .details-page .ap-detail-feature-list {
     display: flex;
     flex-wrap: wrap;
-    gap: 9px;
+    gap: 8px;
 }
 
 .details-page .ap-detail-feature {
@@ -482,19 +435,17 @@
 
     max-width: 100%;
     min-height: 35px;
-
     padding: 8px 12px;
 
-    border: 1px solid #dce8f4;
-    border-radius: 9px;
+    border: 1px solid #d9e6f4;
+    border-radius: 8px;
 
-    background: #f3f7fc;
-    color: #294e79;
+    background: #f0f6fd;
+    color: #244b77;
 
     font-size: 11px;
-    font-weight: 700;
+    font-weight: 750;
     line-height: 1.5;
-
     overflow-wrap: anywhere;
 }
 
@@ -507,20 +458,16 @@
     height: 17px;
 
     border-radius: 50%;
-
     background: #dceafa;
-    color: #205c99;
-
+    color: #244b77;
     font-size: 10px;
 }
 
-/* =========================================
-   DESCRIPTION
-========================================= */
+/* DESCRIPTION */
 
 .detail-panel p,
 .car-description p {
-    color: #506176;
+    color: #52657c;
     font-size: 13px;
     line-height: 1.85;
     overflow-wrap: anywhere;
@@ -531,12 +478,11 @@
     white-space: pre-line;
 }
 
-/* =========================================
-   SELLER
-========================================= */
+/* SELLER PANEL */
 
 .seller-panel {
-    position: relative;
+    position: sticky;
+    top: 135px;
 }
 
 .seller-panel .listing-heading {
@@ -544,19 +490,17 @@
     align-items: flex-start;
     justify-content: space-between;
     gap: 12px;
-
-    margin-bottom: 14px;
+    margin-bottom: 15px;
 }
 
 .seller-panel .listing-heading h1 {
     min-width: 0;
     margin: 0;
 
-    color: var(--detail-navy);
-    font-size: clamp(19px, 2vw, 25px);
-    font-weight: 800;
+    color: #14263f;
+    font-size: clamp(20px, 2vw, 26px);
+    font-weight: 850;
     line-height: 1.4;
-
     overflow-wrap: anywhere;
 }
 
@@ -566,23 +510,27 @@
 
 .detail-price {
     display: block;
-
     margin-bottom: 15px;
 
-    color: var(--detail-navy);
-    font-size: clamp(27px, 3vw, 36px);
-    font-weight: 800;
+    color: #14263f;
+    font-size: clamp(27px, 3vw, 37px);
+    font-weight: 900;
     line-height: 1.25;
-    letter-spacing: -0.03em;
-
+    letter-spacing: -0.035em;
     overflow-wrap: anywhere;
+}
+
+.seller-panel hr {
+    height: 1px;
+    margin: 22px 0;
+    border: 0;
+    background: #e5ebf3;
 }
 
 .seller-identity {
     display: flex;
     align-items: center;
     gap: 13px;
-
     margin: 19px 0;
 }
 
@@ -595,19 +543,18 @@
     place-items: center;
     flex-shrink: 0;
 
-    width: 49px;
-    height: 49px;
-
+    width: 50px;
+    height: 50px;
     overflow: hidden;
 
-    border: 1px solid #dce7f3;
-    border-radius: 14px;
+    border: 1px solid #d9e6f4;
+    border-radius: 12px;
 
-    background: #edf3fa;
-    color: var(--detail-navy);
+    background: #edf4fc;
+    color: #244b77;
 
     font-size: 20px;
-    font-weight: 800;
+    font-weight: 850;
 }
 
 .seller-avatar img {
@@ -623,24 +570,20 @@
 
 .seller-profile-link {
     display: inline-flex;
+    color: #244b77;
 
-    color: #285a91;
     font-size: 12px;
-    font-weight: 700;
+    font-weight: 750;
     line-height: 1.5;
-
     text-decoration: none;
     overflow-wrap: anywhere;
 }
 
 .seller-profile-link:hover {
-    color: #173e6c;
     text-decoration: underline;
 }
 
-/* =========================================
-   ACTION BUTTONS
-========================================= */
+/* ACTION BUTTONS */
 
 .detail-primary,
 .detail-secondary {
@@ -650,15 +593,14 @@
     gap: 9px;
 
     width: 100%;
-    min-height: 45px;
-
+    min-height: 46px;
     padding: 11px 15px;
 
     border-radius: 10px;
 
     font-family: inherit;
     font-size: 12px;
-    font-weight: 800;
+    font-weight: 850;
     line-height: 1.5;
     text-align: center;
     text-decoration: none;
@@ -666,21 +608,20 @@
     cursor: pointer;
 
     transition:
-        background 0.2s,
-        border-color 0.2s,
-        transform 0.2s;
+        background 0.2s ease,
+        border-color 0.2s ease;
 }
 
 .detail-primary {
-    border: 1px solid var(--detail-navy);
-    background: var(--detail-navy);
+    border: 1px solid #14263f;
+    background: #14263f;
     color: #ffffff;
 }
 
 .detail-primary:hover:not(:disabled) {
-    background: #21456d;
+    border-color: #244b77;
+    background: #244b77;
     color: #ffffff;
-    transform: translateY(-1px);
 }
 
 .detail-primary:disabled {
@@ -690,15 +631,14 @@
 
 .detail-secondary {
     margin-top: 10px;
-
-    border: 1px solid var(--detail-border);
-
+    border: 1px solid #dce5ef;
     background: #ffffff;
-    color: var(--detail-navy);
+    color: #14263f;
 }
 
 .detail-secondary:hover {
-    background: #edf3fa;
+    background: #edf4fc;
+    color: #244b77;
 }
 
 .detail-favorite {
@@ -710,62 +650,64 @@
     height: 43px;
     min-width: 43px;
     min-height: 43px;
-
     padding: 8px;
 
-    border: 1px solid var(--detail-border);
-    border-radius: 11px;
+    border: 1px solid #e0e8f2;
+    border-radius: 10px;
 
     background: #ffffff;
-    color: var(--detail-navy);
-
+    color: #14263f;
     cursor: pointer;
-
-    transition:
-        background 0.2s,
-        border-color 0.2s;
 }
 
-.detail-favorite:hover {
-    background: #fff3f4;
-    color: #cf3c54;
-}
-
+.detail-favorite:hover,
 .detail-favorite[aria-pressed="true"] {
     border-color: #f3cbd3;
     background: #fff0f3;
     color: #d93d59;
 }
 
-/* =========================================
-   RELATED CARS
-========================================= */
+/* SELLER CONTACT COLORS */
+
+.details-page .seller-contact-label {
+    color: #315b89;
+}
+
+.details-page .seller-contact-call > svg,
+.details-page .seller-contact-arrow {
+    color: #c7def7;
+}
+
+.details-page .seller-contact a:focus-visible {
+    outline-color: #477fba;
+}
+
+/* RELATED CARS */
 
 .related-cars {
-    margin-top: 30px;
+    margin-top: 32px;
 }
 
 .related-cars > h2 {
-    margin: 0 0 18px;
-
-    color: var(--detail-navy);
+    margin: 0 0 19px;
+    color: #14263f;
     font-size: 22px;
-    font-weight: 800;
+    font-weight: 850;
 }
 
 .related-cars .products-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
+    align-items: stretch;
     gap: 16px;
 }
 
 .related-cars .products-grid > * {
     min-width: 0;
+    height: 100%;
 }
 
-/* =========================================
-   TABLET
-========================================= */
+/* TABLET */
 
 @media (max-width: 1100px) {
     .detail-layout {
@@ -783,22 +725,24 @@
         grid-template-columns: minmax(0, 1fr);
     }
 
+    .seller-panel {
+        position: static;
+    }
+
     .related-cars .products-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
 
-/* =========================================
-   MOBILE
-========================================= */
+/* MOBILE */
 
 @media (max-width: 600px) {
     .details-page {
-        padding: 17px 12px 90px;
+        padding: 17px 12px 95px;
     }
 
     .detail-heading {
-        margin-bottom: 16px;
+        margin-bottom: 15px;
     }
 
     .detail-heading > .detail-secondary {
@@ -807,7 +751,8 @@
     }
 
     .gallery-main {
-        border-radius: 13px;
+        aspect-ratio: 4 / 3;
+        border-radius: 12px;
     }
 
     .gallery-prev,
@@ -824,10 +769,15 @@
         right: 9px;
     }
 
+    .gallery-thumbs {
+        gap: 8px;
+    }
+
     .gallery-thumbs button {
-        flex: 0 0 70px;
-        width: 70px;
-        height: 54px;
+        flex: 0 0 77px;
+        width: 77px;
+        height: 57px;
+        border-radius: 7px;
     }
 
     .detail-panel,
@@ -835,18 +785,19 @@
     .car-description,
     .details-page .ap-detail-extras {
         padding: 17px;
-        border-radius: 14px;
+        border-radius: 13px;
     }
 
     .detail-panel h2,
     .seller-panel h2,
     .car-description h2 {
-        font-size: 17px;
         margin-bottom: 15px;
+        font-size: 17px;
     }
 
     .spec-grid,
     .details-page .ap-detail-extra-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 8px;
     }
 
@@ -886,13 +837,12 @@
     }
 
     .related-cars .products-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 10px;
     }
 }
 
-/* =========================================
-   VERY SMALL PHONES
-========================================= */
+/* SMALL PHONES */
 
 @media (max-width: 360px) {
     .details-page {
@@ -916,13 +866,11 @@
     }
 }
 
-/* =========================================
-   ACCESSIBILITY
-========================================= */
+/* ACCESSIBILITY */
 
 .details-page button:focus-visible,
 .details-page a:focus-visible {
-    outline: 2px solid #5b93cf;
+    outline: 2px solid #477fba;
     outline-offset: 3px;
 }
 

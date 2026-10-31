@@ -18,6 +18,8 @@ import { useI18n } from "../utils/i18n";
 import "./AddProductPage.css";
 import "./AddProductSuccess.css";
 
+import SearchableSelect from "../components/common/SearchableSelect";
+
 /* =========================================
    OPTIONS
 ========================================= */
@@ -518,33 +520,15 @@ function Select({
     disabled = false,
 }) {
     return (
-        <label className="ap-field">
-            <span className="ap-field-label">
-                {label}
-                {required && <em>*</em>}
-            </span>
-
-            <select
-                value={value ?? ""}
-                onChange={(event) => onChange(event.target.value)}
-                required={required}
-                disabled={disabled}
-            >
-                <option value="">{placeholder}</option>
-
-                {options.map((option) => {
-                    const [key, text] = Array.isArray(option)
-                        ? option
-                        : [option, option];
-
-                    return (
-                        <option key={String(key)} value={key}>
-                            {text}
-                        </option>
-                    );
-                })}
-            </select>
-        </label>
+        <SearchableSelect
+            label={label}
+            value={value}
+            onChange={onChange}
+            options={options}
+            placeholder={placeholder}
+            required={required}
+            disabled={disabled}
+        />
     );
 }
 
@@ -1295,7 +1279,6 @@ export default function AddProductPage() {
 
                     <div className="ap-heading">
                         <div>
-
                             <h1>{isEditing ? t.edit : t.add}</h1>
 
                             <p>{t.help}</p>

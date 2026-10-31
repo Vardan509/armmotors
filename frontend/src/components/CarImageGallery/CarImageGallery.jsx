@@ -1,27 +1,30 @@
 import { useEffect, useRef, useState } from "react";
-import "./CarImageGallery.css";
 
+import useInterfaceText from "../../utils/interfaceText";
+
+import "./CarImageGallery.css";
 
 const MIN_ZOOM = 1;
 const MAX_ZOOM = 4;
 const ZOOM_STEP = 0.25;
 
-function clamp(value, min, max) {
-    return Math.min(max, Math.max(min, value));
+function clamp(value, minimum, maximum) {
+    return Math.min(maximum, Math.max(minimum, value));
 }
 
 function distance(a, b) {
     return Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
 }
 
-export default function CarImageGallery({ images = [], title = "Ավտոմեքենա" }) {
+export default function CarImageGallery({ images = [], title = "" }) {
+    const { tr } = useInterfaceText();
+
+    const list = Array.isArray(images) ? images.filter(Boolean) : [];
+
     const [index, setIndex] = useState(0);
     const [failed, setFailed] = useState({});
     const [zoom, setZoom] = useState(1);
-    const [position, setPosition] = useState({
-        x: 0,
-        y: 0,
-    });
+    const [position, setPosition] = useState({ x: 0, y: 0 });
     const [dragging, setDragging] = useState(false);
 
     const viewportRef = useRef(null);
@@ -30,32 +33,38 @@ export default function CarImageGallery({ images = [], title = "Ավտոմեքե
     const pointersRef = useRef(new Map());
     const gestureRef = useRef(null);
 
-    const src = images[index];
+    const currentIndex = Math.min(index, Math.max(0, list.length - 1));
+
+    const src = list[currentIndex];
+    const imageTitle = title || tr("car");
 
     function limitPosition(next, scale = zoomRef.current) {
-        const element = viewportRef.current;
+        const viewport = viewportRef.current;
 
-        if (!element || scale <= 1) {
+        if (!viewport || scale <= 1) {
             return { x: 0, y: 0 };
         }
 
-        const maxX = (element.clientWidth * (scale - 1)) / 2;
-        const maxY = (element.clientHeight * (scale - 1)) / 2;
+        const maximumX = (viewport.clientWidth * (scale - 1)) / 2;
+
+        const maximumY = (viewport.clientHeight * (scale - 1)) / 2;
 
         return {
-            x: clamp(next.x, -maxX, maxX),
-            y: clamp(next.y, -maxY, maxY),
+            x: clamp(next.x, -maximumX, maximumX),
+            y: clamp(next.y, -maximumY, maximumY),
         };
     }
 
     function updatePosition(next, scale = zoomRef.current) {
         const limited = limitPosition(next, scale);
+
         positionRef.current = limited;
         setPosition(limited);
     }
 
     function updateZoom(nextZoom) {
         const limited = clamp(nextZoom, MIN_ZOOM, MAX_ZOOM);
+
         zoomRef.current = limited;
         setZoom(limited);
         updatePosition(positionRef.current, limited);
@@ -64,6 +73,7 @@ export default function CarImageGallery({ images = [], title = "Ավտոմեքե
     function resetZoom() {
         zoomRef.current = 1;
         positionRef.current = { x: 0, y: 0 };
+
         pointersRef.current.clear();
         gestureRef.current = null;
 
@@ -78,64 +88,75 @@ export default function CarImageGallery({ images = [], title = "Ավտոմեքե
     }
 
     function previousImage() {
-        if (images.length < 2) return;
+        if (list.length < 2) return;
 
-        changeImage((index + images.length - 1) % images.length);
+        changeImage((currentIndex + list.length - 1) % list.length);
     }
 
     function nextImage() {
-        if (images.length < 2) return;
+        if (list.length < 2) return;
 
-        changeImage((index + 1) % images.length);
+        changeImage((currentIndex + 1) % list.length);
     }
 
     function imageFailed(image) {
-        setFailed((previous) => ({
-            ...previous,
+        setFailed((current) => ({
+            ...current,
             [image]: true,
         }));
     }
 
-    function handleWheel(event) {
-        if (!src || failed[src]) return;
-
-        event.preventDefault();
-
-        const direction = event.deltaY < 0 ? 1 : -1;
-        updateZoom(zoomRef.current + direction * ZOOM_STEP);
-    }
-
     useEffect(() => {
-        const element = viewportRef.current;
-        if (!element) return;
+        const viewport = viewportRef.current;
 
-        element.addEventListener("wheel", handleWheel, {
+        if (!viewport) return;
+
+        function wheel(event) {
+            if (!src || failed[src]) return;
+
+            event.preventDefault();
+
+            updateZoom(
+                zoomRef.current + (event.deltaY < 0 ? ZOOM_STEP : -ZOOM_STEP),
+            );
+        }
+
+        viewport.addEventListener("wheel", wheel, {
             passive: false,
         });
 
         return () => {
-            element.removeEventListener("wheel", handleWheel);
+            viewport.removeEventListener("wheel", wheel);
         };
     });
 
     useEffect(() => {
-        function handleKey(event) {
+        function keyboard(event) {
             if (
                 event.target instanceof HTMLElement &&
-                ["INPUT", "TEXTAREA", "SELECT"].includes(event.target.tagName)
+                (["INPUT", "TEXTAREA", "SELECT"].includes(
+                    event.target.tagName,
+                ) ||
+                    event.target.isContentEditable)
             ) {
                 return;
             }
 
-            if (!viewportRef.current?.contains(document.activeElement)) {
+            if (
+                !viewportRef.current
+                    ?.closest(".car-gallery")
+                    ?.contains(document.activeElement)
+            ) {
                 return;
             }
 
             if (event.key === "ArrowLeft") {
+                event.preventDefault();
                 previousImage();
             }
 
             if (event.key === "ArrowRight") {
+                event.preventDefault();
                 nextImage();
             }
 
@@ -144,10 +165,10 @@ export default function CarImageGallery({ images = [], title = "Ավտոմեքե
             }
         }
 
-        window.addEventListener("keydown", handleKey);
+        window.addEventListener("keydown", keyboard);
 
         return () => {
-            window.removeEventListener("keydown", handleKey);
+            window.removeEventListener("keydown", keyboard);
         };
     });
 
@@ -158,8 +179,9 @@ export default function CarImageGallery({ images = [], title = "Ավտոմեքե
             return;
         }
 
-        const element = viewportRef.current;
-        if (!element) return;
+        const viewport = viewportRef.current;
+
+        if (!viewport) return;
 
         pointersRef.current.set(event.pointerId, {
             clientX: event.clientX,
@@ -170,7 +192,7 @@ export default function CarImageGallery({ images = [], title = "Ավտոմեքե
             return;
         }
 
-        element.setPointerCapture(event.pointerId);
+        viewport.setPointerCapture(event.pointerId);
 
         const points = [...pointersRef.current.values()];
 
@@ -192,14 +214,13 @@ export default function CarImageGallery({ images = [], title = "Ավտոմեքե
                 y: event.clientY,
                 position: { ...positionRef.current },
             };
+
             setDragging(true);
         }
     }
 
     function handlePointerMove(event) {
-        if (!pointersRef.current.has(event.pointerId)) {
-            return;
-        }
+        if (!pointersRef.current.has(event.pointerId)) return;
 
         pointersRef.current.set(event.pointerId, {
             clientX: event.clientX,
@@ -212,12 +233,11 @@ export default function CarImageGallery({ images = [], title = "Ավտոմեքե
         if (!gesture) return;
 
         if (points.length >= 2 && gesture.type === "pinch") {
-            const currentDistance = distance(points[0], points[1]);
-
             if (!gesture.distance) return;
 
             const nextZoom = clamp(
-                gesture.zoom * (currentDistance / gesture.distance),
+                gesture.zoom *
+                    (distance(points[0], points[1]) / gesture.distance),
                 MIN_ZOOM,
                 MAX_ZOOM,
             );
@@ -255,7 +275,14 @@ export default function CarImageGallery({ images = [], title = "Ավտոմեքե
     function handlePointerUp(event) {
         pointersRef.current.delete(event.pointerId);
 
-        if (viewportRef.current?.hasPointerCapture(event.pointerId)) {
+        /*
+         * lostpointercapture-ը կարող է կրկին կանչել այս handler-ը։
+         * Capture-ը բաց ենք թողնում միայն եթե դեռ առկա է։
+         */
+        if (
+            event.type !== "lostpointercapture" &&
+            viewportRef.current?.hasPointerCapture(event.pointerId)
+        ) {
             viewportRef.current.releasePointerCapture(event.pointerId);
         }
 
@@ -274,18 +301,10 @@ export default function CarImageGallery({ images = [], title = "Ավտոմեքե
         }
     }
 
-    function handleDoubleClick() {
-        if (zoomRef.current > 1) {
-            resetZoom();
-        } else {
-            updateZoom(2);
-        }
-    }
-
     return (
         <section
             className="car-gallery am-zoom-gallery"
-            aria-label="Հայտարարության նկարներ"
+            aria-label={tr("gallery")}
         >
             <div className="gallery-main am-zoom-main">
                 <div
@@ -293,39 +312,51 @@ export default function CarImageGallery({ images = [], title = "Ավտոմեքե
                     className={`am-zoom-viewport ${
                         zoom > 1 ? "is-zoomed" : ""
                     } ${dragging ? "is-dragging" : ""}`}
-                    onDoubleClick={handleDoubleClick}
+                    onDoubleClick={() => {
+                        if (!src || failed[src]) return;
+
+                        if (zoomRef.current > 1) {
+                            resetZoom();
+                        } else {
+                            updateZoom(2);
+                        }
+                    }}
                     onPointerDown={handlePointerDown}
                     onPointerMove={handlePointerMove}
                     onPointerUp={handlePointerUp}
                     onPointerCancel={handlePointerUp}
                     onLostPointerCapture={handlePointerUp}
                     tabIndex={0}
-                    aria-label="Մեծացնել կամ տեղափոխել նկարը"
+                    aria-label={tr("moveImage")}
                 >
                     {src && !failed[src] ? (
                         <img
                             src={src}
-                            alt={`${title} — նկար ${index + 1}`}
+                            alt={`${imageTitle} — ${tr("image", {
+                                number: currentIndex + 1,
+                            })}`}
                             draggable={false}
                             onError={() => imageFailed(src)}
                             style={{
-                                transform: `translate3d(${position.x}px, ${position.y}px, 0) scale(${zoom})`,
+                                transform:
+                                    `translate3d(${position.x}px, ` +
+                                    `${position.y}px, 0) scale(${zoom})`,
                             }}
                         />
                     ) : (
                         <div className="gallery-empty">
-                            <p>Նկարը հասանելի չէ</p>
+                            <p>{tr("imageUnavailable")}</p>
                         </div>
                     )}
                 </div>
 
-                {images.length > 1 && (
+                {list.length > 1 && (
                     <>
                         <button
                             type="button"
                             className="gallery-prev"
                             onClick={previousImage}
-                            aria-label="Նախորդ նկար"
+                            aria-label={tr("previousImage")}
                         >
                             ‹
                         </button>
@@ -334,7 +365,7 @@ export default function CarImageGallery({ images = [], title = "Ավտոմեքե
                             type="button"
                             className="gallery-next"
                             onClick={nextImage}
-                            aria-label="Հաջորդ նկար"
+                            aria-label={tr("nextImage")}
                         >
                             ›
                         </button>
@@ -349,8 +380,8 @@ export default function CarImageGallery({ images = [], title = "Ավտոմեքե
                                 updateZoom(zoomRef.current - ZOOM_STEP)
                             }
                             disabled={zoom <= MIN_ZOOM}
-                            aria-label="Փոքրացնել նկարը"
-                            title="Փոքրացնել"
+                            aria-label={tr("zoomOut")}
+                            title={tr("zoomOut")}
                         >
                             −
                         </button>
@@ -363,8 +394,8 @@ export default function CarImageGallery({ images = [], title = "Ավտոմեքե
                                 updateZoom(zoomRef.current + ZOOM_STEP)
                             }
                             disabled={zoom >= MAX_ZOOM}
-                            aria-label="Մեծացնել նկարը"
-                            title="Մեծացնել"
+                            aria-label={tr("zoomIn")}
+                            title={tr("zoomIn")}
                         >
                             +
                         </button>
@@ -373,8 +404,8 @@ export default function CarImageGallery({ images = [], title = "Ավտոմեքե
                             type="button"
                             onClick={resetZoom}
                             disabled={zoom === 1}
-                            aria-label="Վերականգնել նկարը"
-                            title="Վերականգնել"
+                            aria-label={tr("resetImage")}
+                            title={tr("resetImage")}
                         >
                             ↺
                         </button>
@@ -382,22 +413,28 @@ export default function CarImageGallery({ images = [], title = "Ավտոմեքե
                 )}
 
                 <span className="gallery-counter" aria-live="polite">
-                    {images.length ? index + 1 : 0} / {images.length}
+                    {list.length ? currentIndex + 1 : 0} / {list.length}
                 </span>
             </div>
 
-            {images.length > 0 && (
+            {list.length > 0 && (
                 <div className="gallery-thumbs">
-                    {images.map((image, i) => (
+                    {list.map((image, imageIndex) => (
                         <button
                             type="button"
-                            key={`${image}-${i}`}
-                            aria-label={`Ցուցադրել նկար ${i + 1}`}
-                            aria-pressed={i === index}
-                            onClick={() => changeImage(i)}
+                            key={`${image}-${imageIndex}`}
+                            aria-label={tr("showImage", {
+                                number: imageIndex + 1,
+                            })}
+                            aria-pressed={imageIndex === currentIndex}
+                            onClick={() => changeImage(imageIndex)}
                         >
                             {failed[image] ? (
-                                <span>Նկար {i + 1}</span>
+                                <span>
+                                    {tr("image", {
+                                        number: imageIndex + 1,
+                                    })}
+                                </span>
                             ) : (
                                 <img
                                     src={image}

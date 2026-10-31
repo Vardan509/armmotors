@@ -26,25 +26,27 @@ function sendError(res, error) {
 
 export async function getAllProductController(req, res) {
     try {
-        res.json(await getAllProduct());
+        const products = await getAllProduct(req.query);
+
+        return res.json(products);
     } catch (error) {
-        sendError(res, error);
+        return sendError(res, error);
     }
 }
 
 export async function getMyProductsController(req, res) {
     try {
-        res.json(await getMyProducts(req.userId));
+        return res.json(await getMyProducts(req.userId));
     } catch (error) {
-        sendError(res, error);
+        return sendError(res, error);
     }
 }
 
 export async function getProductByController(req, res) {
     try {
-        res.json(await getProductById(req.params.id));
+        return res.json(await getProductById(req.params.id));
     } catch (error) {
-        sendError(res, error);
+        return sendError(res, error);
     }
 }
 
@@ -52,9 +54,9 @@ export async function controllerAddProduct(req, res) {
     try {
         const product = await addProduct(req.body, req.userId);
 
-        res.status(201).json(product);
+        return res.status(201).json(product);
     } catch (error) {
-        sendError(res, error);
+        return sendError(res, error);
     }
 }
 
@@ -62,9 +64,9 @@ export async function updateAllProductController(req, res) {
     try {
         const product = await updateById(req.params.id, req.body, req.userId);
 
-        res.json(product);
+        return res.json(product);
     } catch (error) {
-        sendError(res, error);
+        return sendError(res, error);
     }
 }
 
@@ -72,8 +74,8 @@ export async function controllerDeleteProduct(req, res) {
     try {
         await deleteProduct(req.params.id, req.userId);
 
-        res.status(204).end();
+        return res.status(204).end();
     } catch (error) {
-        sendError(res, error);
+        return sendError(res, error);
     }
 }

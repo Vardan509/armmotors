@@ -1,18 +1,48 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
+
+import { useI18n } from "../../utils/i18n";
+
 import "./SearchableSelect.css";
+
+const TEXTS = {
+    hy: {
+        all: "Բոլորը",
+        search: "Որոնել...",
+        empty: "Արդյունք չի գտնվել",
+    },
+    ru: {
+        all: "Все",
+        search: "Поиск...",
+        empty: "Ничего не найдено",
+    },
+    en: {
+        all: "All",
+        search: "Search...",
+        empty: "No results found",
+    },
+};
 
 export default function SearchableSelect({
     label,
     value = "",
     options = [],
     onChange,
-    placeholder = "Բոլորը",
+    placeholder,
     disabled = false,
 }) {
+    const { language } = useI18n();
+    const text = TEXTS[language] || TEXTS.hy;
+
+    const emptyLabel = placeholder || text.all;
+
     const [open, setOpen] = useState(false);
     const [query, setQuery] = useState("");
+
     const rootRef = useRef(null);
     const inputRef = useRef(null);
+    const triggerRef = useRef(null);
+
+    const popupId = useId();
 
     const items = options.map((option) =>
         typeof option === "string"
@@ -38,7 +68,9 @@ export default function SearchableSelect({
 
         function onKeyDown(event) {
             if (event.key === "Escape") {
+                event.preventDefault();
                 setOpen(false);
+                triggerRef.current?.focus();
             }
         }
 
@@ -50,17 +82,24 @@ export default function SearchableSelect({
 
         document.addEventListener("keydown", onKeyDown);
         document.addEventListener("pointerdown", onOutside);
+        document.addEventListener("focusin", onOutside);
 
         return () => {
             document.removeEventListener("keydown", onKeyDown);
             document.removeEventListener("pointerdown", onOutside);
+            document.removeEventListener("focusin", onOutside);
         };
     }, [open]);
+
+    useEffect(() => {
+        if (disabled) setOpen(false);
+    }, [disabled]);
 
     function choose(nextValue) {
         onChange(nextValue);
         setQuery("");
         setOpen(false);
+        triggerRef.current?.focus();
     }
 
     return (
@@ -70,29 +109,40 @@ export default function SearchableSelect({
                 disabled ? "disabled" : ""
             } ${open ? "is-open" : ""}`}
         >
-            {label && <label className="am-select-label">{label}</label>}
+            {label && <span className="am-select-label">{label}</span>}
 
             <button
+                ref={triggerRef}
                 type="button"
                 className="am-select-trigger"
                 disabled={disabled}
-                aria-expanded={open}
+                aria-expanded={open && !disabled}
+                aria-controls={open && !disabled ? popupId : undefined}
+                aria-label={
+                    label
+                        ? `${label}: ${selected?.label || emptyLabel}`
+                        : undefined
+                }
                 onClick={() => {
                     setOpen((current) => !current);
                     setQuery("");
                 }}
             >
-                <span>{selected?.label || placeholder}</span>
-                <span className="am-select-arrow">{open ? "⌃" : "⌄"}</span>
+                <span>{selected?.label || emptyLabel}</span>
+
+                <span className="am-select-arrow" aria-hidden="true">
+                    {open ? "⌃" : "⌄"}
+                </span>
             </button>
 
-            {open && (
-                <div className="am-select-popup">
+            {open && !disabled && (
+                <div id={popupId} className="am-select-popup">
                     <div className="am-select-search">
                         <input
                             ref={inputRef}
                             type="search"
-                            placeholder="Որոնել..."
+                            aria-label={text.search}
+                            placeholder={text.search}
                             value={query}
                             onChange={(event) => setQuery(event.target.value)}
                         />
@@ -104,7 +154,7 @@ export default function SearchableSelect({
                             className="am-select-option"
                             onClick={() => choose("")}
                         >
-                            {placeholder}
+                            {emptyLabel}
                         </button>
 
                         {filtered.map((item) => (
@@ -114,16 +164,20 @@ export default function SearchableSelect({
                                 className={`am-select-option ${
                                     item.value === value ? "selected" : ""
                                 }`}
+                                aria-pressed={item.value === value}
                                 onClick={() => choose(item.value)}
                             >
                                 <span>{item.label}</span>
-                                {item.value === value && <span>✓</span>}
+
+                                {item.value === value && (
+                                    <span aria-hidden="true">✓</span>
+                                )}
                             </button>
                         ))}
 
                         {filtered.length === 0 && (
-                            <div className="am-select-empty">
-                                Արդյունք չի գտնվել
+                            <div className="am-select-empty" role="status">
+                                {text.empty}
                             </div>
                         )}
                     </div>

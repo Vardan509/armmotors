@@ -1,44 +1,38 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
+
 import { apiRequest } from "../../utils/api";
+import useInterfaceText from "../../utils/interfaceText";
+
 import "./ListingPromotion.css";
 
-const BASE = import.meta.env.BASE_URL;
-
 const PLANS = {
-    top7: {
-        title: "TOP՝ 7 օր",
-        price: 200,
-        benefits: [
-            "Ոսկեգույն TOP նշան մեքենայի նկարին",
-            "Հայտարարությունը սովորականներից վերև",
-            "Ավելի նկատելի քարտ՝ 7 օր",
-        ],
-    },
-    top30: {
-        title: "TOP՝ 30 օր",
-        price: 600,
-        benefits: [
-            "Ոսկեգույն TOP նշան",
-            "Ցուցակի առաջին հատվածում առաջնահերթություն",
-            "Առավելություններ՝ 30 ամբողջ օր",
-        ],
-    },
-    auto7: {
-        title: "Ավտոթարմացում՝ 7 օր",
-        price: 100,
-        benefits: [
-            "Ամեն օր նորացված հայտարարություն",
-            "Բարձրացում նորացվածների ցուցակում",
-            "7 օրվա գործողություն",
-        ],
-    },
+    top7: { price: 200, benefit: "topBenefit" },
+    top30: { price: 600, benefit: "topMonthBenefit" },
+    auto7: { price: 100, benefit: "autoBenefit" },
 };
 
 export default function ListingPromotion({ product }) {
+    const { tr, locale } = useInterfaceText();
+
     const [busy, setBusy] = useState("");
     const [selected, setSelected] = useState("");
-    const [message, setMessage] = useState("");
-    const [error, setError] = useState("");
+    const [messageKey, setMessageKey] = useState("");
+    const [errorKey, setErrorKey] = useState("");
+
+    const dialogRef = useRef(null);
+
+    const plan = PLANS[selected];
+
+    useEffect(() => {
+        if (plan && !dialogRef.current?.open) {
+            dialogRef.current?.showModal();
+        }
+
+        if (!plan && dialogRef.current?.open) {
+            dialogRef.current.close();
+        }
+    }, [plan]);
 
     if (!product?._id || product.status !== "active") {
         return null;
@@ -47,56 +41,52 @@ export default function ListingPromotion({ product }) {
     const topActive =
         product.topUntil && new Date(product.topUntil).getTime() > Date.now();
 
-    const plan = PLANS[selected];
+    function dram(value) {
+        return `${Number(value).toLocaleString(locale)} ֏`;
+    }
 
     async function send(kind) {
+        if (busy) return;
+
+        setBusy(kind);
+        setMessageKey("");
+        setErrorKey("");
+
         try {
-            setBusy(kind);
-            setMessage("");
-            setError("");
+            const productId = encodeURIComponent(product._id);
 
             if (kind === "refresh") {
                 await apiRequest(
-                    `/monetization/products/${product._id}/refresh`,
+                    `/monetization/products/${productId}/refresh`,
                     { method: "POST" },
                 );
 
-                setMessage("Հայտարարությունը թարմացվեց։");
+                setMessageKey("refreshed");
             } else {
                 await apiRequest(
-                    `/monetization/products/${product._id}/upgrade`,
+                    `/monetization/products/${productId}/upgrade`,
                     {
                         method: "POST",
                         body: JSON.stringify({ kind }),
                     },
                 );
 
-                setMessage(
-                    "Վճարման հայտը ստեղծվեց։ Այն կակտիվանա ադմինի հաստատումից հետո։",
-                );
-
+                setMessageKey("requestCreated");
                 setSelected("");
             }
-        } catch (err) {
-            setError(err.message);
+        } catch {
+            setErrorKey("actionError");
         } finally {
             setBusy("");
         }
     }
 
     return (
-        <section
-            className="listing-promotion"
-            aria-label="Հայտարարության խթանում"
-        >
+        <section className="listing-promotion" aria-label={tr("promotion")}>
             <div className="listing-promotion-heading">
-                <b>
-                    {topActive
-                        ? "★ TOP ակտիվ"
-                        : "Թարմացրեք Հայտարարությունը"}
-                </b>
+                <b>{tr(topActive ? "topActive" : "promotion")}</b>
 
-                <a href={`${BASE}monetization`}>Բոլոր պայմանները ↗</a>
+                <Link to="/monetization">{tr("allTerms")} ↗</Link>
             </div>
 
             <div className="listing-promotion-buttons">
@@ -105,59 +95,51 @@ export default function ListingPromotion({ product }) {
                     disabled={Boolean(busy)}
                     onClick={() => send("refresh")}
                 >
-                    ↻ Թարմացնել (4 օրը մեկ)
+                    ↻ {tr("refreshEvery4")}
                 </button>
 
-                <button
-                    type="button"
-                    disabled={Boolean(busy)}
-                    onClick={() => setSelected("top7")}
-                >
-                    ★ TOP՝ 7 օր · 200 ֏
-                </button>
-
-                <button
-                    type="button"
-                    disabled={Boolean(busy)}
-                    onClick={() => setSelected("top30")}
-                >
-                    ★ TOP՝ 30 օր · 600 ֏
-                </button>
-
-                <button
-                    type="button"
-                    disabled={Boolean(busy)}
-                    onClick={() => setSelected("auto7")}
-                >
-                    ↻ Ամեն օր՝ 7 օր · 100 ֏
-                </button>
+                {Object.entries(PLANS).map(([kind, details]) => (
+                    <button
+                        key={kind}
+                        type="button"
+                        disabled={Boolean(busy)}
+                        onClick={() => {
+                            setErrorKey("");
+                            setSelected(kind);
+                        }}
+                    >
+                        {kind === "auto7" ? "↻" : "★"} {tr(kind)} ·{" "}
+                        {dram(details.price)}
+                    </button>
+                ))}
             </div>
 
-            {message && <p className="listing-promotion-message">{message}</p>}
-
-            {error && (
-                <p className="listing-promotion-error" role="alert">
-                    {error}
+            {messageKey && (
+                <p className="listing-promotion-message" role="status">
+                    {tr(messageKey)}
                 </p>
             )}
 
-            {plan && (
-                <div
-                    className="promotion-modal-overlay"
-                    onClick={() => setSelected("")}
-                >
-                    <div
-                        className="promotion-modal"
-                        role="dialog"
-                        aria-modal="true"
-                        aria-label={plan.title}
-                        onClick={(event) => event.stopPropagation()}
-                    >
+            {errorKey && (
+                <p className="listing-promotion-error" role="alert">
+                    {tr(errorKey)}
+                </p>
+            )}
+
+            <dialog
+                ref={dialogRef}
+                className="promotion-modal"
+                aria-label={plan ? tr(selected) : tr("promotion")}
+                onClose={() => setSelected("")}
+            >
+                {plan && (
+                    <>
                         <button
                             className="promotion-close"
                             type="button"
                             onClick={() => setSelected("")}
-                            aria-label="Փակել"
+                            aria-label={tr("close")}
+                            disabled={Boolean(busy)}
                         >
                             ×
                         </button>
@@ -166,30 +148,31 @@ export default function ListingPromotion({ product }) {
                             ARMMOTORS PREMIUM
                         </span>
 
-                        <h3>{plan.title}</h3>
+                        <h3>{tr(selected)}</h3>
 
                         <strong className="promotion-price">
-                            {plan.price} ֏
+                            {dram(plan.price)}
                         </strong>
 
                         <ul>
-                            {plan.benefits.map((benefit) => (
-                                <li key={benefit}>{benefit}</li>
-                            ))}
+                            <li>{tr(plan.benefit)}</li>
                         </ul>
 
-                        <p>
-                            Ստեղծվելու է վճարման հայտ։ Գումարի ավտոմատ գանձում
-                            դեռ միացված չէ։ Ակտիվացումը կատարում է ադմինը՝
-                            վճարումը ստուգելուց հետո։
-                        </p>
+                        <p>{tr("paymentWarning")}</p>
+
+                        {errorKey && (
+                            <p className="listing-promotion-error" role="alert">
+                                {tr(errorKey)}
+                            </p>
+                        )}
 
                         <div className="promotion-modal-actions">
                             <button
                                 type="button"
+                                disabled={Boolean(busy)}
                                 onClick={() => setSelected("")}
                             >
-                                Չեղարկել
+                                {tr("cancel")}
                             </button>
 
                             <button
@@ -197,12 +180,12 @@ export default function ListingPromotion({ product }) {
                                 disabled={Boolean(busy)}
                                 onClick={() => send(selected)}
                             >
-                                Ստեղծել հայտ
+                                {tr(busy ? "loading" : "createRequest")}
                             </button>
                         </div>
-                    </div>
-                </div>
-            )}
+                    </>
+                )}
+            </dialog>
         </section>
     );
 }

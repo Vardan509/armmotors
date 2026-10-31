@@ -5,6 +5,8 @@ import useCurrency from "../../utils/useCurrency";
 import useFavorite from "../../utils/useFavorite";
 import { useI18n } from "../../utils/i18n";
 
+import { localizeListingValue } from "../../utils/localizeListing";
+
 import {
     getCompareIds,
     toggleCompare,
@@ -13,10 +15,6 @@ import {
 
 import "./ProductCard.css";
 import "../../styles/ArmMotorsMobile.css";
-
-/* =========================================
-   TRANSLATIONS
-========================================= */
 
 const CARD_TEXT = {
     hy: {
@@ -29,15 +27,12 @@ const CARD_TEXT = {
         removeCompare: "Հեռացնել համեմատությունից",
         view: "Դիտել համեմատությունը",
         viewDetails: "Դիտել մանրամասները",
-        compareError: "Համեմատությունը չհաջողվեց։",
+        compareError: "Համեմատությունը թարմացնել չհաջողվեց։",
         yearSuffix: "թ.",
         notSpecified: "Չնշված",
-        automatic: "Ավտոմատ",
-        manual: "Մեխանիկական",
-        robotic: "Ռոբոտացված",
-        cvt: "Վարիատոր",
         transmission: "Փոխանցման տուփ",
     },
+
     ru: {
         listing: "Объявление",
         car: "Автомобиль",
@@ -48,15 +43,12 @@ const CARD_TEXT = {
         removeCompare: "Убрать из сравнения",
         view: "Посмотреть сравнение",
         viewDetails: "Посмотреть детали",
-        compareError: "Не удалось выполнить сравнение.",
+        compareError: "Не удалось обновить сравнение.",
         yearSuffix: "г.",
         notSpecified: "Не указано",
-        automatic: "Автомат",
-        manual: "Механика",
-        robotic: "Робот",
-        cvt: "Вариатор",
         transmission: "Коробка передач",
     },
+
     en: {
         listing: "Listing",
         car: "Car",
@@ -70,143 +62,89 @@ const CARD_TEXT = {
         compareError: "Could not update comparison.",
         yearSuffix: "",
         notSpecified: "Not specified",
-        automatic: "Automatic",
-        manual: "Manual",
-        robotic: "Robotic",
-        cvt: "CVT",
         transmission: "Transmission",
     },
 };
 
-/* =========================================
-   ICONS
-========================================= */
+const ICON_PATHS = {
+    heart: (
+        <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z" />
+    ),
+    calendar: (
+        <>
+            <rect x="3" y="5" width="18" height="16" rx="2" />
+            <path d="M7 3v4M17 3v4M3 10h18" />
+        </>
+    ),
+    speed: (
+        <>
+            <path d="M5 18a9 9 0 1 1 14 0" />
+            <path d="m12 14 4-5" />
+            <circle cx="12" cy="14" r="1.5" />
+            <path d="M8 20h8" />
+        </>
+    ),
+    fuel: (
+        <>
+            <rect x="4" y="4" width="11" height="17" rx="2" />
+            <path d="M7 8h5M15 9h2l3 3v6a2 2 0 0 1-4 0v-4" />
+        </>
+    ),
+    gearbox: (
+        <>
+            <circle cx="6" cy="5" r="2" />
+            <circle cx="18" cy="5" r="2" />
+            <circle cx="6" cy="19" r="2" />
+            <circle cx="18" cy="19" r="2" />
+            <path d="M6 7v10M18 7v10M6 12h12M12 12V5" />
+        </>
+    ),
+    pin: (
+        <>
+            <path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z" />
+            <circle cx="12" cy="10" r="2.5" />
+        </>
+    ),
+    compare: <path d="M4 7h16M16 3l4 4-4 4M20 17H4M8 13l-4 4 4 4" />,
+    arrow: <path d="M5 12h14M13 6l6 6-6 6" />,
+    car: (
+        <>
+            <path d="m5 11 2-5h10l2 5" />
+            <rect x="3" y="11" width="18" height="7" rx="2" />
+            <path d="M6 18v2M18 18v2M7 14h1M16 14h1" />
+        </>
+    ),
+};
 
 function Icon({ name, size = 17 }) {
-    const common = {
-        width: size,
-        height: size,
-        viewBox: "0 0 24 24",
-        fill: "none",
-        stroke: "currentColor",
-        strokeWidth: 1.8,
-        strokeLinecap: "round",
-        strokeLinejoin: "round",
-        "aria-hidden": true,
-    };
-
-    switch (name) {
-        case "heart":
-            return (
-                <svg {...common}>
-                    <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z" />
-                </svg>
-            );
-
-        case "calendar":
-            return (
-                <svg {...common}>
-                    <rect x="3" y="5" width="18" height="16" rx="2" />
-                    <path d="M7 3v4M17 3v4M3 10h18" />
-                </svg>
-            );
-
-        case "speed":
-            return (
-                <svg {...common}>
-                    <path d="M5 18a9 9 0 1 1 14 0" />
-                    <path d="m12 14 4-5" />
-                    <circle cx="12" cy="14" r="1.5" />
-                    <path d="M8 20h8" />
-                </svg>
-            );
-
-        case "fuel":
-            return (
-                <svg {...common}>
-                    <rect x="4" y="4" width="11" height="17" rx="2" />
-                    <path d="M7 8h5M15 9h2l3 3v6a2 2 0 0 1-4 0v-4" />
-                </svg>
-            );
-
-        case "gearbox":
-            return (
-                <svg {...common}>
-                    <circle cx="6" cy="5" r="2" />
-                    <circle cx="18" cy="5" r="2" />
-                    <circle cx="6" cy="19" r="2" />
-                    <circle cx="18" cy="19" r="2" />
-                    <path d="M6 7v10M18 7v10M6 12h12M12 12V5" />
-                </svg>
-            );
-
-        case "pin":
-            return (
-                <svg {...common}>
-                    <path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z" />
-                    <circle cx="12" cy="10" r="2.5" />
-                </svg>
-            );
-
-        case "compare":
-            return (
-                <svg {...common}>
-                    <path d="M4 7h16M16 3l4 4-4 4M20 17H4M8 13l-4 4 4 4" />
-                </svg>
-            );
-
-        case "arrow":
-            return (
-                <svg {...common}>
-                    <path d="M5 12h14M13 6l6 6-6 6" />
-                </svg>
-            );
-
-        case "car":
-            return (
-                <svg {...common}>
-                    <path d="m5 11 2-5h10l2 5" />
-                    <rect x="3" y="11" width="18" height="7" rx="2" />
-                    <path d="M6 18v2M18 18v2M7 14h1M16 14h1" />
-                </svg>
-            );
-
-        default:
-            return null;
-    }
+    return (
+        <svg
+            width={size}
+            height={size}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+        >
+            {ICON_PATHS[name]}
+        </svg>
+    );
 }
 
-/* =========================================
-   TRANSMISSION FORMAT
-========================================= */
-
-function getTransmission(item, text) {
-    const raw = item?.transmission || item?.gearbox || item?.gearboxType || "";
-
-    if (!raw) return text.notSpecified;
-
-    const value = String(raw).trim().toLowerCase();
-
-    const types = {
-        automatic: text.automatic,
-        auto: text.automatic,
-        at: text.automatic,
-        manual: text.manual,
-        mechanic: text.manual,
-        mechanical: text.manual,
-        mt: text.manual,
-        robotic: text.robotic,
-        robot: text.robotic,
-        cvt: text.cvt,
-        variator: text.cvt,
-    };
-
-    return types[value] || String(raw);
+function getCompareSnapshot() {
+    return JSON.stringify(getCompareIds());
 }
 
-/* =========================================
-   PRODUCT CARD
-========================================= */
+function getServerCompareSnapshot() {
+    return "[]";
+}
+
+function hasValue(value) {
+    return value !== undefined && value !== null && value !== "";
+}
 
 export default function ProductCard({ item }) {
     const navigate = useNavigate();
@@ -216,37 +154,40 @@ export default function ProductCard({ item }) {
 
     const [failedImage, setFailedImage] = useState("");
     const [loadedImage, setLoadedImage] = useState("");
-    const [message, setMessage] = useState("");
+    const [compareFailed, setCompareFailed] = useState(false);
 
     const { format } = useCurrency();
 
     const id = String(item?._id || item?.id || "");
-
     const [favorite, toggleFavorite] = useFavorite(id);
-
-    /* COMPARE */
 
     const compareSnapshot = useSyncExternalStore(
         subscribeCompare,
-        () => JSON.stringify(getCompareIds()),
-        () => "[]",
+        getCompareSnapshot,
+        getServerCompareSnapshot,
     );
 
     const compareIds = JSON.parse(compareSnapshot);
-    const isCompared = compareIds.includes(id);
+    const isCompared = compareIds.some((compareId) => String(compareId) === id);
 
-    /* PRODUCT DATA */
+    function localized(value, field) {
+        return localizeListingValue(value, language, field);
+    }
+
+    const translatedTitle =
+        item?.translations?.[language]?.title ||
+        item?.titleTranslations?.[language];
 
     const title =
+        (typeof translatedTitle === "string" && translatedTitle.trim()) ||
         item?.title ||
         [item?.brand, item?.model].filter(Boolean).join(" ") ||
         text.listing;
 
     const image = item?.image || item?.images?.[0] || "";
-
     const isCar = item?.type === "car";
 
-    const isNew = item?.condition === "new" || item?.condition === "Նոր";
+    const isNew = localized(item?.condition, "condition") === t("new");
 
     const isTop = Boolean(
         item?.topUntil && new Date(item.topUntil).getTime() > Date.now(),
@@ -256,18 +197,18 @@ export default function ProductCard({ item }) {
         language === "ru" ? "ru-RU" : language === "en" ? "en-US" : "hy-AM";
 
     const mileage =
-        item?.mileage !== null &&
-        item?.mileage !== undefined &&
-        item?.mileage !== "" &&
-        Number.isFinite(Number(item.mileage))
-            ? `${Number(item.mileage).toLocaleString(locale)} ${t("mileageUnit")}`
+        hasValue(item?.mileage) && Number.isFinite(Number(item.mileage))
+            ? `${Number(item.mileage).toLocaleString(locale)} ${t(
+                  "mileageUnit",
+              )}`
             : text.notSpecified;
 
-    const transmission = getTransmission(item, text);
+    const rawTransmission =
+        item?.transmission || item?.gearbox || item?.gearboxType;
 
-    /* =========================================
-       DETAILS — 2 X 2
-    ========================================= */
+    const transmission = hasValue(rawTransmission)
+        ? localized(rawTransmission, "transmission")
+        : text.notSpecified;
 
     const details = isCar
         ? [
@@ -285,10 +226,8 @@ export default function ProductCard({ item }) {
               },
               {
                   icon: "fuel",
-                  text: item?.fuel
-                      ? item.fuel === "benzin"
-                          ? t("petrol")
-                          : t(item.fuel)
+                  text: hasValue(item?.fuel)
+                      ? localized(item.fuel, "fuel")
                       : text.notSpecified,
               },
               {
@@ -300,17 +239,11 @@ export default function ProductCard({ item }) {
         : [
               {
                   icon: "car",
-                  text: item?.condition
-                      ? isNew
-                          ? t("new")
-                          : item.condition === "used"
-                            ? t("used")
-                            : item.condition
+                  text: hasValue(item?.condition)
+                      ? localized(item.condition, "condition")
                       : text.notSpecified,
               },
           ];
-
-    /* FAVORITES */
 
     function handleFavoriteClick() {
         if (!id) return;
@@ -323,22 +256,16 @@ export default function ProductCard({ item }) {
         void toggleFavorite();
     }
 
-    /* COMPARE */
-
     function handleCompareClick() {
         if (!id) return;
 
-        const result = toggleCompare(id);
-
-        if (!result.success) {
-            setMessage(text.compareError);
-            return;
+        try {
+            const result = toggleCompare(id);
+            setCompareFailed(!result?.success);
+        } catch {
+            setCompareFailed(true);
         }
-
-        setMessage("");
     }
-
-    /* RENDER */
 
     return (
         <article className={`listing-card ${isTop ? "listing-card-top" : ""}`}>
@@ -350,8 +277,6 @@ export default function ProductCard({ item }) {
                     if (!id) event.preventDefault();
                 }}
             >
-                {/* IMAGE */}
-
                 <div className="product-image-wrapper">
                     {!image || failedImage === image ? (
                         <div className="product-image-fallback">
@@ -379,7 +304,7 @@ export default function ProductCard({ item }) {
                         </>
                     )}
 
-                    <div className="product-image-overlay" />
+                    <div className="product-image-overlay" aria-hidden="true" />
 
                     <div className="product-image-badges">
                         {isTop && (
@@ -402,8 +327,6 @@ export default function ProductCard({ item }) {
                     </span>
                 </div>
 
-                {/* CONTENT */}
-
                 <div className="product-info">
                     <div className="product-main">
                         <p className="product-price">
@@ -413,41 +336,37 @@ export default function ProductCard({ item }) {
                         <h3 className="product-title">{title}</h3>
                     </div>
 
-                    {/* 2 X 2 DETAILS */}
+                    <div className="product-details">
+                        {details.map((detail, index) => (
+                            <span
+                                className="detail-item"
+                                key={`${detail.icon}-${index}`}
+                                title={detail.title || detail.text}
+                            >
+                                <Icon name={detail.icon} size={14} />
 
-                    {details.length > 0 && (
-                        <div className="product-details">
-                            {details.map((detail, index) => (
-                                <span
-                                    className="detail-item"
-                                    key={`${detail.icon}-${index}`}
-                                    title={detail.title || detail.text}
-                                >
-                                    <Icon name={detail.icon} size={14} />
-
-                                    <span>{detail.text}</span>
-                                </span>
-                            ))}
-                        </div>
-                    )}
-
-                    {/* REGION */}
+                                <span>{detail.text}</span>
+                            </span>
+                        ))}
+                    </div>
 
                     <div className="product-bottom">
                         <span className="product-region">
                             <Icon name="pin" size={15} />
 
-                            <span>{item?.region || text.noRegion}</span>
+                            <span>
+                                {item?.region
+                                    ? localized(item.region, "region")
+                                    : text.noRegion}
+                            </span>
                         </span>
 
-                        <span className="product-view-arrow">
+                        <span className="product-view-arrow" aria-hidden="true">
                             <Icon name="arrow" size={17} />
                         </span>
                     </div>
                 </div>
             </Link>
-
-            {/* FAVORITE */}
 
             <button
                 className={`favorite-button ${favorite ? "is-favorite" : ""}`}
@@ -459,8 +378,6 @@ export default function ProductCard({ item }) {
             >
                 <Icon name="heart" size={19} />
             </button>
-
-            {/* COMPARE */}
 
             {isCar && Boolean(id) && (
                 <div className="compare-card-actions">
@@ -484,9 +401,9 @@ export default function ProductCard({ item }) {
                         </Link>
                     )}
 
-                    {message && (
+                    {compareFailed && (
                         <p className="compare-card-error" role="alert">
-                            {message}
+                            {text.compareError}
                         </p>
                     )}
                 </div>

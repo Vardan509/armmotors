@@ -28,7 +28,7 @@ import MonetizationPage from "./pages/MonetizationPage";
 import MessagesPage from "./components/messaging/MessagesPage";
 import SessionBootstrap from "./components/SessionBootstrap";
 
-import { getAccessToken, clearAuthSession } from "./utils/api";
+import { getAccessToken } from "./utils/api";
 
 import "./components/header/HomePage.css";
 import "./pages/CarDetailsPage.css";
@@ -39,7 +39,7 @@ import "./styles/ArmMotorsSearchFix.css";
 const BASE = import.meta.env.BASE_URL;
 
 // ==========================================
-// TOKEN VALIDATION
+// AUTHENTICATION
 // ==========================================
 
 function hasValidAccessToken() {
@@ -50,9 +50,7 @@ function hasValidAccessToken() {
     try {
         const parts = token.split(".");
 
-        if (parts.length !== 3) {
-            return false;
-        }
+        if (parts.length !== 3) return false;
 
         const payload = JSON.parse(
             atob(parts[1].replace(/-/g, "+").replace(/_/g, "/")),
@@ -134,50 +132,107 @@ function AdminRoute() {
 }
 
 // ==========================================
-// NOT FOUND
+// NOT FOUND — BLUE / WHITE DESIGN
 // ==========================================
 
 function NotFound() {
     return (
         <main
             style={{
-                minHeight: "65vh",
+                minHeight: "75vh",
                 display: "flex",
-                flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
-                padding: "50px 20px",
-                textAlign: "center",
+                padding: "40px 20px",
+                background: "#f6f8fc",
+                fontFamily: 'Arial, "Noto Sans Armenian", sans-serif',
             }}
         >
-            <h1
+            <div
                 style={{
-                    fontSize: "70px",
-                    margin: "0 0 10px",
-                    color: "#b99547",
+                    width: "100%",
+                    maxWidth: "560px",
+                    padding: "55px 30px",
+                    border: "1px solid #e2e8f0",
+                    borderRadius: "22px",
+                    background: "#ffffff",
+                    textAlign: "center",
+                    boxShadow: "0 15px 45px rgba(20,38,63,0.06)",
                 }}
             >
-                404
-            </h1>
+                <div
+                    style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        padding: "9px 16px",
+                        borderRadius: "30px",
+                        background: "#edf3fa",
+                        color: "#24476d",
+                        fontSize: "12px",
+                        fontWeight: 700,
+                        letterSpacing: "1px",
+                    }}
+                >
+                    ARMMOTORS
+                </div>
 
-            <h2>Էջը չի գտնվել</h2>
+                <h1
+                    style={{
+                        margin: "18px 0 5px",
+                        color: "#14263f",
+                        fontSize: "clamp(70px, 15vw, 115px)",
+                        fontWeight: 900,
+                        lineHeight: 1,
+                        letterSpacing: "-5px",
+                    }}
+                >
+                    404
+                </h1>
 
-            <p style={{ color: "#777" }}>Ձեր որոնած էջը գոյություն չունի։</p>
+                <h2
+                    style={{
+                        margin: "20px 0 12px",
+                        color: "#14263f",
+                        fontSize: "23px",
+                        fontWeight: 800,
+                    }}
+                >
+                    Էջը չի գտնվել
+                </h2>
 
-            <Link
-                to="/"
-                style={{
-                    padding: "13px 24px",
-                    borderRadius: "9px",
-                    background: "#b99547",
-                    color: "#fff",
-                    fontWeight: 700,
-                    textDecoration: "none",
-                    marginTop: "15px",
-                }}
-            >
-                Վերադառնալ գլխավոր էջ
-            </Link>
+                <p
+                    style={{
+                        maxWidth: "380px",
+                        margin: "0 auto 28px",
+                        color: "#64748b",
+                        fontSize: "14px",
+                        lineHeight: 1.8,
+                    }}
+                >
+                    Հնարավոր է՝ էջը հեռացվել է, հասցեն փոխվել է կամ մուտքագրված
+                    հղումը սխալ է։
+                </p>
+
+                <Link
+                    to="/"
+                    style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        minHeight: "46px",
+                        padding: "0 25px",
+                        borderRadius: "11px",
+                        background: "#14263f",
+                        color: "#ffffff",
+                        fontSize: "13px",
+                        fontWeight: 800,
+                        textDecoration: "none",
+                    }}
+                >
+                    Վերադառնալ գլխավոր էջ
+                </Link>
+            </div>
         </main>
     );
 }
@@ -198,12 +253,16 @@ function ApplicationRoutes() {
 
                 <Route path="sellers/:id" element={<SellerRoute />} />
 
+                <Route path="seller/:id" element={<SellerRoute />} />
+
                 <Route path="login" element={<AuthPage />} />
 
                 <Route
                     path="registration"
                     element={<AuthPage registration />}
                 />
+
+                <Route path="register" element={<AuthPage registration />} />
 
                 <Route
                     path="forgot-password"
@@ -267,11 +326,13 @@ export default function App() {
                     style={{
                         minHeight: "100vh",
                         display: "flex",
-                        justifyContent: "center",
                         alignItems: "center",
-                        background: "#fff",
-                        color: "#555",
+                        justifyContent: "center",
+                        background: "#f6f8fc",
+                        color: "#14263f",
+                        fontFamily: 'Arial, "Noto Sans Armenian", sans-serif',
                         fontSize: "14px",
+                        fontWeight: 600,
                     }}
                 >
                     ArmMotors-ը բեռնվում է…

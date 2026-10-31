@@ -1,54 +1,112 @@
-
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 import { apiRequest } from "../utils/api";
+import { useI18n } from "../utils/i18n";
+
 import "./ReportProduct.css";
 
-const BASE = import.meta.env.BASE_URL;
+const TEXTS = {
+    hy: {
+        open: "Բողոքել հայտարարության մասին",
+        title: "Հայտնել խնդրի մասին",
+        close: "Փակել",
+        reason: "Բողոքի պատճառ",
+        incorrect: "Սխալ տեղեկություններ",
+        spam: "Կրկնվող կամ գովազդային հայտարարություն",
+        fraud: "Կասկածելի հայտարարություն",
+        other: "Այլ պատճառ",
+        description: "Նկարագրություն",
+        placeholder: "Նկարագրեք խնդիրը...",
+        sending: "Ուղարկվում է...",
+        sent: "Ուղարկված է",
+        submit: "Ուղարկել բողոքը",
+        success: "Բողոքը հաջողությամբ ուղարկվեց։",
+        error: "Չհաջողվեց ուղարկել բողոքը։ Կրկին փորձեք։",
+    },
+
+    ru: {
+        open: "Пожаловаться на объявление",
+        title: "Сообщить о проблеме",
+        close: "Закрыть",
+        reason: "Причина жалобы",
+        incorrect: "Неверная информация",
+        spam: "Повторное или рекламное объявление",
+        fraud: "Подозрительное объявление",
+        other: "Другая причина",
+        description: "Описание",
+        placeholder: "Опишите проблему...",
+        sending: "Отправка...",
+        sent: "Отправлено",
+        submit: "Отправить жалобу",
+        success: "Жалоба успешно отправлена.",
+        error: "Не удалось отправить жалобу. Попробуйте ещё раз.",
+    },
+
+    en: {
+        open: "Report this listing",
+        title: "Report a problem",
+        close: "Close",
+        reason: "Reason for reporting",
+        incorrect: "Incorrect information",
+        spam: "Duplicate or promotional listing",
+        fraud: "Suspicious listing",
+        other: "Other reason",
+        description: "Description",
+        placeholder: "Describe the problem...",
+        sending: "Sending...",
+        sent: "Sent",
+        submit: "Submit report",
+        success: "Your report has been submitted successfully.",
+        error: "Could not submit your report. Please try again.",
+    },
+};
 
 export default function ReportProduct({ productId }) {
+    const navigate = useNavigate();
+    const { language } = useI18n();
+
+    const text = TEXTS[language] || TEXTS.hy;
+
     const [open, setOpen] = useState(false);
     const [reason, setReason] = useState("incorrect");
     const [details, setDetails] = useState("");
-    const [loading, setLoading] = useState(false);
-    const [message, setMessage] = useState("");
-    const [success, setSuccess] = useState(false);
+    const [status, setStatus] = useState("idle");
+
+    const loading = status === "loading";
+    const success = status === "success";
 
     async function handleSubmit(event) {
         event.preventDefault();
 
+        if (loading || success) return;
+
         if (!localStorage.getItem("token")) {
-            window.location.assign(
-                `${BASE}login?next=${encodeURIComponent(
-                    window.location.pathname
-                )}`
-            );
+            const next =
+                window.location.pathname +
+                window.location.search +
+                window.location.hash;
+
+            navigate(`/login?next=${encodeURIComponent(next)}`);
             return;
         }
 
-        setLoading(true);
-        setMessage("");
+        setStatus("loading");
 
         try {
-            const result = await apiRequest("/reports", {
+            await apiRequest("/reports", {
                 method: "POST",
                 body: JSON.stringify({
                     productId,
                     reason,
-                    details,
+                    details: details.trim(),
                 }),
             });
 
-            setMessage(
-                result?.message || "Բողոքը հաջողությամբ ուղարկվեց։"
-            );
-
-            setSuccess(true);
+            setStatus("success");
             setDetails("");
-        } catch (error) {
-            setMessage(error.message);
-            setSuccess(false);
-        } finally {
-            setLoading(false);
+        } catch {
+            setStatus("error");
         }
     }
 
@@ -60,75 +118,72 @@ export default function ReportProduct({ productId }) {
                     className="report-open-button"
                     onClick={() => setOpen(true)}
                 >
-                    Բողոքել հայտարարության մասին
+                    {text.open}
                 </button>
             ) : (
-                <form
-                    className="report-form"
-                    onSubmit={handleSubmit}
-                >
+                <form className="report-form" onSubmit={handleSubmit}>
                     <div className="report-form-heading">
-                        <h3>Հայտնել խնդրի մասին</h3>
+                        <h3>{text.title}</h3>
 
                         <button
                             type="button"
                             onClick={() => setOpen(false)}
-                            aria-label="Փակել"
+                            aria-label={text.close}
                         >
                             ×
                         </button>
                     </div>
 
-                    <label htmlFor="report-reason">
-                        Բողոքի պատճառ
-                    </label>
+                    <label htmlFor="report-reason">{text.reason}</label>
 
                     <select
                         id="report-reason"
                         value={reason}
-                        onChange={(event) =>
-                            setReason(event.target.value)
-                        }
+                        disabled={loading || success}
+                        onChange={(event) => {
+                            setReason(event.target.value);
+
+                            if (status === "error") {
+                                setStatus("idle");
+                            }
+                        }}
                     >
-                        <option value="incorrect">
-                            Սխալ տեղեկություններ
-                        </option>
-                        <option value="spam">
-                            Կրկնվող կամ գովազդային հայտարարություն
-                        </option>
-                        <option value="fraud">
-                            Կասկածելի հայտարարություն
-                        </option>
-                        <option value="other">
-                            Այլ պատճառ
-                        </option>
+                        <option value="incorrect">{text.incorrect}</option>
+
+                        <option value="spam">{text.spam}</option>
+
+                        <option value="fraud">{text.fraud}</option>
+
+                        <option value="other">{text.other}</option>
                     </select>
 
-                    <label htmlFor="report-details">
-                        Նկարագրություն
-                    </label>
+                    <label htmlFor="report-details">{text.description}</label>
 
                     <textarea
                         id="report-details"
                         rows={4}
                         maxLength={1000}
-                        placeholder="Նկարագրեք խնդիրը..."
+                        placeholder={text.placeholder}
                         value={details}
-                        onChange={(event) =>
-                            setDetails(event.target.value)
-                        }
+                        disabled={loading || success}
+                        onChange={(event) => {
+                            setDetails(event.target.value);
+
+                            if (status === "error") {
+                                setStatus("idle");
+                            }
+                        }}
                     />
 
-                    {message && (
-                        <p
-                            className={
-                                success
-                                    ? "report-success"
-                                    : "report-error"
-                            }
-                            role="status"
-                        >
-                            {message}
+                    {success && (
+                        <p className="report-success" role="status">
+                            {text.success}
+                        </p>
+                    )}
+
+                    {status === "error" && (
+                        <p className="report-error" role="alert">
+                            {text.error}
                         </p>
                     )}
 
@@ -138,10 +193,10 @@ export default function ReportProduct({ productId }) {
                         disabled={loading || success}
                     >
                         {loading
-                            ? "Ուղարկվում է..."
+                            ? text.sending
                             : success
-                              ? "Ուղարկված է"
-                              : "Ուղարկել բողոքը"}
+                              ? text.sent
+                              : text.submit}
                     </button>
                 </form>
             )}

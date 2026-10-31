@@ -1,24 +1,43 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
+
+import { Link, useNavigate } from "react-router-dom";
 
 import { apiRequest } from "../../utils/api";
+import useInterfaceText from "../../utils/interfaceText";
 
 import "./NotificationBell.css";
 
-const BASE = import.meta.env.BASE_URL;
-
 export default function NotificationBell() {
+    const { tr, language, locale } = useInterfaceText();
+    const navigate = useNavigate();
+
     const [open, setOpen] = useState(false);
     const [items, setItems] = useState([]);
     const [unreadCount, setUnreadCount] = useState(0);
     const [loading, setLoading] = useState(false);
     const [selected, setSelected] = useState(null);
+    const [failed, setFailed] = useState(false);
 
     const rootRef = useRef(null);
+    const buttonRef = useRef(null);
+    const mountedRef = useRef(false);
+    const requestRef = useRef(0);
+
+    const panelId = useId();
 
     const loadNotifications = useCallback(async () => {
-        if (!localStorage.getItem("token")) {
-            setItems([]);
-            setUnreadCount(0);
+        const token = localStorage.getItem("token");
+        const requestId = ++requestRef.current;
+
+        if (!token) {
+            if (mountedRef.current) {
+                setItems([]);
+                setUnreadCount(0);
+                setSelected(null);
+                setOpen(false);
+                setFailed(false);
+            }
+
             return;
         }
 
@@ -27,71 +46,82 @@ export default function NotificationBell() {
                 timeoutMs: 10000,
             });
 
-            setItems(Array.isArray(result.items) ? result.items : []);
+            if (
+                !mountedRef.current ||
+                requestId !== requestRef.current ||
+                token !== localStorage.getItem("token")
+            ) {
+                return;
+            }
 
-            setUnreadCount(Number(result.unreadCount || 0));
-        } catch (error) {
-            console.error("Notifications:", error.message);
+            setItems(Array.isArray(result?.items) ? result.items : []);
+
+            setUnreadCount(Math.max(0, Number(result?.unreadCount) || 0));
+
+            setFailed(false);
+        } catch {
+            if (mountedRef.current && requestId === requestRef.current) {
+                setFailed(true);
+            }
         }
     }, []);
 
     useEffect(() => {
+        mountedRef.current = true;
         void loadNotifications();
-
-        const interval = window.setInterval(() => {
-            if (document.visibilityState === "visible") {
-                void loadNotifications();
-            }
-        }, 15000);
 
         const refresh = () => {
             void loadNotifications();
         };
 
+        const timer = window.setInterval(() => {
+            if (document.visibilityState === "visible") {
+                refresh();
+            }
+        }, 15000);
+
         window.addEventListener("session-changed", refresh);
-
         window.addEventListener("focus", refresh);
-
         window.addEventListener("notifications-updated", refresh);
 
         return () => {
-            window.clearInterval(interval);
+            mountedRef.current = false;
+            requestRef.current += 1;
+
+            window.clearInterval(timer);
 
             window.removeEventListener("session-changed", refresh);
-
             window.removeEventListener("focus", refresh);
-
             window.removeEventListener("notifications-updated", refresh);
         };
     }, [loadNotifications]);
 
     useEffect(() => {
-        function onPointerDown(event) {
-            if (rootRef.current && !rootRef.current.contains(event.target)) {
+        function outside(event) {
+            if (!rootRef.current?.contains(event.target)) {
                 setOpen(false);
             }
         }
 
-        function onKeyDown(event) {
+        function keyboard(event) {
             if (event.key === "Escape") {
                 setOpen(false);
+                buttonRef.current?.focus();
             }
         }
 
-        document.addEventListener("pointerdown", onPointerDown);
-
-        document.addEventListener("keydown", onKeyDown);
+        document.addEventListener("pointerdown", outside);
+        document.addEventListener("keydown", keyboard);
 
         return () => {
-            document.removeEventListener("pointerdown", onPointerDown);
-
-            document.removeEventListener("keydown", onKeyDown);
+            document.removeEventListener("pointerdown", outside);
+            document.removeEventListener("keydown", keyboard);
         };
     }, []);
 
     async function toggle() {
         if (!localStorage.getItem("token")) {
-            window.location.assign(`${BASE}login?next=%2Faccount`);
+            navigate("/login?next=%2Faccount");
             return;
         }
 
@@ -106,18 +136,25 @@ export default function NotificationBell() {
             try {
                 await loadNotifications();
             } finally {
-                setLoading(false);
+                if (mountedRef.current) setLoading(false);
             }
         }
     }
 
     async function openNotification(item) {
         if (item.type === "message") {
-            const url = new URL(`${BASE}messages`, window.location.origin);
+            const params = new URLSearchParams();
 
-            url.searchParams.set("conversation", item.conversationId);
+            if (item.conversationId) {
+                params.set("conversation", item.conversationId);
+            }
 
-            window.location.assign(url.href);
+            setOpen(false);
+
+            navigate(
+                params.size ? `/messages?${params.toString()}` : "/messages",
+            );
+
             return;
         }
 
@@ -125,51 +162,57 @@ export default function NotificationBell() {
 
         setSelected(item);
 
-        if (!item.read) {
-            try {
-                await apiRequest(
-                    `/notifications/broadcasts/${encodeURIComponent(
-                        item.deliveryId,
-                    )}/read`,
-                    {
-                        method: "PATCH",
-                    },
-                );
+        if (item.read) return;
 
-                await loadNotifications();
+        try {
+            await apiRequest(
+                `/notifications/broadcasts/${encodeURIComponent(
+                    item.deliveryId,
+                )}/read`,
+                { method: "PATCH" },
+            );
 
-                window.dispatchEvent(new Event("notifications-updated"));
-            } catch (error) {
-                console.error("Mark notification read:", error.message);
-            }
+            if (!mountedRef.current) return;
+
+            setSelected((current) =>
+                current?.id === item.id ? { ...current, read: true } : current,
+            );
+
+            window.dispatchEvent(new Event("notifications-updated"));
+        } catch {
+            if (mountedRef.current) setFailed(true);
         }
     }
 
     function formatDate(value) {
-        if (!value) return "";
-
         const date = new Date(value);
 
-        if (Number.isNaN(date.getTime())) {
-            return "";
-        }
+        return Number.isFinite(date.getTime())
+            ? date.toLocaleString(locale, {
+                  dateStyle: "medium",
+                  timeStyle: "short",
+              })
+            : "";
+    }
 
-        return date.toLocaleString("hy-AM", {
-            dateStyle: "medium",
-            timeStyle: "short",
-        });
+    function content(item, field) {
+        return item.translations?.[language]?.[field] || item[field] || "";
     }
 
     return (
         <div className="am-notifications" ref={rootRef}>
             <button
+                ref={buttonRef}
                 type="button"
                 className="am-notifications-trigger"
                 onClick={toggle}
-                aria-label={`Ծանուցումներ, ${unreadCount} չկարդացված`}
+                aria-label={`${tr("notifications")}. ${tr("unreadCount", {
+                    count: unreadCount,
+                })}`}
                 aria-expanded={open}
                 aria-haspopup="dialog"
-                title="Ծանուցումներ"
+                aria-controls={open ? panelId : undefined}
+                title={tr("notifications")}
             >
                 <svg
                     width="21"
@@ -195,47 +238,53 @@ export default function NotificationBell() {
 
             {open && (
                 <div
+                    id={panelId}
                     className="am-notifications-panel"
                     role="dialog"
-                    aria-label="Ծանուցումներ"
+                    aria-label={tr("notifications")}
                 >
                     <div className="am-notifications-head">
                         <div>
-                            <strong>Ծանուցումներ</strong>
+                            <strong>{tr("notifications")}</strong>
 
-                            <small>{unreadCount} չկարդացված</small>
+                            <small>
+                                {tr("unreadCount", {
+                                    count: unreadCount,
+                                })}
+                            </small>
                         </div>
 
                         <button
                             type="button"
+                            aria-label={tr("close")}
                             onClick={() => {
                                 setOpen(false);
                                 setSelected(null);
+                                buttonRef.current?.focus();
                             }}
-                            aria-label="Փակել"
                         >
                             ×
                         </button>
                     </div>
 
                     <div className="am-notifications-body">
+                        {failed && (
+                            <p className="am-notifications-empty" role="alert">
+                                {tr("loadError")}
+                            </p>
+                        )}
+
                         {selected ? (
-                            <div
-                                style={{
-                                    padding: "16px",
-                                }}
-                            >
+                            <div style={{ padding: 16 }}>
                                 <button
                                     type="button"
                                     onClick={() => setSelected(null)}
-                                    style={{
-                                        marginBottom: 14,
-                                    }}
+                                    style={{ marginBottom: 14 }}
                                 >
-                                    ← Հետ
+                                    ← {tr("back")}
                                 </button>
 
-                                <h3>{selected.title}</h3>
+                                <h3>{content(selected, "title")}</h3>
 
                                 <small>{formatDate(selected.createdAt)}</small>
 
@@ -246,22 +295,21 @@ export default function NotificationBell() {
                                         overflowWrap: "anywhere",
                                     }}
                                 >
-                                    {selected.text}
+                                    {content(selected, "text")}
                                 </p>
                             </div>
                         ) : loading && items.length === 0 ? (
-                            <p className="am-notifications-empty">
-                                Բեռնվում է...
+                            <p className="am-notifications-empty" role="status">
+                                {tr("loading")}
                             </p>
                         ) : items.length === 0 ? (
-                            <div className="am-notifications-empty">
-                                <strong>Ծանուցումներ չկան</strong>
+                            !failed && (
+                                <div className="am-notifications-empty">
+                                    <strong>{tr("noNotifications")}</strong>
 
-                                <p>
-                                    Ադմինի նամակները և նոր հաղորդագրություններն
-                                    այստեղ կերևան։
-                                </p>
-                            </div>
+                                    <p>{tr("notificationsIntro")}</p>
+                                </div>
+                            )
                         ) : (
                             items.map((item) => (
                                 <button
@@ -274,18 +322,27 @@ export default function NotificationBell() {
                                         className="am-notification-dot"
                                         style={{
                                             opacity:
-                                                item.unreadCount > 0 ? 1 : 0,
+                                                item.type === "broadcast"
+                                                    ? item.read
+                                                        ? 0
+                                                        : 1
+                                                    : item.unreadCount > 0
+                                                      ? 1
+                                                      : 0,
                                         }}
+                                        aria-hidden="true"
                                     />
 
                                     <span className="am-notification-content">
                                         <strong>
                                             {item.type === "broadcast" &&
                                                 "ARMMOTORS · "}
-                                            {item.title}
+                                            {content(item, "title")}
                                         </strong>
 
-                                        <span>{item.description}</span>
+                                        <span>
+                                            {content(item, "description")}
+                                        </span>
 
                                         <small>
                                             {formatDate(item.createdAt)}
@@ -296,12 +353,13 @@ export default function NotificationBell() {
                         )}
                     </div>
 
-                    <a
+                    <Link
                         className="am-notifications-footer"
-                        href={`${BASE}account`}
+                        to="/account"
+                        onClick={() => setOpen(false)}
                     >
-                        Իմ հաշիվը →
-                    </a>
+                        {tr("account")} →
+                    </Link>
                 </div>
             )}
         </div>
