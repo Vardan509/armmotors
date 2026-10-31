@@ -4,8 +4,8 @@ import { Link, useNavigate } from "react-router-dom";
 import useCurrency from "../../utils/useCurrency";
 import useFavorite from "../../utils/useFavorite";
 import { useI18n } from "../../utils/i18n";
-
 import { localizeListingValue } from "../../utils/localizeListing";
+import { resolveImageUrl } from "../../utils/imageUrl";
 
 import {
     getCompareIds,
@@ -32,7 +32,6 @@ const CARD_TEXT = {
         notSpecified: "Չնշված",
         transmission: "Փոխանցման տուփ",
     },
-
     ru: {
         listing: "Объявление",
         car: "Автомобиль",
@@ -48,7 +47,6 @@ const CARD_TEXT = {
         notSpecified: "Не указано",
         transmission: "Коробка передач",
     },
-
     en: {
         listing: "Listing",
         car: "Car",
@@ -148,7 +146,6 @@ function hasValue(value) {
 
 export default function ProductCard({ item }) {
     const navigate = useNavigate();
-
     const { language, t } = useI18n();
     const text = CARD_TEXT[language] || CARD_TEXT.hy;
 
@@ -157,7 +154,6 @@ export default function ProductCard({ item }) {
     const [compareFailed, setCompareFailed] = useState(false);
 
     const { format } = useCurrency();
-
     const id = String(item?._id || item?.id || "");
     const [favorite, toggleFavorite] = useFavorite(id);
 
@@ -184,9 +180,9 @@ export default function ProductCard({ item }) {
         [item?.brand, item?.model].filter(Boolean).join(" ") ||
         text.listing;
 
-    const image = item?.image || item?.images?.[0] || "";
-    const isCar = item?.type === "car";
+    const image = resolveImageUrl(item?.image || item?.images?.[0] || "");
 
+    const isCar = item?.type === "car";
     const isNew = localized(item?.condition, "condition") === t("new");
 
     const isTop = Boolean(
@@ -198,9 +194,7 @@ export default function ProductCard({ item }) {
 
     const mileage =
         hasValue(item?.mileage) && Number.isFinite(Number(item.mileage))
-            ? `${Number(item.mileage).toLocaleString(locale)} ${t(
-                  "mileageUnit",
-              )}`
+            ? `${Number(item.mileage).toLocaleString(locale)} ${t("mileageUnit")}`
             : text.notSpecified;
 
     const rawTransmission =
@@ -215,15 +209,10 @@ export default function ProductCard({ item }) {
               {
                   icon: "calendar",
                   text: item?.year
-                      ? `${item.year}${
-                            text.yearSuffix ? ` ${text.yearSuffix}` : ""
-                        }`
+                      ? `${item.year}${text.yearSuffix ? ` ${text.yearSuffix}` : ""}`
                       : text.notSpecified,
               },
-              {
-                  icon: "speed",
-                  text: mileage,
-              },
+              { icon: "speed", text: mileage },
               {
                   icon: "fuel",
                   text: hasValue(item?.fuel)
@@ -344,7 +333,6 @@ export default function ProductCard({ item }) {
                                 title={detail.title || detail.text}
                             >
                                 <Icon name={detail.icon} size={14} />
-
                                 <span>{detail.text}</span>
                             </span>
                         ))}
@@ -353,7 +341,6 @@ export default function ProductCard({ item }) {
                     <div className="product-bottom">
                         <span className="product-region">
                             <Icon name="pin" size={15} />
-
                             <span>
                                 {item?.region
                                     ? localized(item.region, "region")
@@ -383,14 +370,11 @@ export default function ProductCard({ item }) {
                 <div className="compare-card-actions">
                     <button
                         type="button"
-                        className={`compare-card-button ${
-                            isCompared ? "is-selected" : ""
-                        }`}
+                        className={`compare-card-button ${isCompared ? "is-selected" : ""}`}
                         aria-pressed={isCompared}
                         onClick={handleCompareClick}
                     >
                         <Icon name="compare" size={15} />
-
                         {isCompared ? text.removeCompare : text.compare}
                     </button>
 

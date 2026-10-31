@@ -12,6 +12,7 @@ import ContactSellerButton from "../components/messaging/ContactSellerButton";
 import { apiRequest } from "../utils/api";
 import { useI18n } from "../utils/i18n";
 import { localizeListingValue } from "../utils/localizeListing";
+import { resolveImageUrl } from "../utils/imageUrl";
 
 import useProducts from "../utils/useProducts";
 import useCurrency from "../utils/useCurrency";
@@ -66,7 +67,6 @@ const TEXTS = {
     halogen: ["Հալոգեն", "Галогенные", "Halogen"],
     xenon: ["Քսենոն", "Ксеноновые", "Xenon"],
     led: ["LED", "Светодиодные", "LED"],
-
     airConditioning: ["Օդորակիչ", "Кондиционер", "Air conditioning"],
     climateControl: ["Կլիմատ-կոնտրոլ", "Климат-контроль", "Climate control"],
     heatedSeats: ["Նստատեղերի տաքացում", "Подогрев сидений", "Heated seats"],
@@ -110,7 +110,6 @@ const TEXTS = {
     bluetooth: ["Bluetooth", "Bluetooth", "Bluetooth"],
     appleCarplay: ["Apple CarPlay", "Apple CarPlay", "Apple CarPlay"],
     androidAuto: ["Android Auto", "Android Auto", "Android Auto"],
-
     purchaseRequest: [
         "Ուղարկել գնման հայտ",
         "Отправить заявку на покупку",
@@ -187,13 +186,8 @@ for (const [alias, key] of Object.entries(EXTRA_ALIASES)) {
 }
 
 function extraValue(value, language) {
-    if (value === true || value === "true") {
-        return label("yes", language);
-    }
-
-    if (value === false || value === "false") {
-        return label("no", language);
-    }
+    if (value === true || value === "true") return label("yes", language);
+    if (value === false || value === "false") return label("no", language);
 
     const key = EXTRA_LOOKUP.get(normalize(value));
 
@@ -206,7 +200,6 @@ function getId(product) {
 
 function getSellerId(car) {
     const seller = car?.owner || car?.seller;
-
     if (!seller) return "";
 
     return typeof seller === "string"
@@ -220,7 +213,6 @@ function hasValue(value) {
 
 function normalizePhone(value) {
     const digits = String(value ?? "").replace(/\D/g, "");
-
     if (!digits) return "";
 
     let number = digits;
@@ -290,12 +282,10 @@ function SellerContact({ car }) {
                 aria-label={`${t("callSeller")}: ${car.phone}`}
             >
                 <ContactIcon type="phone" />
-
                 <span>
                     <strong>{t("callSeller")}</strong>
                     <small>{car.phone}</small>
                 </span>
-
                 <span className="seller-contact-arrow" aria-hidden="true">
                     ↗
                 </span>
@@ -355,7 +345,6 @@ function ExtraSpecs({ car, language }) {
         if (!hasValue(value)) continue;
 
         const key = EXTRA_LOOKUP.get(normalize(value)) || normalize(value);
-
         comfortMap.set(key, value);
     }
 
@@ -421,7 +410,6 @@ function ExtraSpecs({ car, language }) {
                         <path d="m3 16.5 9 4.5 9-4.5" />
                     </svg>
                 </span>
-
                 <h2>{label("technical", language)}</h2>
             </div>
 
@@ -460,20 +448,14 @@ function similarityScore(item, car) {
 
     if (item.brand === car.brand) {
         score += 50;
-
-        if (item.model === car.model) {
-            score += 40;
-        }
+        if (item.model === car.model) score += 40;
     }
 
     const yearDifference = Math.abs(Number(item.year) - Number(car.year));
 
     if (item.year && car.year && Number.isFinite(yearDifference)) {
-        if (yearDifference <= 2) {
-            score += 20;
-        } else if (yearDifference <= 5) {
-            score += 10;
-        }
+        if (yearDifference <= 2) score += 20;
+        else if (yearDifference <= 5) score += 10;
     }
 
     const itemPrice = Number(item.price);
@@ -486,11 +468,8 @@ function similarityScore(item, car) {
     ) {
         const difference = Math.abs(itemPrice - carPrice) / carPrice;
 
-        if (difference <= 0.15) {
-            score += 20;
-        } else if (difference <= 0.3) {
-            score += 10;
-        }
+        if (difference <= 0.15) score += 20;
+        else if (difference <= 0.3) score += 10;
     }
 
     if (item.vehicleType && item.vehicleType === car.vehicleType) {
@@ -512,10 +491,7 @@ export default function CarDetailsPage({ id }) {
     });
 
     const [copiedId, setCopiedId] = useState("");
-    const [purchase, setPurchase] = useState({
-        id: "",
-        status: "idle",
-    });
+    const [purchase, setPurchase] = useState({ id: "", status: "idle" });
 
     const { products = [] } = useProducts();
     const { format } = useCurrency();
@@ -523,7 +499,6 @@ export default function CarDetailsPage({ id }) {
 
     const requestedId = String(id || "");
     const current = state.id === requestedId;
-
     const car = current ? state.car : null;
     const loading = !current || state.loading;
     const failed = current && state.failed;
@@ -538,12 +513,7 @@ export default function CarDetailsPage({ id }) {
         const controller = new AbortController();
 
         setCopiedId("");
-
-        setPurchase({
-            id: requestedId,
-            status: "idle",
-        });
-
+        setPurchase({ id: requestedId, status: "idle" });
         setState({
             id: requestedId,
             car: null,
@@ -559,7 +529,6 @@ export default function CarDetailsPage({ id }) {
                     loading: false,
                     failed: true,
                 });
-
                 return;
             }
 
@@ -592,7 +561,6 @@ export default function CarDetailsPage({ id }) {
         }
 
         void loadProduct();
-
         return () => controller.abort();
     }, [requestedId]);
 
@@ -610,11 +578,9 @@ export default function CarDetailsPage({ id }) {
         if (!car) return;
 
         const previousTitle = document.title;
-
         document.title = `${title} — ArmMotors`;
 
         let meta = document.querySelector('meta[name="description"]');
-
         const createdMeta = !meta;
 
         if (!meta) {
@@ -624,7 +590,6 @@ export default function CarDetailsPage({ id }) {
         }
 
         const previousDescription = meta.getAttribute("content");
-
         const localizedDescription = car.translations?.[language]?.description;
 
         const description = String(
@@ -642,20 +607,16 @@ export default function CarDetailsPage({ id }) {
         return () => {
             document.title = previousTitle;
 
-            if (createdMeta) {
-                meta.remove();
-            } else if (previousDescription === null) {
+            if (createdMeta) meta.remove();
+            else if (previousDescription === null)
                 meta.removeAttribute("content");
-            } else {
-                meta.setAttribute("content", previousDescription);
-            }
+            else meta.setAttribute("content", previousDescription);
         };
     }, [car, title, language]);
 
     async function share() {
         try {
             await navigator.clipboard.writeText(window.location.href);
-
             setCopiedId(requestedId);
         } catch {
             setCopiedId("");
@@ -666,13 +627,11 @@ export default function CarDetailsPage({ id }) {
         if (localStorage.getItem("token")) return false;
 
         navigate(`/login?next=${encodeURIComponent(`/cars/${requestedId}`)}`);
-
         return true;
     }
 
     function handleFavorite() {
         if (requireLogin()) return;
-
         void toggleFavorite();
     }
 
@@ -689,11 +648,7 @@ export default function CarDetailsPage({ id }) {
         if (requireLogin()) return;
 
         const productId = requestedId;
-
-        setPurchase({
-            id: productId,
-            status: "loading",
-        });
+        setPurchase({ id: productId, status: "loading" });
 
         try {
             await apiRequest("/orders", {
@@ -701,15 +656,9 @@ export default function CarDetailsPage({ id }) {
                 body: JSON.stringify({ productId }),
             });
 
-            setPurchase({
-                id: productId,
-                status: "success",
-            });
+            setPurchase({ id: productId, status: "success" });
         } catch {
-            setPurchase({
-                id: productId,
-                status: "error",
-            });
+            setPurchase({ id: productId, status: "error" });
         }
     }
 
@@ -717,12 +666,14 @@ export default function CarDetailsPage({ id }) {
         return localizeListingValue(value, language, field);
     }
 
-    const images =
+    const rawImages =
         Array.isArray(car?.images) && car.images.length > 0
             ? car.images
             : car?.image
               ? [car.image]
               : [];
+
+    const images = rawImages.map(resolveImageUrl).filter(Boolean);
 
     const sellerId = getSellerId(car);
     const productId = getId(car) || requestedId;
@@ -735,9 +686,7 @@ export default function CarDetailsPage({ id }) {
               [
                   t("mileage"),
                   hasValue(car.mileage) && Number.isFinite(Number(car.mileage))
-                      ? `${Number(car.mileage).toLocaleString(
-                            locale,
-                        )} ${t("mileageUnit")}`
+                      ? `${Number(car.mileage).toLocaleString(locale)} ${t("mileageUnit")}`
                       : null,
               ],
               [t("fuel"), valueText(car.fuel, "fuel")],
@@ -759,10 +708,7 @@ export default function CarDetailsPage({ id }) {
                           item.status !== "sold" &&
                           item.status !== "draft",
                   )
-                  .map((item) => ({
-                      item,
-                      score: similarityScore(item, car),
-                  }))
+                  .map((item) => ({ item, score: similarityScore(item, car) }))
                   .sort((a, b) => b.score - a.score)
                   .slice(0, 4)
                   .map(({ item }) => item)
@@ -784,16 +730,13 @@ export default function CarDetailsPage({ id }) {
             ) : failed || !car ? (
                 <section className="detail-panel">
                     <h1>{t("listingUnavailable")}</h1>
-
                     {failed && <p role="alert">{t("error")}</p>}
-
                     <Link to="/cars">{t("listings")} →</Link>
                 </section>
             ) : (
                 <>
                     <div className="detail-heading">
                         <div />
-
                         <button
                             type="button"
                             className="detail-secondary"
@@ -817,7 +760,6 @@ export default function CarDetailsPage({ id }) {
 
                             <section className="detail-panel">
                                 <h2>{t("details")}</h2>
-
                                 <dl className="spec-grid">
                                     {specs
                                         .filter(([, value]) => hasValue(value))
@@ -834,7 +776,6 @@ export default function CarDetailsPage({ id }) {
 
                             <section className="detail-panel">
                                 <h2>{t("description")}</h2>
-
                                 <TranslatedDescription
                                     productId={productId}
                                     description={car.description || ""}
@@ -906,12 +847,9 @@ export default function CarDetailsPage({ id }) {
 
                                 <div>
                                     <h2>{t("contactSeller")}</h2>
-
                                     {sellerId && (
                                         <Link
-                                            to={`/sellers/${encodeURIComponent(
-                                                sellerId,
-                                            )}`}
+                                            to={`/sellers/${encodeURIComponent(sellerId)}`}
                                             className="seller-profile-link"
                                         >
                                             {t("sellerPage")} →
@@ -923,11 +861,7 @@ export default function CarDetailsPage({ id }) {
                             <SellerContact car={car} />
 
                             {!car.isDemo && (
-                                <div
-                                    style={{
-                                        marginTop: 14,
-                                    }}
-                                >
+                                <div style={{ marginTop: 14 }}>
                                     <ContactSellerButton
                                         key={productId}
                                         productId={productId}
@@ -939,9 +873,7 @@ export default function CarDetailsPage({ id }) {
                                 <button
                                     type="button"
                                     className="detail-primary"
-                                    style={{
-                                        marginTop: 12,
-                                    }}
+                                    style={{ marginTop: 12 }}
                                     disabled={
                                         car.status === "sold" ||
                                         purchaseStatus === "loading" ||
@@ -981,7 +913,6 @@ export default function CarDetailsPage({ id }) {
                     {relatedCars.length > 0 && (
                         <section className="related-cars">
                             <h2>{t("relatedCars")}</h2>
-
                             <div className="products-grid">
                                 {relatedCars.map((item) => (
                                     <ProductCard
