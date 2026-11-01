@@ -1,16 +1,7 @@
-
 import { useEffect, useState } from "react";
-import {
-    Link,
-    useNavigate,
-    useSearchParams,
-} from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 
-import {
-    apiRequest,
-    saveAuthSession,
-    logoutUser,
-} from "../utils/api";
+import { apiRequest, saveAuthSession, logoutUser } from "../utils/api";
 
 import { useI18n } from "../utils/i18n";
 
@@ -20,6 +11,7 @@ import GoogleAccountLink from "../components/GoogleAccountLink";
 import "./Account.css";
 import "./Forms.css";
 import "./AuthPagePremium.css";
+import "./AuthPageClean.css";
 
 const EMPTY_FORM = {
     name: "",
@@ -30,100 +22,123 @@ const EMPTY_FORM = {
     repetPassword: "",
 };
 
-// Only internal, approved redirect destinations.
+const TEXT = {
+    hy: {
+        welcome: "Բարի վերադարձ",
+        register: "Ստեղծեք Ձեր հաշիվը",
+        description: "Մուտք գործեք Ձեր ArmMotors հաշիվ՝ շարունակելու համար։",
+        registerDescription: "Միացեք ArmMotors-ին և գտեք Ձեր հաջորդ մեքենան։",
+        remember: "Հիշել ինձ 30 օր",
+        forgot: "Մոռացե՞լ եք գաղտնաբառը",
+        or: "կամ",
+        show: "Ցույց տալ գաղտնաբառը",
+        hide: "Թաքցնել գաղտնաբառը",
+    },
+    ru: {
+        welcome: "С возвращением",
+        register: "Создайте аккаунт",
+        description: "Войдите в свой аккаунт ArmMotors, чтобы продолжить.",
+        registerDescription:
+            "Присоединяйтесь к ArmMotors и найдите свой автомобиль.",
+        remember: "Запомнить на 30 дней",
+        forgot: "Забыли пароль?",
+        or: "или",
+        show: "Показать пароль",
+        hide: "Скрыть пароль",
+    },
+    en: {
+        welcome: "Welcome back",
+        register: "Create your account",
+        description: "Sign in to your ArmMotors account to continue.",
+        registerDescription: "Join ArmMotors and find your next car.",
+        remember: "Remember me for 30 days",
+        forgot: "Forgot password?",
+        or: "or",
+        show: "Show password",
+        hide: "Hide password",
+    },
+};
+
 function getSafeDestination(requestedNext) {
     if (
         typeof requestedNext === "string" &&
         /^\/(?:add-product|favorites|account|admin(?:\/(?:users|products|orders|messages|broadcasts|audit))?|cars\/[a-f0-9]{24})$/.test(
-            requestedNext
+            requestedNext,
         )
     ) {
         return requestedNext;
     }
 
-    // Ordinary login opens the account page.
     return "/account";
+}
+
+function EyeIcon({ visible }) {
+    return (
+        <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.7"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+        >
+            <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" />
+            <circle cx="12" cy="12" r="3" />
+            {visible && <path d="m3 3 18 18" />}
+        </svg>
+    );
 }
 
 export default function AuthPage({ registration = false }) {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
 
-    const { t } = useI18n();
+    const { t, language } = useI18n();
+    const text = TEXT[language] || TEXT.hy;
 
-    const [mode, setMode] = useState(
-        registration ? "register" : "login"
-    );
+    const [mode, setMode] = useState(registration ? "register" : "login");
 
-    const [form, setForm] = useState({
-        ...EMPTY_FORM,
-    });
-
+    const [form, setForm] = useState({ ...EMPTY_FORM });
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
-    const [remember, setRemember] = useState(false);
+
+    // Սկզբից միացված է՝ սովորական և Google մուտքի համար։
+    const [remember, setRemember] = useState(true);
 
     const [isLoggedIn, setIsLoggedIn] = useState(() =>
-        Boolean(localStorage.getItem("token"))
+        Boolean(localStorage.getItem("token")),
     );
 
     const isRegistration = mode === "register";
 
-    const requestedNext = searchParams.get("next");
-
-    const destination = getSafeDestination(requestedNext);
-
-    // ==========================================
-    // SESSION EVENTS
-    // ==========================================
+    const destination = getSafeDestination(searchParams.get("next"));
 
     useEffect(() => {
         function updateSession() {
-            setIsLoggedIn(
-                Boolean(localStorage.getItem("token"))
-            );
+            setIsLoggedIn(Boolean(localStorage.getItem("token")));
         }
 
-        window.addEventListener(
-            "session-changed",
-            updateSession
-        );
-
-        window.addEventListener(
-            "storage",
-            updateSession
-        );
+        window.addEventListener("session-changed", updateSession);
+        window.addEventListener("storage", updateSession);
 
         return () => {
-            window.removeEventListener(
-                "session-changed",
-                updateSession
-            );
-
-            window.removeEventListener(
-                "storage",
-                updateSession
-            );
+            window.removeEventListener("session-changed", updateSession);
+            window.removeEventListener("storage", updateSession);
         };
     }, []);
 
-    // ==========================================
-    // SWITCH LOGIN / REGISTER
-    // ==========================================
-
     function switchMode(nextMode) {
-        if (nextMode === mode) return;
+        if (nextMode === mode || loading) return;
 
         setMode(nextMode);
         setError("");
         setShowPassword(false);
         setForm({ ...EMPTY_FORM });
     }
-
-    // ==========================================
-    // INPUT HANDLER
-    // ==========================================
 
     function changeField(event) {
         const { name, value } = event.target;
@@ -136,10 +151,6 @@ export default function AuthPage({ registration = false }) {
         setError("");
     }
 
-    // ==========================================
-    // LOGIN / REGISTRATION
-    // ==========================================
-
     async function handleSubmit(event) {
         event.preventDefault();
 
@@ -147,10 +158,7 @@ export default function AuthPage({ registration = false }) {
 
         setError("");
 
-        if (
-            isRegistration &&
-            form.password !== form.repetPassword
-        ) {
+        if (isRegistration && form.password !== form.repetPassword) {
             setError(t("passwordsMismatch"));
             return;
         }
@@ -161,6 +169,7 @@ export default function AuthPage({ registration = false }) {
             const body = isRegistration
                 ? {
                       ...form,
+                      email: form.email.trim(),
                       remember,
                   }
                 : {
@@ -170,37 +179,24 @@ export default function AuthPage({ registration = false }) {
                   };
 
             const data = await apiRequest(
-                isRegistration
-                    ? "/auth/reg"
-                    : "/auth/login",
+                isRegistration ? "/auth/reg" : "/auth/login",
                 {
                     method: "POST",
                     body: JSON.stringify(body),
-                }
+                },
             );
 
             saveAuthSession(data);
-
-            // IMPORTANT:
-            // /login -> /account
-            // /login?next=/add-product -> /add-product
-            // /login?next=/favorites -> /favorites
 
             navigate(destination, {
                 replace: true,
             });
         } catch (requestError) {
-            setError(
-                requestError.message || t("error")
-            );
+            setError(requestError.message || t("error"));
         } finally {
             setLoading(false);
         }
     }
-
-    // ==========================================
-    // LOGOUT
-    // ==========================================
 
     async function handleLogout() {
         setLoading(true);
@@ -208,39 +204,32 @@ export default function AuthPage({ registration = false }) {
 
         try {
             await logoutUser();
-
             setIsLoggedIn(false);
-
-            navigate("/", {
-                replace: true,
-            });
+            navigate("/", { replace: true });
         } catch (requestError) {
-            setError(
-                requestError.message || t("error")
-            );
+            setError(requestError.message || t("error"));
         } finally {
             setLoading(false);
         }
     }
 
-    // ==========================================
-    // RENDER
-    // ==========================================
-
     return (
-        <main className="auth-shell">
+        <main className="auth-shell am-auth-clean">
             <section className="auth-panel">
                 <div className="auth-card">
+                    {/* <Link
+                        to="/"
+                        className="am-auth-brand"
+                        aria-label="ArmMotors"
+                    >
+                        Arm<span>Motors</span>
+                    </Link> */}
+
                     {isLoggedIn ? (
                         <div className="auth-component-frame">
                             <div className="auth-title-block">
-                                <span className="auth-eyebrow">
-                                    {t("accountSettings")}
-                                </span>
-
-                                <h2>Google Account</h2>
-
-                                <p>{t("account")}</p>
+                                <h2>{t("account")}</h2>
+                                <p>{t("accountSettings")}</p>
                             </div>
 
                             <GoogleAccountLink />
@@ -257,9 +246,7 @@ export default function AuthPage({ registration = false }) {
                             <button
                                 type="button"
                                 className="auth-submit"
-                                onClick={() =>
-                                    navigate(destination)
-                                }
+                                onClick={() => navigate(destination)}
                             >
                                 {destination === "/add-product"
                                     ? t("addProduct")
@@ -268,7 +255,7 @@ export default function AuthPage({ registration = false }) {
 
                             <button
                                 type="button"
-                                className="auth-password-toggle"
+                                className="am-auth-logout"
                                 onClick={handleLogout}
                                 disabled={loading}
                             >
@@ -277,129 +264,84 @@ export default function AuthPage({ registration = false }) {
                         </div>
                     ) : (
                         <>
-                            {/* LOGIN / REGISTER TABS */}
-
-                            <div
-                                className="auth-tabs"
-                                role="tablist"
-                                aria-label={t("account")}
-                            >
+                            <div className="auth-tabs">
                                 <button
                                     type="button"
-                                    role="tab"
-                                    aria-selected={!isRegistration}
-                                    className={
-                                        !isRegistration
-                                            ? "active"
-                                            : ""
-                                    }
-                                    onClick={() =>
-                                        switchMode("login")
-                                    }
+                                    className={!isRegistration ? "active" : ""}
+                                    aria-pressed={!isRegistration}
+                                    disabled={loading}
+                                    onClick={() => switchMode("login")}
                                 >
                                     {t("login")}
                                 </button>
 
                                 <button
                                     type="button"
-                                    role="tab"
-                                    aria-selected={isRegistration}
-                                    className={
-                                        isRegistration
-                                            ? "active"
-                                            : ""
-                                    }
-                                    onClick={() =>
-                                        switchMode("register")
-                                    }
+                                    className={isRegistration ? "active" : ""}
+                                    aria-pressed={isRegistration}
+                                    disabled={loading}
+                                    onClick={() => switchMode("register")}
                                 >
                                     {t("register")}
                                 </button>
                             </div>
 
-                            {/* TITLE */}
-
                             <div className="auth-title-block">
-                                <span className="auth-eyebrow">
-                                    {isRegistration
-                                        ? t("newAccount")
-                                        : t("welcome")}
-                                </span>
-
                                 <h2>
                                     {isRegistration
-                                        ? t("registerTitle")
-                                        : t("loginTitle")}
+                                        ? text.register
+                                        : text.welcome}
                                 </h2>
 
                                 <p>
                                     {isRegistration
-                                        ? t("registerDescription")
-                                        : t("loginDescription")}
+                                        ? text.registerDescription
+                                        : text.description}
                                 </p>
                             </div>
 
-                            <div
-                                className="auth-component-frame"
-                                key={mode}
-                            >
+                            <div className="auth-component-frame" key={mode}>
                                 <form
                                     className="auth-form-modern"
                                     onSubmit={handleSubmit}
+                                    autoComplete="on"
                                 >
-                                    {/* NAME AND SURNAME */}
-
                                     {isRegistration && (
-                                        <div className="auth-two-columns">
+                                        <>
+                                            <div className="auth-two-columns">
+                                                <label>
+                                                    <span>{t("name")}</span>
+                                                    <input
+                                                        type="text"
+                                                        name="name"
+                                                        value={form.name}
+                                                        onChange={changeField}
+                                                        minLength={2}
+                                                        autoComplete="given-name"
+                                                        placeholder={t("name")}
+                                                        required
+                                                    />
+                                                </label>
+
+                                                <label>
+                                                    <span>{t("surname")}</span>
+                                                    <input
+                                                        type="text"
+                                                        name="surname"
+                                                        value={form.surname}
+                                                        onChange={changeField}
+                                                        minLength={2}
+                                                        autoComplete="family-name"
+                                                        placeholder={t(
+                                                            "surname",
+                                                        )}
+                                                        required
+                                                    />
+                                                </label>
+                                            </div>
+
                                             <label>
-                                                <span>
-                                                    {t("name")}
-                                                </span>
-
-                                                <input
-                                                    type="text"
-                                                    name="name"
-                                                    value={form.name}
-                                                    onChange={changeField}
-                                                    minLength={2}
-                                                    autoComplete="given-name"
-                                                    placeholder={t("name")}
-                                                    required
-                                                />
-                                            </label>
-
-                                            <label>
-                                                <span>
-                                                    {t("surname")}
-                                                </span>
-
-                                                <input
-                                                    type="text"
-                                                    name="surname"
-                                                    value={form.surname}
-                                                    onChange={changeField}
-                                                    minLength={2}
-                                                    autoComplete="family-name"
-                                                    placeholder={t("surname")}
-                                                    required
-                                                />
-                                            </label>
-                                        </div>
-                                    )}
-
-                                    {/* PHONE */}
-
-                                    {isRegistration && (
-                                        <label>
-                                            <span>
-                                                {t("phone")}
-                                            </span>
-
-                                            <div className="auth-input-shell">
-                                                <span className="auth-input-icon">
-                                                    ☎
-                                                </span>
-
+                                                <span>{t("phone")}</span>
                                                 <input
                                                     type="tel"
                                                     name="phone"
@@ -409,46 +351,33 @@ export default function AuthPage({ registration = false }) {
                                                     placeholder="+374 00 00 00 00"
                                                     required
                                                 />
-                                            </div>
-                                        </label>
+                                            </label>
+                                        </>
                                     )}
 
-                                    {/* EMAIL */}
-
                                     <label>
-                                        <span>
-                                            {t("email")}
-                                        </span>
-
-                                        <div className="auth-input-shell">
-                                            <span className="auth-input-icon">
-                                                @
-                                            </span>
-
-                                            <input
-                                                type="email"
-                                                name="email"
-                                                value={form.email}
-                                                onChange={changeField}
-                                                autoComplete="email"
-                                                placeholder="name@example.com"
-                                                required
-                                            />
-                                        </div>
+                                        <span>{t("email")}</span>
+                                        <input
+                                            type="email"
+                                            name="email"
+                                            value={form.email}
+                                            onChange={changeField}
+                                            autoComplete={
+                                                isRegistration
+                                                    ? "email"
+                                                    : "username"
+                                            }
+                                            autoCapitalize="none"
+                                            spellCheck={false}
+                                            placeholder="name@example.com"
+                                            required
+                                        />
                                     </label>
 
-                                    {/* PASSWORD */}
-
                                     <label>
-                                        <span>
-                                            {t("password")}
-                                        </span>
+                                        <span>{t("password")}</span>
 
                                         <div className="auth-input-shell">
-                                            <span className="auth-input-icon">
-                                                ⌁
-                                            </span>
-
                                             <input
                                                 type={
                                                     showPassword
@@ -475,117 +404,67 @@ export default function AuthPage({ registration = false }) {
                                             <button
                                                 type="button"
                                                 className="auth-password-toggle"
+                                                aria-label={
+                                                    showPassword
+                                                        ? text.hide
+                                                        : text.show
+                                                }
+                                                aria-pressed={showPassword}
                                                 onClick={() =>
                                                     setShowPassword(
-                                                        (previous) =>
-                                                            !previous
+                                                        (previous) => !previous,
                                                     )
                                                 }
                                             >
-                                                {showPassword
-                                                    ? t("hidePassword")
-                                                    : t("showPassword")}
+                                                <EyeIcon
+                                                    visible={showPassword}
+                                                />
                                             </button>
                                         </div>
                                     </label>
 
-                                    {/* REPEAT PASSWORD */}
-
                                     {isRegistration && (
                                         <label>
-                                            <span>
-                                                {t("repeatPassword")}
-                                            </span>
-
-                                            <div className="auth-input-shell">
-                                                <span className="auth-input-icon">
-                                                    ✓
-                                                </span>
-
-                                                <input
-                                                    type={
-                                                        showPassword
-                                                            ? "text"
-                                                            : "password"
-                                                    }
-                                                    name="repetPassword"
-                                                    value={form.repetPassword}
-                                                    onChange={changeField}
-                                                    minLength={8}
-                                                    autoComplete="new-password"
-                                                    placeholder={t(
-                                                        "repeatPassword"
-                                                    )}
-                                                    required
-                                                />
-                                            </div>
+                                            <span>{t("repeatPassword")}</span>
+                                            <input
+                                                type={
+                                                    showPassword
+                                                        ? "text"
+                                                        : "password"
+                                                }
+                                                name="repetPassword"
+                                                value={form.repetPassword}
+                                                onChange={changeField}
+                                                minLength={8}
+                                                autoComplete="new-password"
+                                                placeholder={t(
+                                                    "repeatPassword",
+                                                )}
+                                                required
+                                            />
                                         </label>
                                     )}
 
-                                    {/* FORGOT PASSWORD */}
+                                    <div className="am-auth-options">
+                                        <label className="am-auth-remember">
+                                            <input
+                                                type="checkbox"
+                                                checked={remember}
+                                                onChange={(event) =>
+                                                    setRemember(
+                                                        event.target.checked,
+                                                    )
+                                                }
+                                            />
+                                            <span>{text.remember}</span>
+                                        </label>
 
-                                    {!isRegistration && (
-                                        <div
-                                            style={{
-                                                display: "flex",
-                                                justifyContent: "flex-end",
-                                                margin: "-4px 0 15px",
-                                            }}
-                                        >
-                                            <Link
-                                                to="/forgot-password"
-                                                style={{
-                                                    color: "#b99547",
-                                                    fontSize: "12px",
-                                                    fontWeight: 700,
-                                                    textDecoration: "none",
-                                                }}
-                                            >
-                                                {t("forgotPassword")}
+                                        {!isRegistration && (
+                                            <Link to="/forgot-password">
+                                                {text.forgot}
                                             </Link>
-                                        </div>
-                                    )}
-
-                                    {/* REMEMBER ME */}
-
-                                    <label
-                                        style={{
-                                            display: "flex",
-                                            alignItems: "center",
-                                            gap: "10px",
-                                            margin: "0 0 22px",
-                                            cursor: "pointer",
-                                        }}
-                                    >
-                                        <input
-                                            type="checkbox"
-                                            checked={remember}
-                                            onChange={(event) =>
-                                                setRemember(
-                                                    event.target.checked
-                                                )
-                                            }
-                                            style={{
-                                                width: "17px",
-                                                height: "17px",
-                                                accentColor: "#b99547",
-                                                cursor: "pointer",
-                                                flexShrink: 0,
-                                            }}
-                                        />
-
-                                        <span
-                                            style={{
-                                                fontSize: "13px",
-                                                color: "#555",
-                                                fontWeight: 500,
-                                            }}
-                                        >
-                                            {t("rememberMe")}
-                                        </span>
-                                    </label>
-
-                                    {/* ERROR */}
+                                        )}
+                                    </div>
 
                                     {error && (
                                         <p
@@ -596,41 +475,27 @@ export default function AuthPage({ registration = false }) {
                                         </p>
                                     )}
 
-                                    {/* SUBMIT */}
-
                                     <button
                                         type="submit"
                                         className="auth-submit"
                                         disabled={loading}
                                     >
-                                        <span>
-                                            {loading
-                                                ? t("processing")
-                                                : isRegistration
-                                                  ? t("createAccount")
-                                                  : t("login")}
-                                        </span>
-
-                                        {!loading && (
-                                            <span>→</span>
-                                        )}
+                                        {loading
+                                            ? t("processing")
+                                            : isRegistration
+                                              ? t("createAccount")
+                                              : t("login")}
                                     </button>
                                 </form>
 
-                                {/* GOOGLE SIGN IN */}
-
                                 <div className="auth-divider">
-                                    <span>
-                                        {t("continue")}
-                                    </span>
+                                    <span>{text.or}</span>
                                 </div>
 
                                 <GoogleSignIn
                                     destination={destination}
                                     remember={remember}
                                 />
-
-                                {/* SWITCH MODE */}
 
                                 <p className="auth-switch-copy">
                                     {isRegistration
@@ -639,11 +504,12 @@ export default function AuthPage({ registration = false }) {
 
                                     <button
                                         type="button"
+                                        disabled={loading}
                                         onClick={() =>
                                             switchMode(
                                                 isRegistration
                                                     ? "login"
-                                                    : "register"
+                                                    : "register",
                                             )
                                         }
                                     >

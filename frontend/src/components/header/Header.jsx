@@ -10,6 +10,7 @@ import { asset } from "../../utils/asset";
 import NotificationBell from "../notifications/NotificationBell";
 
 import "./Header.css";
+import "./HeaderAccount.css";
 
 function readSession() {
     const token = localStorage.getItem("token");
@@ -28,26 +29,37 @@ function readSession() {
     }
 }
 
+const FLAGS = {
+    hy: "🇦🇲",
+    am: "🇦🇲",
+    ru: "🇷🇺",
+    en: "🇺🇸",
+};
+
 const ICONS = {
     heart: (
         <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z" />
     ),
+
     user: (
         <>
-            <circle cx="12" cy="8" r="4" />
-            <path d="M4.5 21a7.5 7.5 0 0 1 15 0" />
+            <circle cx="12" cy="8" r="3.5" />
+            <path d="M5 21v-1a7 7 0 0 1 14 0v1" />
         </>
     ),
+
     plus: <path d="M12 5v14M5 12h14" />,
     menu: <path d="M4 7h16M4 12h16M4 17h16" />,
     close: <path d="m6 6 12 12M18 6 6 18" />,
     chevron: <path d="m6 9 6 6 6-6" />,
+
     home: (
         <>
             <path d="m3 11 9-7 9 7" />
             <path d="M5 10v11h14V10M9 21v-7h6v7" />
         </>
     ),
+
     cars: (
         <>
             <path d="m5 11 2-5h10l2 5" />
@@ -55,19 +67,23 @@ const ICONS = {
             <path d="M6 18v2M18 18v2M7 14h1M16 14h1" />
         </>
     ),
+
     compare: <path d="M4 7h16M16 3l4 4-4 4M20 17H4M8 13l-4 4 4 4" />,
+
     message: (
         <>
             <path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5H5l-3 2V11.5a9.5 9.5 0 0 1 19 0Z" />
             <path d="M7 10h10M7 14h6" />
         </>
     ),
+
     logout: (
         <>
             <path d="M9 4H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4" />
             <path d="M12 12h9m-4-4 4 4-4 4" />
         </>
     ),
+
     settings: (
         <>
             <circle cx="12" cy="12" r="3" />
@@ -99,7 +115,6 @@ export default function Header() {
     const location = useLocation();
 
     const { language, languages, setLanguage, t } = useI18n();
-
     const tr = (key) => uiText(language, key);
 
     const [session, setSession] = useState(readSession);
@@ -120,17 +135,23 @@ export default function Header() {
         (session.user?.isAdmin === true || session.user?.role === "admin");
 
     const path = location.pathname;
-
     const isHome = path === "/";
     const isCars = path === "/cars" || path.startsWith("/cars/");
     const isFavorites = path === "/favorites";
-    const isAccount = path === "/account";
+    const isAccount = path === "/account" || path.startsWith("/account/");
 
     const mobileOpen = mobile && openMenu === "mobile";
 
     const addListingUrl = loggedIn
         ? "/add-product"
         : "/login?next=%2Fadd-product";
+
+    const accountLabel =
+        language === "ru"
+            ? "Мой аккаунт"
+            : language === "en"
+              ? "My account"
+              : "Իմ հաշիվը";
 
     useEffect(() => {
         setCurrencyByLanguage(language);
@@ -145,10 +166,7 @@ export default function Header() {
         }
 
         media.addEventListener("change", change);
-
-        return () => {
-            media.removeEventListener("change", change);
-        };
+        return () => media.removeEventListener("change", change);
     }, []);
 
     useEffect(() => {
@@ -157,12 +175,10 @@ export default function Header() {
         }
 
         window.addEventListener("session-changed", updateSession);
-
         window.addEventListener("storage", updateSession);
 
         return () => {
             window.removeEventListener("session-changed", updateSession);
-
             window.removeEventListener("storage", updateSession);
         };
     }, []);
@@ -183,16 +199,10 @@ export default function Header() {
                 const user = result?.user || result;
 
                 if (user && typeof user === "object") {
-                    setSession((current) => ({
-                        ...current,
-                        user,
-                    }));
+                    setSession((current) => ({ ...current, user }));
                 }
             } catch {
-                /*
-                 * SessionBootstrap և apiRequest-ը
-                 * շարունակում են կառավարել սեսիան։
-                 */
+                // Սեսիայի թարմացումը կառավարում են apiRequest-ը և SessionBootstrap-ը։
             }
         }
 
@@ -213,12 +223,12 @@ export default function Header() {
         }
 
         function keyboard(event) {
-            if (event.key === "Escape") {
-                setOpenMenu("");
+            if (event.key !== "Escape") return;
 
-                if (mobileOpen) {
-                    mobileButtonRef.current?.focus();
-                }
+            setOpenMenu("");
+
+            if (mobileOpen) {
+                mobileButtonRef.current?.focus();
             }
         }
 
@@ -227,7 +237,6 @@ export default function Header() {
 
         return () => {
             document.removeEventListener("pointerdown", outside);
-
             document.removeEventListener("keydown", keyboard);
         };
     }, [mobileOpen]);
@@ -264,7 +273,6 @@ export default function Header() {
 
     function openSupport() {
         setOpenMenu("");
-
         window.dispatchEvent(new CustomEvent("open-support"));
     }
 
@@ -274,11 +282,9 @@ export default function Header() {
         setLoggingOut(true);
 
         try {
-            await apiRequest("/auth/logout", {
-                method: "POST",
-            });
+            await apiRequest("/auth/logout", { method: "POST" });
         } catch {
-            // Տեղային սեսիան փակվում է նաև ցանցային սխալի դեպքում։
+            // Ցանցային սխալի դեպքում նույնպես մաքրում ենք տեղային սեսիան։
         } finally {
             localStorage.removeItem("token");
             localStorage.removeItem("user");
@@ -288,7 +294,6 @@ export default function Header() {
             setLoggingOut(false);
 
             window.dispatchEvent(new Event("session-changed"));
-
             navigate("/", { replace: true });
         }
     }
@@ -303,7 +308,9 @@ export default function Header() {
                     aria-label={tr("changeLanguage")}
                     aria-expanded={openMenu === "language"}
                 >
-                    <span>{language.toUpperCase()}</span>
+                    <span className="am-header-flag" aria-hidden="true">
+                        {FLAGS[language] || "🇦🇲"}
+                    </span>
 
                     <Icon name="chevron" size={12} />
                 </button>
@@ -319,13 +326,30 @@ export default function Header() {
                                 }
                                 onClick={() => changeLanguage(item.code)}
                             >
-                                <span>{item.flag}</span>
+                                <span>{FLAGS[item.code] || item.flag}</span>
                                 <span>{item.label}</span>
                             </button>
                         ))}
                     </div>
                 )}
             </div>
+        );
+    }
+
+    function accountControl() {
+        return (
+            <Link
+                to="/account"
+                className={`am-header-profile-link ${
+                    isAccount ? "is-active" : ""
+                }`}
+                aria-label={accountLabel}
+                aria-current={isAccount ? "page" : undefined}
+                title={accountLabel}
+                onClick={() => setOpenMenu("")}
+            >
+                <Icon name="user" size={19} />
+            </Link>
         );
     }
 
@@ -390,7 +414,7 @@ export default function Header() {
                     <>
                         <Link to="/account">
                             <Icon name="user" />
-                            <span>{tr("account")}</span>
+                            <span>{accountLabel}</span>
                         </Link>
 
                         {isAdmin && (
@@ -406,7 +430,6 @@ export default function Header() {
                             disabled={loggingOut}
                         >
                             <Icon name="logout" />
-
                             <span>
                                 {loggingOut
                                     ? tr("logoutProgress")
@@ -444,47 +467,37 @@ export default function Header() {
 
                         <div className="am-header-actions">
                             {!mobile && (
-                                <Link
-                                    to="/favorites"
-                                    onClick={favoritesClick}
-                                    className="am-icon-button"
-                                    aria-label={t("favorites")}
-                                    title={t("favorites")}
-                                >
-                                    <Icon name="heart" />
-                                </Link>
+                                <>
+                                    <Link
+                                        to="/favorites"
+                                        onClick={favoritesClick}
+                                        className="am-icon-button"
+                                        aria-label={t("favorites")}
+                                        title={t("favorites")}
+                                    >
+                                        <Icon name="heart" />
+                                    </Link>
+
+                                    {!loggedIn && (
+                                        <Link
+                                            to="/login"
+                                            className="am-login-button"
+                                        >
+                                            {t("login")}
+                                        </Link>
+                                    )}
+
+                                    <Link
+                                        to={addListingUrl}
+                                        className="am-add-button"
+                                    >
+                                        <Icon name="plus" size={18} />
+                                        <span>{t("addListing")}</span>
+                                    </Link>
+                                </>
                             )}
 
                             {mobile && languageControl()}
-
-                            <Link
-                                to={loggedIn ? "/account" : "/login"}
-                                className={
-                                    mobile || loggedIn
-                                        ? "am-icon-button am-account-button"
-                                        : "am-login-button"
-                                }
-                                aria-label={
-                                    loggedIn ? tr("account") : t("login")
-                                }
-                                title={loggedIn ? tr("account") : t("login")}
-                            >
-                                {mobile || loggedIn ? (
-                                    <Icon name="user" />
-                                ) : (
-                                    t("login")
-                                )}
-                            </Link>
-
-                            {!mobile && (
-                                <Link
-                                    to={addListingUrl}
-                                    className="am-add-button"
-                                >
-                                    <Icon name="plus" size={18} />
-                                    <span>{t("addListing")}</span>
-                                </Link>
-                            )}
 
                             {mobile && (
                                 <button
@@ -509,6 +522,8 @@ export default function Header() {
                                     />
                                 </button>
                             )}
+
+                            {loggedIn && accountControl()}
                         </div>
                     </div>
 

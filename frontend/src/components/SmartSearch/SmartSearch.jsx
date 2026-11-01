@@ -2,8 +2,16 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import useInterfaceText from "../../utils/interfaceText";
+import { useI18n } from "../../utils/i18n";
 
 import "./SmartSearch.css";
+import "./SmartSearchMobile.css";
+
+const PLACEHOLDERS = {
+    hy: "Որոնել մեքենա…",
+    ru: "Найти автомобиль…",
+    en: "Search cars…",
+};
 
 export default function SmartSearch({
     value,
@@ -14,6 +22,7 @@ export default function SmartSearch({
 }) {
     const navigate = useNavigate();
     const { tr } = useInterfaceText();
+    const { language } = useI18n();
 
     const [internalValue, setInternalValue] = useState(initialValue);
 
@@ -58,8 +67,27 @@ export default function SmartSearch({
                 onSubmit={submit}
             >
                 <div className="smart-search-input-wrap">
+                    <input
+                        className="smart-search-input"
+                        type="search"
+                        value={query}
+                        onChange={changeQuery}
+                        placeholder={PLACEHOLDERS[language] || PLACEHOLDERS.hy}
+                        aria-label={tr("searchLabel")}
+                    />
+                </div>
+
+                <button
+                    className="smart-search-button"
+                    type="submit"
+                    aria-label={tr("search")}
+                >
+                    <span className="smart-search-button-text">
+                        {tr("search")}
+                    </span>
+
                     <svg
-                        className="smart-search-icon"
+                        className="smart-search-submit-icon"
                         width="21"
                         height="21"
                         viewBox="0 0 24 24"
@@ -67,24 +95,12 @@ export default function SmartSearch({
                         stroke="currentColor"
                         strokeWidth="1.8"
                         strokeLinecap="round"
+                        strokeLinejoin="round"
                         aria-hidden="true"
                     >
                         <circle cx="10.5" cy="10.5" r="6.5" />
                         <path d="m16 16 4.5 4.5" />
                     </svg>
-
-                    <input
-                        className="smart-search-input"
-                        type="search"
-                        value={query}
-                        onChange={changeQuery}
-                        placeholder={tr("searchPlaceholder")}
-                        aria-label={tr("searchLabel")}
-                    />
-                </div>
-
-                <button className="smart-search-button" type="submit">
-                    {tr("search")}
                 </button>
             </form>
         </div>

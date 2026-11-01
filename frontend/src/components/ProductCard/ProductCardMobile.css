@@ -1,0 +1,104 @@
+/* =========================================
+   ARMMOTORS — PRODUCT CARD MOBILE
+========================================= */
+
+/* Հեռացնում ենք նկարի վրայի տեսակի պիտակը */
+
+body .listing-card .product-image-wrapper .product-type {
+    display: none !important;
+}
+
+/* Հեռախոս՝ տվյալների հավասար 2 × 2 դասավորություն */
+
+@media (max-width: 768px) {
+    body .listing-card .product-info .product-details {
+        display: grid !important;
+
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        grid-auto-rows: 1fr !important;
+
+        align-items: stretch !important;
+        gap: 6px !important;
+
+        width: 100% !important;
+        min-width: 0 !important;
+
+        margin: 11px 0 !important;
+        padding: 0 !important;
+    }
+
+    body .listing-card .product-info .product-details > .detail-item,
+    body
+        .listing-card
+        .product-info
+        .product-details
+        > .detail-item:nth-child(n) {
+        box-sizing: border-box;
+
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+
+        grid-column: auto !important;
+        grid-row: auto !important;
+
+        width: auto !important;
+        min-width: 0 !important;
+        max-width: none !important;
+
+        height: auto !important;
+        min-height: 34px !important;
+
+        gap: 4px !important;
+        margin: 0 !important;
+        padding: 6px 5px !important;
+
+        border: 1px solid #e2eaf4 !important;
+        border-radius: 8px !important;
+        background: #f6f9fd !important;
+
+        color: #29486e !important;
+        font-family: inherit !important;
+        font-size: 9px !important;
+        font-weight: 500 !important;
+        line-height: 1.4 !important;
+
+        white-space: normal !important;
+        overflow: visible !important;
+    }
+
+    body .listing-card .product-info .product-details > .detail-item > svg {
+        display: block !important;
+        flex: 0 0 12px !important;
+
+        width: 12px !important;
+        min-width: 12px !important;
+        height: 12px !important;
+
+        margin: 0 !important;
+        color: #507aaa !important;
+    }
+
+    body .listing-card .product-info .product-details > .detail-item > span {
+        display: block !important;
+        flex: 1 1 0 !important;
+
+        width: auto !important;
+        min-width: 0 !important;
+        max-width: none !important;
+
+        margin: 0 !important;
+        padding: 0 !important;
+
+        font-size: inherit !important;
+        font-weight: inherit !important;
+        line-height: inherit !important;
+        text-align: left !important;
+
+        white-space: normal !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
+        overflow-wrap: anywhere !important;
+    }
+}

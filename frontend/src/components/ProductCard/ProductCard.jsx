@@ -15,6 +15,7 @@ import {
 
 import "./ProductCard.css";
 import "../../styles/ArmMotorsMobile.css";
+import "./ProductCardMobile.css";
 
 const CARD_TEXT = {
     hy: {

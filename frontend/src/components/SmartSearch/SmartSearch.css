@@ -1,182 +1,219 @@
-.smart-search {
-    position: relative;
-    width: 100%;
-    min-width: 0;
-    max-width: 100%;
-    color: #14263f;
-    font-family: Arial, "Noto Sans Armenian", sans-serif;
-}
+/* ARMMOTORS — MOBILE SEARCH ICONS */
 
-.smart-search *,
-.smart-search *::before,
-.smart-search *::after {
-    box-sizing: border-box;
-}
-
-.smart-search .smart-search-form {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    width: 100%;
-    min-width: 0;
-    min-height: 58px;
-    margin: 0;
-    padding: 5px;
-    border: 1px solid #dce5ef;
-    border-radius: 12px;
-    background: #ffffff;
-    box-shadow: none;
-}
-
-.smart-search .smart-search-form:focus-within {
-    border-color: #7c9fc4;
-    box-shadow: 0 0 0 3px rgba(36, 75, 119, 0.07);
-}
-
-.smart-search .smart-search-input-wrap {
-    display: flex;
-    flex: 1 1 0;
-    align-items: center;
-    gap: 10px;
-    min-width: 0;
-    padding-left: 10px;
-}
-
-.smart-search .smart-search-icon {
-    display: block;
-    flex: 0 0 19px;
-    width: 19px;
-    height: 19px;
-    color: #527fae;
-}
-
-.smart-search input.smart-search-input {
-    display: block;
-    flex: 1 1 0;
-    width: 100%;
-    min-width: 0;
-    height: 46px;
-    min-height: 0;
-    margin: 0;
-    padding: 0;
-    border: 0;
-    border-radius: 0;
-    outline: none;
-    background: transparent;
-    color: #14263f;
-    box-shadow: none;
-    font: inherit;
-    font-size: 14px;
-    line-height: normal;
-}
-
-.smart-search input.smart-search-input:focus {
-    border: 0;
-    outline: none;
-    box-shadow: none;
-}
-
-.smart-search .smart-search-input::placeholder {
-    color: #94a3b8;
-    opacity: 1;
-    text-overflow: ellipsis;
-}
-
-.smart-search button.smart-search-button {
-    display: inline-flex;
-    flex: 0 0 auto;
-    align-items: center;
-    justify-content: center;
-    width: auto;
-    min-width: 105px;
-    height: 46px;
-    min-height: 46px;
-    margin: 0;
-    padding: 0 17px;
-    border: 0;
-    border-radius: 8px;
-    background: #14263f;
-    color: #ffffff;
-    font: inherit;
-    font-size: 14px;
-    font-weight: 700;
-    white-space: nowrap;
-    cursor: pointer;
-}
-
-.smart-search button.smart-search-button:hover {
-    background: #244b77;
-}
-
-.smart-search button.smart-search-button:focus-visible {
-    outline: 2px solid #7aa5d3;
-    outline-offset: 2px;
+.smart-search .smart-search-submit-icon {
+    display: none;
 }
 
 @media (max-width: 768px) {
-    .home-wrapper .intro-section {
-        padding: 7px;
+    body .home-wrapper .home-search-controls {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        align-items: center !important;
+
+        gap: 8px !important;
+        width: 100% !important;
+        min-width: 0 !important;
     }
 
-    .home-wrapper .home-search-controls {
-        gap: 6px !important;
+    body .home-wrapper .home-search-controls .search-area {
+        flex: 1 1 0 !important;
+        width: auto !important;
+        min-width: 0 !important;
     }
 
-    .home-wrapper .home-search-controls .am-filter-trigger {
-        flex: 0 0 40px !important;
-        width: 40px !important;
-        height: 48px !important;
-        min-height: 48px !important;
+    body .home-wrapper .home-search-controls .smart-search {
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: none !important;
+    }
+
+    body .home-wrapper .home-search-controls .smart-search-form {
+        box-sizing: border-box;
+
+        display: flex !important;
+        align-items: center !important;
+        flex-wrap: nowrap !important;
+        gap: 4px !important;
+
+        width: 100% !important;
+        min-width: 0 !important;
+        height: 46px !important;
+        min-height: 46px !important;
+
+        margin: 0 !important;
+        padding: 4px !important;
+
+        border: 1px solid #d6e2f0 !important;
+        border-radius: 12px !important;
+        background: #ffffff !important;
+
+        box-shadow: 0 3px 10px rgba(22, 48, 80, 0.03) !important;
+    }
+
+    body .home-wrapper .home-search-controls .smart-search-form:focus-within {
+        border-color: #8faed3 !important;
+        box-shadow: 0 0 0 3px rgba(49, 101, 164, 0.07) !important;
+    }
+
+    body .home-wrapper .home-search-controls .smart-search-input-wrap {
+        display: flex !important;
+        align-items: center !important;
+
+        flex: 1 1 0 !important;
+        width: auto !important;
+        min-width: 0 !important;
+
+        margin: 0 !important;
         padding: 0 !important;
-        border-radius: 9px;
     }
 
-    .smart-search .smart-search-form {
-        gap: 4px;
-        min-height: 48px;
-        padding: 4px;
-        border-radius: 10px;
+    /* Ձախ որոնման նշանը հեռացված է */
+
+    body .home-wrapper .home-search-controls .smart-search-icon,
+    body .home-wrapper .home-search-controls .smart-search-input-wrap::before,
+    body .home-wrapper .home-search-controls .smart-search-input-wrap::after {
+        display: none !important;
+        content: none !important;
     }
 
-    .smart-search .smart-search-input-wrap {
-        gap: 6px;
-        padding-left: 5px;
+    body .home-wrapper .home-search-controls .smart-search-input {
+        box-sizing: border-box;
+
+        flex: 1 1 0 !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        height: 36px !important;
+
+        margin: 0 !important;
+        padding: 0 8px !important;
+
+        border: 0 !important;
+        outline: none !important;
+        background: transparent !important;
+        box-shadow: none !important;
+
+        color: #203d60 !important;
+        font-family: Arial, "Noto Sans Armenian", sans-serif;
+        font-size: 16px !important;
     }
 
-    .smart-search .smart-search-icon {
-        flex-basis: 15px;
-        width: 15px;
-        height: 15px;
-    }
-
-    .smart-search input.smart-search-input {
-        height: 38px;
-        font-size: 13px;
-    }
-
-    .smart-search button.smart-search-button {
-        min-width: 66px;
-        height: 38px;
-        min-height: 38px;
-        padding: 0 9px;
-        border-radius: 7px;
-        font-size: 11px;
-    }
-}
-
-@media (max-width: 350px) {
-    .smart-search .smart-search-input-wrap {
-        gap: 4px;
-        padding-left: 3px;
-    }
-
-    .smart-search button.smart-search-button {
-        min-width: 58px;
-        padding: 0 6px;
-        font-size: 10px;
-    }
-
-    .smart-search input.smart-search-input {
+    body .home-wrapper .home-search-controls .smart-search-input::placeholder {
+        color: #8a9eb7 !important;
         font-size: 12px;
+        opacity: 1;
+    }
+
+    /* Խոշորացույցով կոճակ */
+
+    body .home-wrapper .home-search-controls .smart-search-button {
+        box-sizing: border-box;
+
+        display: block !important;
+        flex: 0 0 36px !important;
+
+        width: 36px !important;
+        min-width: 36px !important;
+        max-width: 36px !important;
+        height: 36px !important;
+        min-height: 36px !important;
+
+        margin: 0 !important;
+        padding: 0 !important;
+
+        border: 1px solid #173657 !important;
+        border-radius: 9px !important;
+
+        background-color: #173657 !important;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='1.8' stroke-linecap='round'%3E%3Ccircle cx='10.5' cy='10.5' r='6.5'/%3E%3Cpath d='m16 16 4.5 4.5'/%3E%3C/svg%3E") !important;
+        background-position: center !important;
+        background-repeat: no-repeat !important;
+        background-size: 21px 21px !important;
+
+        /* Թաքցնում է նաև հին JSX-ի ուղիղ գրությունը */
+        font-size: 0 !important;
+        line-height: 0 !important;
+
+        box-shadow: none !important;
+        cursor: pointer;
+    }
+
+    body .home-wrapper .home-search-controls .smart-search-button > *,
+    body .home-wrapper .home-search-controls .smart-search-button::before,
+    body .home-wrapper .home-search-controls .smart-search-button::after {
+        display: none !important;
+        content: none !important;
+    }
+
+    /* Ֆիլտրի կարգավորման նշան */
+
+    body .home-wrapper .home-search-controls .am-filter-trigger {
+        position: relative !important;
+        box-sizing: border-box;
+
+        display: block !important;
+        flex: 0 0 46px !important;
+
+        width: 46px !important;
+        min-width: 46px !important;
+        max-width: 46px !important;
+        height: 46px !important;
+        min-height: 46px !important;
+
+        margin: 0 !important;
+        padding: 0 !important;
+
+        border: 1px solid #d7e5f5 !important;
+        border-radius: 12px !important;
+
+        background-color: #edf4fd !important;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23294f7e' stroke-width='1.8' stroke-linecap='round'%3E%3Cpath d='M3 6h4m4 0h10M3 12h10m4 0h4M3 18h3m4 0h11'/%3E%3Ccircle cx='9' cy='6' r='2'/%3E%3Ccircle cx='15' cy='12' r='2'/%3E%3Ccircle cx='8' cy='18' r='2'/%3E%3C/svg%3E") !important;
+        background-position: center !important;
+        background-repeat: no-repeat !important;
+        background-size: 23px 23px !important;
+
+        box-shadow: none !important;
+        overflow: visible !important;
+        cursor: pointer;
+    }
+
+    body .home-wrapper .home-search-controls .am-filter-trigger > svg {
+        display: none !important;
+    }
+
+    /* Ակտիվ ֆիլտրերի իրական քանակ */
+
+    body .home-wrapper .home-search-controls .am-filter-count {
+        position: absolute !important;
+        top: -5px !important;
+        right: -4px !important;
+        bottom: auto !important;
+        left: auto !important;
+
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+
+        min-width: 19px !important;
+        height: 19px !important;
+        margin: 0 !important;
+        padding: 0 4px !important;
+
+        border: 2px solid #ffffff !important;
+        border-radius: 999px !important;
+        background: #326cbb !important;
+        color: #ffffff !important;
+
+        font-family: Arial, sans-serif;
+        font-size: 9px !important;
+        font-weight: 700;
+        line-height: 1 !important;
+
+        transform: none !important;
+    }
+
+    body .home-wrapper .home-search-controls button:focus-visible {
+        outline: 2px solid #6e99ca !important;
+        outline-offset: 3px;
     }
 }
