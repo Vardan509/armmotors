@@ -62,7 +62,6 @@ const productSchema = new mongoose.Schema(
             uppercase: true,
         },
 
-        // Գործող վճարային համակարգ
         topUntil: {
             type: Date,
             default: null,
@@ -98,7 +97,8 @@ const productSchema = new mongoose.Schema(
             index: true,
         },
 
-        // Մեքենայի հիմնական տվյալներ
+        /* Մեքենայի հիմնական տվյալներ */
+
         vehicleType: {
             type: String,
             enum: ["passenger", "truck"],
@@ -137,6 +137,23 @@ const productSchema = new mongoose.Schema(
             min: 0,
         },
 
+        /*
+         * Շարժիչի ծավալը՝ լիտրերով։
+         * Օրինակ՝ 1.6, 2.0, 3.5։
+         * Հին հայտարարությունների համար կարող է մնալ null։
+         */
+
+        engineVolume: {
+            type: Number,
+            default: null,
+            min: 0.1,
+            max: 30,
+            validate: {
+                validator: (value) => value == null || Number.isFinite(value),
+                message: "Շարժիչի ծավալը սխալ է։",
+            },
+        },
+
         fuel: {
             type: String,
             enum: ["petrol", "diesel", "gas", "hybrid", "electric"],
@@ -167,7 +184,8 @@ const productSchema = new mongoose.Schema(
             default: "Օգտագործված",
         },
 
-        // Գտնվելու վայր
+        /* Գտնվելու վայր */
+
         region: {
             type: String,
             required: true,
@@ -189,7 +207,8 @@ const productSchema = new mongoose.Schema(
             maxlength: 100,
         },
 
-        // Լրացուցիչ տեխնիկական տվյալներ
+        /* Լրացուցիչ տեխնիկական տվյալներ */
+
         customsCleared: {
             type: String,
             enum: ["", "yes", "no"],
@@ -234,7 +253,8 @@ const productSchema = new mongoose.Schema(
             default: "",
         },
 
-        // Ինտերիեր
+        /* Սրահ */
+
         interiorMaterial: {
             type: String,
             enum: ["", "fabric", "leather", "artificial", "alcantara", "other"],
@@ -247,21 +267,20 @@ const productSchema = new mongoose.Schema(
             default: "",
         },
 
-        // Էքստերիեր
         headlights: {
             type: [String],
             enum: ["halogen", "xenon", "led"],
             default: [],
         },
 
-        // Կոմֆորտ
         comfort: {
             type: [String],
             enum: COMFORT_OPTIONS,
             default: [],
         },
 
-        // Հայտարարության նկարագրություն
+        /* Հայտարարության տվյալներ */
+
         description: {
             type: String,
             trim: true,
@@ -294,7 +313,18 @@ const productSchema = new mongoose.Schema(
     },
 );
 
-// INDEXES
+/*
+ * Էլեկտրական մեքենայի կամ պահեստամասի համար
+ * շարժիչի ծավալ չենք պահպանում։
+ */
+
+productSchema.pre("validate", function () {
+    if (this.type !== "car" || this.fuel === "electric") {
+        this.engineVolume = null;
+    }
+});
+
+/* Ինդեքսներ */
 
 productSchema.index({
     status: 1,

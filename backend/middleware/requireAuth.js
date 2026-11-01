@@ -7,16 +7,14 @@ export default async function requireAuth(req, res, next) {
 
     if (!authorization?.startsWith("Bearer ")) {
         return res.status(401).json({
-            message: "Հայտարարություն տեղադրելու համար մուտք գործեք։",
+            message: "Մուտք գործեք Ձեր հաշիվ։",
         });
     }
 
     let decoded;
 
     try {
-        const token = authorization.slice(7);
-
-        decoded = jwt.verify(token, process.env.JWT_SECRET);
+        decoded = jwt.verify(authorization.slice(7), process.env.JWT_SECRET);
 
         if (
             typeof decoded !== "object" ||
@@ -32,7 +30,7 @@ export default async function requireAuth(req, res, next) {
 
     try {
         const user = await User.findById(decoded.userId).select(
-            "_id email name surname role banned tokenVersion",
+            "_id email name surname phone role banned tokenVersion",
         );
 
         if (!user) {

@@ -17,6 +17,7 @@ const ALLOWED_FIELDS = [
     "model",
     "year",
     "mileage",
+    "engineVolume",
     "fuel",
     "steering",
     "color",
@@ -54,6 +55,7 @@ const FILTER_FIELDS = [
 function createError(message, status = 400) {
     const error = new Error(message);
     error.status = status;
+
     return error;
 }
 
@@ -199,6 +201,10 @@ function buildPublicFilter(query = {}) {
     return filter;
 }
 
+/* =========================================
+   Թույլատրված դաշտեր և ստուգում
+========================================= */
+
 export function pickFields(body) {
     if (!body || typeof body !== "object" || Array.isArray(body)) {
         throw createError("Սխալ տվյալներ։");
@@ -212,11 +218,31 @@ export function pickFields(body) {
         }
     }
 
+    if (Object.prototype.hasOwnProperty.call(data, "engineVolume")) {
+        const value = data.engineVolume;
+
+        if (value == null || (typeof value === "string" && !value.trim())) {
+            data.engineVolume = null;
+        } else {
+            if (!["string", "number"].includes(typeof value)) {
+                throw createError("Շարժիչի ծավալը սխալ է։");
+            }
+
+            const volume = Number(String(value).trim().replace(",", "."));
+
+            if (!Number.isFinite(volume) || volume < 0.1 || volume > 30) {
+                throw createError("Շարժիչի ծավալը պետք է լինի 0.1–30 լ։");
+            }
+
+            data.engineVolume = volume;
+        }
+    }
+
     return data;
 }
 
 /* =========================================
-   PUBLIC PRODUCTS
+   Բոլոր հրապարակված հայտարարությունները
 ========================================= */
 
 export async function getAllProduct(query = {}) {
@@ -228,7 +254,7 @@ export async function getAllProduct(query = {}) {
 }
 
 /* =========================================
-   MY PRODUCTS
+   Օգտատիրոջ հայտարարությունները
 ========================================= */
 
 export async function getMyProducts(userId) {
@@ -242,7 +268,7 @@ export async function getMyProducts(userId) {
 }
 
 /* =========================================
-   PRODUCT DETAILS
+   Հայտարարության մանրամասները
 ========================================= */
 
 export async function getProductById(id) {
@@ -273,7 +299,7 @@ export async function getProductById(id) {
 }
 
 /* =========================================
-   CREATE PRODUCT
+   Նոր հայտարարություն
 ========================================= */
 
 export async function addProduct(body, userId) {
@@ -283,7 +309,7 @@ export async function addProduct(body, userId) {
 }
 
 /* =========================================
-   UPDATE PRODUCT
+   Հայտարարության խմբագրում
 ========================================= */
 
 export async function updateById(id, body, userId) {
@@ -326,7 +352,7 @@ export async function updateById(id, body, userId) {
 }
 
 /* =========================================
-   DELETE PRODUCT
+   Հայտարարության ջնջում
 ========================================= */
 
 export async function deleteProduct(id, userId) {

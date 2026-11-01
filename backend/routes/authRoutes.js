@@ -1,5 +1,6 @@
 import express from "express";
 import rateLimit from "express-rate-limit";
+import profileRoutes from "./profileRoutes.js";
 
 import {
     controllerLogin,
@@ -21,6 +22,7 @@ import {
 import User from "../models/user.js";
 
 const router = express.Router();
+router.use(profileRoutes);
 
 // ==========================================
 // RATE LIMIT HELPERS
